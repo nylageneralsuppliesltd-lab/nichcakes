@@ -12,6 +12,7 @@
     <meta property="og:url" content="https://nichcakes.com/">
     <link rel="canonical" href="https://nichcakes.com/">
     <link rel="icon" href="./assets/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
     <!-- GA4 -->
@@ -32,10 +33,11 @@
                 <a href="cake-menu.html">Cake Menu</a>
                 <a href="order-now.html" class="cta-btn">Order Now</a>
             </div>
+            <button class="menu-toggle">☰</button>
         </nav>
         <div class="hero">
             <div class="hero-content">
-                <h1>Welcome to NichCakes!</h1>
+                <h1> Welcome to NichCakes!</h1>
                 <p>Your Dream Cakes, Delivered with LOVE in Mombasa & Coast</p>
                 <a href="order-now.html" class="hero-btn">Calculate Price FREE!</a>
             </div>
@@ -47,19 +49,49 @@
             <h2>Our Latest Creations</h2>
             <div class="cakes-grid">
                 <div class="cake-card">
-                    <img src="./assets/cake1.jpg" alt="Wedding Cake">
-                    <h3>Vanilla Dream Wedding</h3>
+                    <img src="./assets/cake1.jpg" alt="Elegant Wedding Cake">
+                    <h3>Elegant Vanilla Wedding</h3>
                     <p>4kg • KSh 12,000</p>
                 </div>
                 <div class="cake-card">
-                    <img src="./assets/cake2.jpg" alt="Birthday Cake">
-                    <h3>Chocolate Birthday Bliss</h3>
+                    <img src="./assets/cake2.jpg" alt="Festive Birthday Cake">
+                    <h3>Rich Chocolate Birthday</h3>
                     <p>2kg • KSh 5,500</p>
                 </div>
                 <div class="cake-card">
-                    <img src="./assets/cake3.jpg" alt="Anniversary Cake">
-                    <h3>Red Velvet Anniversary</h3>
+                    <img src="./assets/cake3.jpg" alt="Romantic Anniversary Cake">
+                    <h3>Luxury Red Velvet</h3>
                     <p>3kg • KSh 8,000</p>
+                </div>
+                <div class="cake-card">
+                    <img src="./assets/cake4.jpg" alt="Classic Celebration Cake">
+                    <h3>Classic Vanilla Celebration</h3>
+                    <p>2.5kg • KSh 6,250</p>
+                </div>
+                <div class="cake-card">
+                    <img src="./assets/cake5.jpg" alt="Decadent Chocolate Cake">
+                    <h3>Decadent Chocolate Delight</h3>
+                    <p>3kg • KSh 8,400</p>
+                </div>
+                <div class="cake-card">
+                    <img src="./assets/cake6.jpg" alt="Berry Anniversary Cake">
+                    <h3>Berry Red Velvet Twist</h3>
+                    <p>2kg • KSh 6,000</p>
+                </div>
+                <div class="cake-card">
+                    <img src="./assets/cake7.jpg" alt="Forest Fruit Cake">
+                    <h3>Forest Fruit Fantasy</h3>
+                    <p>3.5kg • KSh 9,450</p>
+                </div>
+                <div class="cake-card">
+                    <img src="./assets/cake8.jpg" alt="Golden Birthday Cake">
+                    <h3>Golden Vanilla Surprise</h3>
+                    <p>2kg • KSh 5,600</p>
+                </div>
+                <div class="cake-card">
+                    <img src="./assets/cake9.jpg" alt="Chocolate Celebration Cake">
+                    <h3>Chocolate Celebration Joy</h3>
+                    <p>4kg • KSh 11,200</p>
                 </div>
             </div>
         </section>
@@ -78,11 +110,21 @@
     <footer>
         <p>NichCakes | Made with ❤️ for Celebrations | <a href="tel:+254717028737">Call: +254 717 028 737</a></p>
         <div class="social">
+            <a href="https://web.facebook.com/liz.nichome" target="_blank"><i class="fab fa-facebook"></i></a>
             <a href="https://wa.me/254717028737" target="_blank"><i class="fab fa-whatsapp"></i></a>
-            <a href="https://instagram.com/nichcakes" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.instagram.com/liznichome/" target="_blank"><i class="fab fa-instagram"></i></a>
         </div>
     </footer>
 
     <script src="./scripts/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            menuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+            });
+        });
+    </script>
 </body>
 </html>
