@@ -6,6 +6,7 @@
     <title>Order Now | Cake Price Calculator | NichCakes</title>
     <meta name="description" content="Instant cake price calculator! Select type, size, delivery. Get exact quote in seconds!">
     <link rel="icon" href="./assets/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-05M38MYK0G"></script>
@@ -25,11 +26,12 @@
                 <a href="cake-menu.html">Menu</a>
                 <a href="order-now.html" class="cta-btn">Calculator</a>
             </div>
+            <button class="menu-toggle">☰</button>
         </nav>
     </header>
 
     <main class="container">
-        <h1> Instant Cake Price Calculator</h1>
+        <h1>Instant Cake Price Calculator</h1>
         <div class="calculator">
             <div class="form-group">
                 <label>Cake Type:</label>
@@ -55,7 +57,7 @@
                 <label>Kilometers from Mombasa:</label>
                 <input type="number" id="distance" min="1" max="100" value="5" onchange="calculatePrice()">
             </div>
-            <button onclick="calculatePrice()">Calculate Total Price</button>
+            <button onclick="calculatePrice();">Calculate Total Price</button>
             <div class="result" id="priceResult"></div>
             <div class="order-btn">
                 <a href="https://wa.me/254717028737?text=I%20want%20to%20order:%20[QUOTE]" class="whatsapp-btn" id="whatsappBtn">💬 Order on WhatsApp!</a>
@@ -64,9 +66,23 @@
     </main>
 
     <footer>
-        <p> NichCakes | Your Celebration Partner</p>
+        <p>NichCakes | Made with ❤️ for Celebrations | <a href="tel:+254717028737">Call: +254 717 028 737</a></p>
+        <div class="social">
+            <a href="https://web.facebook.com/liz.nichome" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="https://wa.me/254717028737" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.instagram.com/liznichome/" target="_blank"><i class="fab fa-instagram"></i></a>
+        </div>
     </footer>
 
     <script src="./scripts/calculator.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            menuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+            });
+        });
+    </script>
 </body>
 </html>
