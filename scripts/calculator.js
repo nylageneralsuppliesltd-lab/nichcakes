@@ -21,10 +21,11 @@ function calculatePrice(){
     const result = document.getElementById('priceResult');
     result.innerHTML = '<strong>TOTAL: KSh ' + total.toLocaleString() + '</strong><br>Cake: KSh ' + (prices[type] * size).toLocaleString() + '<br>' + (delivery === 'yes' ? 'Delivery (' + distance + 'km): KSh ' + deliveryFee.toLocaleString() : 'Pickup: FREE');
     
-    const whatsappBtn = document.getElementById('whatsappBtn');
+    // Dynamic WhatsApp link
     let cakeName = type;
     if(type === 'redvelvet') cakeName = 'Red Velvet';
     if(type === 'blackforest') cakeName = 'Black Forest';
-    const message = 'Hi! ' + size + 'kg ' + cakeName + ' cake. Total: KSh ' + total.toLocaleString() + '.';
-    whatsappBtn.href = 'https://wa.me/254712345678?text=' + encodeURIComponent(message); // CHANGE NUMBER!
+    const message = `Hi! I want a ${size}kg ${cakeName} cake. Total: KSh ${total.toLocaleString()}${delivery === 'yes' ? ` (Delivery ${distance}km)` : ''}.`;
+    const whatsappBtn = document.getElementById('whatsappBtn');
+    whatsappBtn.href = 'https://wa.me/254717028737?text=' + encodeURIComponent(message);
 }
