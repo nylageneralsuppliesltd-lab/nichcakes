@@ -6,6 +6,7 @@
     <title>Cake Menu | NichCakes Mombasa</title>
     <meta name="description" content="Vanilla, Chocolate, Red Velvet, Black Forest. Prices from KSh 2,500/kg. Custom designs!">
     <link rel="icon" href="./assets/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-05M38MYK0G"></script>
@@ -25,11 +26,12 @@
                 <a href="cake-menu.html">Cake Menu</a>
                 <a href="order-now.html" class="cta-btn">Order Now</a>
             </div>
+            <button class="menu-toggle">☰</button>
         </nav>
     </header>
 
     <main class="container">
-        <h1>🍰 Our Delicious Cake Menu</h1>
+        <h1>Our Delicious Cake Menu</h1>
         <div class="menu-grid">
             <div class="menu-item">
                 <h3>Vanilla Dream</h3>
@@ -52,9 +54,23 @@
     </main>
 
     <footer>
-        <p>🎂 NichCakes | Sweet Moments Made Special</p>
+        <p>NichCakes | Made with ❤️ for Celebrations | <a href="tel:+254717028737">Call: +254 717 028 737</a></p>
+        <div class="social">
+            <a href="https://web.facebook.com/liz.nichome" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="https://wa.me/254717028737" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.instagram.com/liznichome/" target="_blank"><i class="fab fa-instagram"></i></a>
+        </div>
     </footer>
 
     <script src="./scripts/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            menuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+            });
+        });
+    </script>
 </body>
 </html>
