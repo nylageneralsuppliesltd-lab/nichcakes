@@ -1,26 +1,26 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Lato', sans-serif; background: #fff5f5; color: #333; font-size: 16px; } /* Increased base font */
-h1 { font-family: 'Dancing Script', cursive; font-size: 3.5em; color: #d63384; text-align: center; } /* Bigger */
-h2 { font-family: 'Dancing Script', cursive; font-size: 2.8em; color: #d63384; text-align: center; margin: 2em 0; } /* Bigger */
-p { font-size: 1.1em; } /* Increased readability */
+body { font-family: 'Lato', sans-serif; background: #fff5f5; color: #333; font-size: 16px; }
+h1 { font-family: 'Dancing Script', cursive; font-size: 3.5em; color: #d63384; text-align: center; }
+h2 { font-family: 'Dancing Script', cursive; font-size: 2.8em; color: #d63384; text-align: center; margin: 2em 0; }
+p { font-size: 1.1em; }
 .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
 
 .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1em 2em; background: #ff69b4; color: white; position: relative; }
-.logo { height: 60px; } /* Slightly larger logo */
-.nav-links { display: flex; gap: 2em; }
-.nav-links a { color: white; text-decoration: none; font-weight: bold; font-size: 1.2em; } /* Bigger text */
-.cta-btn { background: #d63384; padding: 12px 25px; border-radius: 25px; font-size: 1.2em; }
+.logo { height: 60px; }
+.nav-links { display: flex; align-items: center; gap: 2em; }
+.nav-links a { color: white; text-decoration: none; font-weight: bold; font-size: 1.2em; }
+.cta-btn { background: #d63384; padding: 12px 25px; border-radius: 25px; font-size: 1.2em; text-align: center; }
 .menu-toggle { display: none; font-size: 1.5em; background: none; border: none; color: white; cursor: pointer; }
 
 .hero { background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500"><rect fill="%23ff69b4" width="1000" height="500"/></svg>'); background-size: cover; height: 60vh; display: flex; align-items: center; justify-content: center; text-align: center; color: white; }
-.hero-content h1 { font-size: 4.5em; } /* Bigger */
+.hero-content h1 { font-size: 4.5em; }
 .hero-btn { background: #d63384; color: white; padding: 15px 30px; border-radius: 25px; text-decoration: none; font-size: 1.3em; display: inline-block; margin-top: 1em; }
 
-.cakes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2em; margin: 2em 0; } /* Adjusted for 9 cakes */
+.cakes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2em; margin: 2em 0; }
 .cake-card { background: white; padding: 1.5em; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
 .cake-card img { width: 100%; border-radius: 10px; }
-.cake-card h3 { color: #d63384; margin: 1em 0; font-size: 1.3em; } /* Bigger */
-.cake-card p { font-size: 1.1em; } /* Bigger */
+.cake-card h3 { color: #d63384; margin: 1em 0; font-size: 1.3em; }
+.cake-card p { font-size: 1.1em; }
 
 .calculator { background: white; padding: 2em; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 500px; margin: 2em auto; }
 .form-group { margin: 1em 0; }
@@ -34,15 +34,24 @@ button { width: 100%; padding: 15px; background: #d63384; color: white; border: 
 .feature { text-align: center; font-size: 1.1em; }
 .feature i { font-size: 2.2em; color: #d63384; }
 
+.menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2em; margin: 2em 0; }
+.menu-item { background: white; padding: 1.5em; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
+.menu-item h3 { color: #d63384; margin: 1em 0; font-size: 1.3em; }
+.menu-item p { font-size: 1.1em; }
+.cta-btn.full { display: block; width: 100%; text-align: center; margin: 2em 0; }
+
 footer { background: #ff69b4; color: white; text-align: center; padding: 2em; font-size: 1.1em; }
-.social { margin-top: 1em; }
-.social a { color: white; font-size: 2em; margin: 0 1em; }
+footer p { margin-bottom: 1em; }
+.social { display: flex; justify-content: center; gap: 1.5em; }
+.social a { color: white; font-size: 2em; }
 
 @media (max-width: 768px) {
     .menu-toggle { display: block; }
-    .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #ff69b4; padding: 1em; }
+    .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #ff69b4; padding: 1em; text-align: center; }
     .nav-links.active { display: flex; }
     .nav-links a { padding: 0.5em 0; }
     .hero h1 { font-size: 2.5em; }
     .hero-btn { font-size: 1.1em; }
+    .calculator { padding: 1em; }
+    footer .social { flex-direction: column; gap: 1em; }
 }
