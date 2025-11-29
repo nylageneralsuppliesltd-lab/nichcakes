@@ -169,28 +169,52 @@ function calc(amount) {
 
 async function fetchData(action, project, payload = {}) {
   if (action === 'get') {
-    // JSONP for GET — 100% bypasses CORS
     return new Promise((resolve, reject) => {
-      const cbName = 'jsonp_' + Date.now();
-      window[cbName] = data => {
-        delete window[cbName];
-        document.head.removeChild(script);
+      const callbackName = 'jsonp_cb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+      const url = `${WEBHOOK}?action=get&project=${project}&secret=${SECRET}&callback=${callbackName}`;
+
+      // Define callback first
+      window[callbackName] = function(data) {
+        cleanup();
         resolve(data);
       };
+
       const script = document.createElement('script');
-      script.src = `${WEBHOOK}?action=get&project=${project}&secret=${SECRET}&callback=${cbName}`;
-      script.onerror = () => reject(new Error('Failed to load'));
+      script.src = url;
+      script.async = true;
+
+      const cleanup = () => {
+        delete window[callbackName];
+        if (script.parentNode) script.parentNode.removeChild(script);
+      };
+
+      script.onerror = () => {
+        cleanup();
+        reject(new Error('JSONP script failed to load'));
+      };
+
       document.head.appendChild(script);
+
+      // Safety timeout (in case network is down)
+      setTimeout(() => {
+        if (window[callbackName]) {
+          cleanup();
+          reject(new Error('JSONP timeout'));
+        }
+      }, 15000);
     });
   } else {
-    // POST for add/update/delete
-    const response = await fetch(WEBHOOK, {
+    // POST (add/update/delete)
+    const resp = await fetch(WEBHOOK, {
       method: 'POST',
       body: JSON.stringify({action, secret: SECRET, project: activeProject, ...payload})
     });
-    const text = await response.text();
-    try { return JSON.parse(text); }
-    catch { return {success: true}; }
+    const text = await resp.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      return {success: true};
+    }
   }
 }
 async function loadProjects() {
