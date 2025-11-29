@@ -570,5 +570,46 @@ document.getElementById('downloadCSV').onclick = () => {
 
 init3D();
 </script>
+
+<script type="module">
+  const SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbywMpRxf_g8mNYvvtX2ommiBymVM49WyX22xKf645U8JbauT7_x2ZT3wNbPQWR6PpLM/exec';  // Replace with the URL from Step 4 above
+const SECRET = 'nyla2025-secret';  // Matches the script above
+
+// Load expenses for a project
+async function loadExpenses(projectId) {
+  try {
+    const url = `${SHEET_WEBHOOK}?action=get&project=${projectId}&secret=${SECRET}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    const data = await res.json();
+    return data.expenses || [];
+  } catch (err) {
+    console.error('Load error:', err);
+    alert(`Error loading expenses: ${err.message}. Please check internet and refresh.`);
+    return [];  // Graceful fallback
+  }
+}
+
+// Save changes to Sheet (add/update/delete)
+async function saveToSheet(action, expense = {}) {
+  try {
+    const payload = { action, secret: SECRET, project: activeProject, ...expense };
+    const res = await fetch(SHEET_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  } catch (err) {
+    console.error('Save error:', err);
+    alert(`Error saving: ${err.message}. Please try again.`);
+  }
+}
+
+// Expose for onclick (global scope)
+window.saveToSheet = saveToSheet;
+window.editExpense = editExpense;  // Assuming your editExpense function exists
+
+  </script>
 </body>
 </html>
