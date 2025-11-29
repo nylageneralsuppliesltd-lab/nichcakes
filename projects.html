@@ -22,26 +22,19 @@
   .project-card.active{border-color:#10b981;background:#d1fae5;}
 
   .main{background:white;padding:14px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.1);border:1px solid #ccfbf1;}
-
   .header-bar{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin-bottom:12px;}
   .title{font-size:20px;font-weight:700;color:#06b6d4;}
   select{border:2px solid #06b6d4;background:white;color:#1e293b;border-radius:10px;padding:9px 14px;font-size:13px;outline:none;}
 
-  .btn{
-    padding:9px 18px;border:none;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;
-    transition:all 0.3s ease;box-shadow:0 2px 8px rgba(0,0,0,0.1);text-transform:uppercase;letter-spacing:0.5px;
-  }
+  .btn{padding:9px 18px;border:none;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;transition:all .3s ease;box-shadow:0 2px 8px rgba(0,0,0,.1);text-transform:uppercase;letter-spacing:.5px;}
   .btn-primary{background:#06b6d4;color:white;}
-  .btn-primary:hover{background:#0891b2;transform:translateY(-2px);box-shadow:0 6px 16px rgba(6,182,212,0.3);}
+  .btn-primary:hover{background:#0891b2;transform:translateY(-2px);box-shadow:0 6px 16px rgba(6,182,212,.3);}
   .btn-success{background:#10b981;color:white;}
-  .btn-success:hover{background:#059669;transform:translateY(-2px);box-shadow:0 6px 16px rgba(16,185,129,0.3);}
+  .btn-success:hover{background:#059669;transform:translateY(-2px);box-shadow:0 6px 16px rgba(16,185,129,.3);}
   .btn-cancel{background:#e2e8f0;color:#475569;}
-  .btn-cancel:hover{background:#cbd5e1;transform:translateY(-1px);}
+  .btn-cancel:hover{background:#cbd5e1;}
 
-  .action-btn{
-    padding:6px 12px;border:none;border-radius:50px;font-size:11px;font-weight:600;cursor:pointer;
-    transition:all 0.2s ease;text-transform:uppercase;letter-spacing:0.5px;
-  }
+  .action-btn{padding:6px 12px;border:none;border-radius:50px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;}
   .btn-edit{background:#f59e0b;color:white;}
   .btn-edit:hover{background:#d97706;transform:scale(1.05);}
   .btn-delete{background:#ef4444;color:white;}
@@ -53,12 +46,11 @@
   .kpi-value{font-size:17px;font-weight:700;color:#10b981;margin-top:4px;}
 
   .section-title{font-size:17px;font-weight:700;color:#06b6d4;margin:16px 0 10px;}
-
   .budget-grid{display:grid;grid-template-columns:1fr;gap:8px;}
   @media(min-width:600px){.budget-grid{grid-template-columns:repeat(2,1fr);}}
   @media(min-width:900px){.budget-grid{grid-template-columns:repeat(3,1fr);}}
-  .budget-card{background:#f8fffe;padding:9px;border-radius:8px;border:1px solid #86efac;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);transition:all 0.3s;}
-  .budget-card.over{background:#fee2e2 !important;border-color:#f87171 !important;box-shadow:0 4px 12px rgba(239,68,68,0.25) !important;}
+  .budget-card{background:#f8fffe;padding:9px;border-radius:8px;border:1px solid #86efac;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.05);transition:all .3s;}
+  .budget-card.over{background:#fee2e2 !important;border-color:#f87171 !important;box-shadow:0 4px 12px rgba(239,68,68,.25) !important;}
   .budget-name{font-weight:700;color:#06b6d4;font-size:12.5px;}
   .progress{height:6px;background:#e0f2fe;border-radius:3px;overflow:hidden;margin:5px 0;}
   .bar{height:100%;background:#10b981;border-radius:3px;transition:width 1s ease;}
@@ -73,12 +65,12 @@
   .ledger td{padding:8px;text-align:left;border-bottom:1px solid #e2e8f0;white-space:normal;word-wrap:break-word;}
   .ledger td:nth-child(5){text-align:right;font-weight:600;}
 
-  .threejs{border-radius:12px;overflow:hidden;height:300px;margin-top:14px;background:#e0f2fe;box-shadow:0 6px 20px rgba(6,182,212,0.2);}
+  .threejs{border-radius:12px;overflow:hidden;height:300px;margin-top:14px;background:#e0f2fe;box-shadow:0 6px 20px rgba(6,182,212,.2);}
   @media(max-width:480px){.threejs{height:240px;}}
 
   .modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px;}
-  .modal-box{background:white;padding:24px;border-radius:16px;width:100%;max-width:420px;box-shadow:0 20px 40px rgba(0,0,0,0.25);}
-  .input{width:100%;padding:12px;margin:10px 0;border-radius:12px;border:1px solid #94a3b8;font-size:14px;outline:none;transition:border 0.3s;}
+  .modal-box{background:white;padding:24px;border-radius:16px;width:100%;max-width:420px;box-shadow:0 20px 40px rgba(0,0,0,.25);}
+  .input{width:100%;padding:12px;margin:10px 0;border-radius:12px;border:1px solid #94a3b8;font-size:14px;outline:none;transition:border .3s;}
   .input:focus{border-color:#06b6d4;}
   .modal-title{font-size:19px;color:#06b6d4;font-weight:700;margin-bottom:16px;text-align:center;}
 </style>
@@ -146,10 +138,18 @@
     </select>
     <select id="expCategory" class="input">
       <option value="">Category</option>
-      <option value="excavation">Excavation</option><option value="concrete">Concrete</option><option value="steel">Steel</option>
-      <option value="pitwall">Pit Wall</option><option value="superwall">Super Wall</option><option value="roofing">Roofing</option>
-      <option value="doors">Doors</option><option value="plaster">Plaster</option><option value="painting">Painting</option>
-      <option value="vent">Vent</option><option value="transport">Transport</option><option value="misc">Misc</option>
+      <option value="excavation">Excavation</option>
+      <option value="concrete">Concrete</option>
+      <option value="steel">Steel</option>
+      <option value="pitwall">Pit Wall</option>
+      <option value="superwall">Super Wall</option>
+      <option value="roofing">Roofing</option>
+      <option value="doors">Doors</option>
+      <option value="plaster">Plaster</option>
+      <option value="painting">Painting</option>
+      <option value="vent">Vent</option>
+      <option value="transport">Transport</option>
+      <option value="misc">Misc</option>
     </select>
     <input type="date" id="expDate" class="input">
     <input type="text" id="expDesc" class="input" placeholder="Description (optional)">
@@ -213,7 +213,6 @@ async function refresh() {
   const single = unitFilter === "unit1" || unitFilter === "unit2";
   const net = single ? d.perBlock : d.net;
 
-  // Deductions (same logic)
   document.getElementById('deductionSummary').innerHTML = `
     <div class="ded-item"><span>Project Gross Amount</span><span>${format(single ? p.original/2 : p.original)}</span></div>
     <div class="ded-item"><span>PMC 5%</span><span>-${format(single ? d.pmc/2 : d.pmc)}</span></div>
@@ -228,11 +227,10 @@ async function refresh() {
   if (!res.success) return;
   const exp = res.expenses || [];
 
-  // CORE FIX: Correct amount to display per view
   const getDisplayAmount = (e) => {
-    if (!e.unit) return single ? e.amount / 2 : e.amount;  // Shared: half when single view
-    if (single && e.unit !== unitFilter) return 0;         // Wrong block in single view
-    return e.amount;                                       // Correct block or both view
+    if (!e.unit) return single ? e.amount / 2 : e.amount;
+    if (single && e.unit !== unitFilter) return 0;
+    return e.amount;
   };
 
   const totalSpent = exp.reduce((sum, e) => sum + getDisplayAmount(e), 0);
@@ -243,7 +241,6 @@ async function refresh() {
   document.getElementById('percent').textContent = Math.round(totalSpent/net*100) + '%';
   document.getElementById('projectTitle').textContent = p.name + (single ? ' • ' + (unitFilter === 'unit1' ? 'Block 1' : 'Block 2') : '');
 
-  // Budget cards
   let html = '';
   CATEGORIES.forEach(c => {
     const budget = net * c.pct / 100;
@@ -259,7 +256,6 @@ async function refresh() {
   });
   document.getElementById('budgetBreakdown').innerHTML = html;
 
-  // Ledger - filter + correct amount display
   const filtered = single ? exp.filter(e => !e.unit || e.unit === unitFilter) : exp;
   document.getElementById('ledgerBody').innerHTML = filtered.map(e => `
     <tr>
@@ -274,7 +270,6 @@ async function refresh() {
       </td>
     </tr>`).join('');
 
-  // Edit/Delete handlers (unchanged)
   document.querySelectorAll('.btn-edit').forEach(b => b.onclick = () => {
     currentEditId = b.dataset.id;
     document.getElementById('modalTitle').textContent = "Edit Expense";
@@ -294,7 +289,6 @@ async function refresh() {
     }
   });
 
-  // 3D Progress
   const b1Spent = exp.filter(e => !e.unit || e.unit === "unit1").reduce((s,e) => s + (e.unit ? e.amount : e.amount/2), 0);
   const b2Spent = exp.filter(e => !e.unit || e.unit === "unit2").reduce((s,e) => s + (e.unit ? e.amount : e.amount/2), 0);
   if (block1 && block2) {
@@ -305,14 +299,23 @@ async function refresh() {
   }
 }
 
-// Save, 3D, UI events — unchanged (perfect)
 document.getElementById('saveExpense').onclick = async () => {
-  const payload = {date: document.getElementById('expDate').value, category: document.getElementById('expCategory').introduce, desc: document.getElementById('expDesc').value.trim(),
-    unit: document.getElementById('expUnit').value || null, amount: Number(document.getElementById('expAmount').value)};
+  const payload = {
+    date: document.getElementById('expDate').value,
+    category: document.getElementById('expCategory').value,
+    desc: document.getElementById('expDesc').value.trim(),
+    unit: document.getElementById('expUnit').value || null,
+    amount: Number(document.getElementById('expAmount').value)
+  };
   if (!payload.date || !payload.category || !payload.amount) return alert("Fill all required fields");
   const res = await call(currentEditId ? 'update' : 'add', currentEditId ? {id: currentEditId, ...payload} : payload);
-  if (res.success) { document.getElementById('modal').style.display = 'none'; currentEditId = null; refresh(); }
+  if (res.success) {
+    document.getElementById('modal').style.display = 'none';
+    currentEditId = null;
+    refresh();
+  }
 };
+
 document.getElementById('cancelModal').onclick = () => document.getElementById('modal').style.display = 'none';
 
 let scene, camera, renderer, controls;
@@ -327,27 +330,59 @@ function init3D() {
   block1 = makeBlock(-7); block2 = makeBlock(7); scene.add(block1.group, block2.group);
   function animate(){requestAnimationFrame(animate); controls.update(); renderer.render(scene,camera);} animate();
   window.addEventListener('resize',()=>{camera.aspect=c.clientWidth/c.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(c.clientWidth,c.clientHeight);});
-}f
-function makeBlock(x){const g=new THREE.Group();const brick=new THREE.MeshStandardMaterial({color:0xd4a574});const roof=new THREE.MeshStandardMaterial({color:0xc41e3a});const conc=new THREE.MeshStandardMaterial({color:0x95a5a6});
-  const pit=new THREE.Mesh(new THREE.CylinderGeometry(1.8,2,2.8,20),brick);pit.position.set(x,-1.4,0);g.add(pit);
-  const slab=new THREE.Mesh(new THREE.BoxGeometry(3.6,0.15,2.5),conc);slab.position.set(x,0,0);g.add(slab);
-  const walls=[];const addWall=(w,d,px,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,2.1,d),brick);m.position.set(x+px,1.05,z);g.add(m);walls.push(m);};
-  addWall(3.6,0.2,0,1.2);addWall(3.6,0.2,0,-1.2);addWall(0.2,2.6,-1.7,0);addWall(0.2,2.6,1.7,0);
-  const r=new THREE.Mesh(new THREE.BoxGeometry(4.2,0.15,3),roof);r.position.set(x,2.5,0);g.add(r);
-  pit.visible=slab.visible=r.visible=false;walls.forEach(w=>w.visible=false);
+}
+
+function makeBlock(x){
+  const g=new THREE.Group();
+  const brick=new THREE.MeshStandardMaterial({color:0xd4a574});
+  const roof=new THREE.MeshStandardMaterial({color:0xc41e3a});
+  const conc=new THREE.MeshStandardMaterial({color:0x95a5a6});
+  const pit=new THREE.Mesh(new THREE.CylinderGeometry(1.8,2,2.8,20),brick); pit.position.set(x,-1.4,0); g.add(pit);
+  const slab=new THREE.Mesh(new THREE.BoxGeometry(3.6,0.15,2.5),conc); slab.position.set(x,0,0); g.add(slab);
+  const walls=[];
+  const addWall=(w,d,px,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,2.1,d),brick); m.position.set(x+px,1.05,z); g.add(m); walls.push(m);};
+  addWall(3.6,0.2,0,1.2); addWall(3.6,0.2,0,-1.2); addWall(0.2,2.6,-1.7,0); addWall(0.2,2.6,1.7,0);
+  const r=new THREE.Mesh(new THREE.BoxGeometry(4.2,0.15,3),roof); r.position.set(x,2.5,0); g.add(r);
+  pit.visible=slab.visible=r.visible=false; walls.forEach(w=>w.visible=false);
   return {group:g,pit,walls,slab,roof:r};
 }
-function updateBlock(b,pct){const s=pct<10?0:pct<35?1:pct<65?2:pct<90?3:4;
-  b.pit.visible=s>=1;b.walls.forEach(w=>w.visible=s>=2);b.slab.visible=s>=2;b.roof.visible=s>=3;
+
+function updateBlock(b,pct){
+  const s=pct<10?0:pct<35?1:pct<65?2:pct<90?3:4;
+  b.pit.visible=s>=1; b.walls.forEach(w=>w.visible=s>=2); b.slab.visible=s>=2; b.roof.visible=s>=3;
 }
 
 document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`<div class="project-card" data-id="${p.id}"><strong>${p.name}</strong><br><small style="color:#64748b;">${format(calc(p.original).net)}</small></div>`).join('');
-document.getElementById('projectsList').onclick = e => {const c=e.target.closest('.project-card');if(c){document.querySelectorAll('.project-card').forEach(x=>x.classList.remove('active'));c.classList.add('active');activeProject=c.dataset.id;unitFilter="";document.getElementById('unitFilter').value="";refresh();}};
-document.getElementById('unitFilter').onchange = e => {unitFilter=e.target.value;refresh();};
-document.getElementById('addExpense').onclick = () => {if(!activeProject)return alert("Select project first");currentEditId=null;document.getElementById('expDate').value=new Date().toISOString().split('T')[0];document.getElementById('modal').style.display='flex';};
-document.getElementById('downloadCSV').onclick = async () => {let all=[];for(const p of PROJECTS){activeProject=p.id;const r=await call("get");if(r.success)all=all.concat(r.expenses.map(e=>({...e,project:p.name})));}if(!all.length)return alert("No data");
-  let csv="Project,Date,Category,Description,Unit,Amount\n";all.forEach(e=>csv+=`"${e.project}","${e.date}","${e.category}","${(e.desc||'').replace(/"/g,'""')}","${e.unit?'Block '+e.unit[4]:'Shared'}","${e.amount}"\n`);
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download="NYLA_Projects.csv";a.click();
+
+document.getElementById('projectsList').onclick = e => {
+  const c = e.target.closest('.project-card');
+  if(c){
+    document.querySelectorAll('.project-card').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+    activeProject = c.dataset.id;
+    unitFilter = "";
+    document.getElementById('unitFilter').value = "";
+    refresh();
+  }
+};
+
+document.getElementById('unitFilter').onchange = e => { unitFilter = e.target.value; refresh(); };
+document.getElementById('addExpense').onclick = () => { if(!activeProject) return alert("Select project first"); currentEditId=null; document.getElementById('expDate').value=new Date().toISOString().split('T')[0]; document.getElementById('modal').style.display='flex'; };
+
+document.getElementById('downloadCSV').onclick = async () => {
+  let all = [];
+  for(const p of PROJECTS){
+    activeProject = p.id;
+    const r = await call("get");
+    if(r.success) all = all.concat(r.expenses.map(e=>({...e, project:p.name})));
+  }
+  if(!all.length) return alert("No data");
+  let csv = "Project,Date,Category,Description,Unit,Amount\n";
+  all.forEach(e=>csv += `"${e.project}","${e.date}","${e.category}","${(e.desc||'').replace(/"/g,'""')}","${e.unit?'Block '+e.unit[4]:'Shared'}","${e.amount}"\n`);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = "NYLA_Projects.csv";
+  a.click();
 };
 
 init3D();
