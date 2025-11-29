@@ -38,22 +38,43 @@
 
   .section-title{font-size:17px;font-weight:700;color:#06b6d4;margin:16px 0 10px;}
 
-  /* TINY & BEAUTIFUL BUDGET CARDS — 3 PER ROW */
+  /* BUDGET CARDS — FULL RED WHEN OVER BUDGET */
   .budget-grid{display:grid;grid-template-columns:1fr;gap:8px;}
   @media(min-width:600px){.budget-grid{grid-template-columns:repeat(2,1fr);}}
   @media(min-width:900px){.budget-grid{grid-template-columns:repeat(3,1fr);}}
-  .budget-card{background:#f8fffe;padding:9px;border-radius:8px;border:1px solid #86efac;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+  .budget-card{
+    background:#f8fffe;padding:9px;border-radius:8px;border:1px solid #86efac;
+    font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);transition:all 0.3s;
+  }
+  .budget-card.over{
+    background:#fee2e2 !important;border-color:#f87171 !important;
+    box-shadow:0 4px 12px rgba(239,68,68,0.25) !important;
+  }
   .budget-name{font-weight:700;color:#06b6d4;font-size:12.5px;}
   .progress{height:6px;background:#e0f2fe;border-radius:3px;overflow:hidden;margin:5px 0;}
   .bar{height:100%;background:#10b981;border-radius:3px;transition:width 1s ease;}
+  .budget-card.over .bar{background:#ef4444;}
 
   .deductions{background:#fffbeb;padding:10px;border-radius:8px;border:1px solid #fcd34d;font-size:12.5px;margin-bottom:12px;}
   .ded-item{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #e2e8f0;}
   .ded-item:last-child{border:none;font-weight:700;color:#10b981;font-size:14px;}
 
+  /* EXPENSE TABLE — FULL TEXT ON DESKTOP, WRAP ON MOBILE */
   .ledger table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px;}
   .ledger th{background:#06b6d4;color:white;padding:8px;font-size:12px;}
-  .ledger td{padding:6px;text-align:center;border-bottom:1px solid #e2e8f0;}
+  .ledger td{padding:8px;text-align:left;border-bottom:1px solid #e2e8f0;white-space:normal;word-wrap:break-word;}
+  .ledger td:nth-child(1){width:15%;} /* Date */
+  .ledger td:nth-child(2){width:18%;font-weight:600;color:#06b6d4;} /* Category */
+  .ledger td:nth-child(3){width:28%;} /* Description */
+  .ledger td:nth-child(4){width:10%;text-align:center;} /* Unit */
+  .ledger td:nth-child(5){width:15%;text-align:right;font-weight:600;} /* Amount */
+  .ledger td:nth-child(6){width:14%;text-align:center;} /* Actions */
+
+  @media(max-width:640px){
+    .ledger td{padding:6px 4px;font-size:12px;}
+    .ledger th{font-size:11px;padding:6px;}
+  }
+
   .action-btn{padding:4px 8px;border:none;border-radius:6px;font-size:11px;cursor:pointer;}
   .btn-edit{background:#f59e0b;color:white;}
   .btn-delete{background:#ef4444;color:white;}
@@ -72,17 +93,15 @@
 <div class="container">
   <header>
     <h1>NYLA PIT LATRINES</h1>
-    <p class="subtitle">Real-Time Project Tracking</p>
+    <p class="subtitle">Real-Time Project Tracking • Growing Strong</p>
   </header>
 
   <div class="grid">
-    <!-- LEFT: PROJECTS -->
     <div class="sidebar">
       <h2 style="font-size:17px;color:#06b6d4;margin-bottom:12px;">Projects</h2>
       <div id="projectsList"></div>
     </div>
 
-    <!-- RIGHT: MAIN DASHBOARD -->
     <div class="main">
       <div class="header-bar">
         <div>
@@ -94,15 +113,13 @@
           </select>
         </div>
         <div>
-          <button class="btn-primary" id="addExpense">Add Expense</button>
+          <button class="btn-primary" id="addExpense">+ Add Expense</button>
           <button class="btn-success" id="downloadCSV">Download CSV</button>
         </div>
       </div>
 
-      <!-- PRELIMINARY COSTS (FULLY ITEMIZED) -->
       <div class="deductions" id="deductionSummary"></div>
 
-      <!-- KPI BOXES -->
       <div class="kpi-grid">
         <div class="kpi"><div>Net</div><div class="kpi-value" id="net">KSh 0</div></div>
         <div class="kpi"><div>Spent</div><div class="kpi-value" id="spent">KSh 0</div></div>
@@ -110,27 +127,31 @@
         <div class="kpi"><div>Progress</div><div class="kpi-value" id="percent">0%</div></div>
       </div>
 
-      <!-- TINY BUDGET CARDS (3 per row on desktop) -->
       <h3 class="section-title">Budget Breakdown</h3>
       <div class="budget-grid" id="budgetBreakdown"></div>
 
-      <!-- EXPENSE LIST -->
-      <h3 class="section-title">Expenses</h3>
+      <h3 class="section-title">Expense Ledger</h3>
       <div class="ledger">
         <table>
-          <thead><tr><th>Date</th><th>Cat</th><th>Desc</th><th>Unit</th><th>Amount</th><th></th></tr></thead>
+          <thead><tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Unit</th>
+            <th>Amount</th>
+            <th>Actions</th>
+          </tr></thead>
           <tbody id="ledgerBody"></tbody>
         </table>
       </div>
 
-      <!-- 3D VIEW -->
-      <h3 class="section-title">3D Progress</h3>
+      <h3 class="section-title">3D Progress View</h3>
       <div class="threejs" id="threejs"></div>
     </div>
   </div>
 </div>
 
-<!-- ADD/EDIT MODAL -->
+<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-box">
     <h2 class="modal-title" id="modalTitle">Add Expense</h2>
@@ -172,7 +193,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// CHANGE THIS TO YOUR WEB APP URL
 const WEBHOOK = 'https://script.google.com/macros/s/AKfycbwjZV7O5sRKDxe1MkrbVLJkHis4bL4gg_2Hl60YiqMTyKvNR1nUZKKU9_rqfMBVKI3Jpg/exec';
 const SECRET = 'nyla2025';
 
@@ -225,7 +245,6 @@ async function refresh() {
   const single = unitFilter === "unit1" || unitFilter === "unit2";
   const net = single ? d.perBlock : d.net;
 
-  // Show itemized deductions
   document.getElementById('deductionSummary').innerHTML = `
     <div class="ded-item"><span>Project Gross Amount</span><span>${format(single ? p.original/2 : p.original)}</span></div>
     <div class="ded-item"><span>PMC 5%</span><span>-${format(single ? d.pmc/2 : d.pmc)}</span></div>
@@ -251,30 +270,31 @@ async function refresh() {
   document.getElementById('percent').textContent = Math.round(spent/net*100) + '%';
   document.getElementById('projectTitle').textContent = p.name + (single ? ' • ' + (unitFilter === 'unit1' ? 'Block 1' : 'Block 2') : '');
 
-  // Tiny budget cards
+  // BUDGET CARDS WITH FULL RED WHEN OVER
   let html = '';
   CATEGORIES.forEach(c => {
     const budget = net * c.pct / 100;
     const spentCat = exp.filter(e => e.category === c.key)
       .reduce((s,e) => s + (e.unit && single && e.unit !== unitFilter ? 0 : e.amount / (e.unit?1:2)), 0);
     const pct = Math.round(spentCat / budget * 100) || 0;
-    html += `<div class="budget-card">
+    const over = pct > 100;
+    html += `<div class="budget-card ${over?'over':''}">
       <div class="budget-name">${c.name}</div>
       <div style="color:#64748b;">${format(spentCat)} / ${format(budget)}</div>
-      <div class="progress"><div class="bar" style="width:${pct}%"></div></div>
-      <div style="text-align:right;font-weight:600;color:${pct>100?'#ef4444':'#10b981'}">${pct}%</div>
+      <div class="progress"><div class="bar" style="width:${Math.min(pct,100)}%"></div></div>
+      <div style="text-align:right;font-weight:700;color:${over?'#dc2626':'#10b981'}">${pct}%</div>
     </div>`;
   });
   document.getElementById('budgetBreakdown').innerHTML = html;
 
-  // Ledger
+  // FULL TEXT IN LEDGER
   const list = single ? exp.filter(e => !e.unit || e.unit === unitFilter) : exp;
   document.getElementById('ledgerBody').innerHTML = list.map(e => `
     <tr>
-      <td>${e.date.slice(5)}</td>
-      <td>${e.category.slice(0,7)}</td>
-      <td>${(e.desc||'—').slice(0,12)}</td>
-      <td>${e.unit?'B'+e.unit[4]:'S'}</td>
+      <td>${e.date}</td>
+      <td>${e.category}</td>
+      <td>${e.desc || '—'}</td>
+      <td>${e.unit ? (e.unit==='unit1'?'Block 1':'Block 2') : 'Shared'}</td>
       <td>${format(e.amount)}</td>
       <td>
         <button class="action-btn btn-edit" data-id="${e.id}" data-date="${e.date}" data-cat="${e.category}" data-desc="${(e.desc||'').replace(/"/g,'&quot;')}" data-unit="${e.unit||''}" data-amt="${e.amount}">Edit</button>
@@ -295,7 +315,7 @@ async function refresh() {
   });
 
   document.querySelectorAll('.btn-delete').forEach(b => b.onclick = async () => {
-    if (confirm("Delete forever?")) {
+    if (confirm("Delete this expense forever?")) {
       await call('delete', {id: b.dataset.id});
       refresh();
     }
@@ -309,22 +329,23 @@ async function refresh() {
   }
 }
 
+// Save/Update
 document.getElementById('saveExpense').onclick = async () => {
   const payload = {
     date: document.getElementById('expDate').value,
     category: document.getElementById('expCategory').value,
-    desc: document.getElementById('expDesc').value,
+    desc: document.getElementById('expDesc').value.trim(),
     unit: document.getElementById('expUnit').value || null,
     amount: Number(document.getElementById('expAmount').value)
   };
-  if (!payload.date || !payload.category || !payload.amount) return alert("Fill all fields");
+  if (!payload.date || !payload.category || !payload.amount) return alert("Fill all required fields");
   const res = await call(currentEditId ? 'update' : 'add', currentEditId ? {id: currentEditId, ...payload} : payload);
   if (res.success) { document.getElementById('modal').style.display = 'none'; currentEditId = null; refresh(); }
 };
 
 document.getElementById('cancelModal').onclick = () => document.getElementById('modal').style.display = 'none';
 
-// 3D (simple beautiful version)
+// 3D Code (unchanged — beautiful & working)
 let scene, camera, renderer, controls;
 function init3D() {
   const c = document.getElementById('threejs');
@@ -337,81 +358,20 @@ function init3D() {
   controls = new OrbitControls(camera, renderer.domElement);
   scene.add(new THREE.AmbientLight(0xffffff, 1));
   const light = new THREE.DirectionalLight(0xffffff, 1); light.position.set(10,20,10); scene.add(light);
-
   block1 = makeBlock(-7); block2 = makeBlock(7);
   scene.add(block1.group, block2.group);
-
-  function animate(){requestAnimationFrame(animate); controls.update(); renderer.render(scene,camera);}
-  animate();
+  function animate(){requestAnimationFrame(animate); controls.update(); renderer.render(scene,camera);} animate();
   window.addEventListener('resize',()=>{camera.aspect=c.clientWidth/c.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(c.clientWidth,c.clientHeight);});
 }
-function makeBlock(x){
-  const g = new THREE.Group();
-  const brick = new THREE.MeshStandardMaterial({color:0xd4a574});
-  const roof = new THREE.MeshStandardMaterial({color:0xc41e3a});
-  const conc = new THREE.MeshStandardMaterial({color:0x95a5a6});
+function makeBlock(x){/* same as before */ const g=new THREE.Group(); const brick=new THREE.MeshStandardMaterial({color:0xd4a574}); const roof=new THREE.MeshStandardMaterial({color:0xc41e3a}); const conc=new THREE.MeshStandardMaterial({color:0x95a5a6}); const pit=new THREE.Mesh(new THREE.CylinderGeometry(1.8,2,2.8,20),brick); pit.position.set(x,-1.4,0); g.add(pit); const slab=new THREE.Mesh(new THREE.BoxGeometry(3.6,0.15,2.5),conc); slab.position.set(x,0,0); g.add(slab); const walls=[]; const addWall=(w,d,px,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,2.1,d),brick); m.position.set(x+px,1.05,z); g.add(m); walls.push(m);}; addWall(3.6,0.2,0,1.2); addWall(3.6,0.2,0,-1.2); addWall(0.2,2.6,-1.7,0); addWall(0.2,2.6,1.7,0); const r=new THREE.Mesh(new THREE.BoxGeometry(4.2,0.15,3),roof); r.position.set(x,2.5,0); g.add(r); pit.visible=slab.visible=r.visible=false; walls.forEach(w=>w.visible=false); return {group:g,pit,walls,slab,roof:r};}
+function updateBlock(b,pct){const s=pct<10?0:pct<35?1:pct<65?2:pct<90?3:4; b.pit.visible=s>=1; b.walls.forEach(w=>w.visible=s>=2); b.slab.visible=s>=2; b.roof.visible=s>=3;}
 
-  const pit = new THREE.Mesh(new THREE.CylinderGeometry(1.8,2,2.8,20), brick); pit.position.set(x,-1.4,0); g.add(pit);
-  const slab = new THREE.Mesh(new THREE.BoxGeometry(3.6,0.15,2.5), conc); slab.position.set(x,0,0); g.add(slab);
-  const walls = [];
-  const addWall = (w,d,px,z) => {const m=new THREE.Mesh(new THREE.BoxGeometry(w,2.1,d),brick); m.position.set(x+px,1.05,z); g.add(m); walls.push(m);};
-  addWall(3.6,0.2,0,1.2); addWall(3.6,0.2,0,-1.2); addWall(0.2,2.6,-1.7,0); addWall(0.2,2.6,1.7,0);
-  const r = new THREE.Mesh(new THREE.BoxGeometry(4.2,0.15,3), roof); r.position.set(x,2.5,0); g.add(r);
-
-  pit.visible = slab.visible = r.visible = false;
-  walls.forEach(w=>w.visible=false);
-  return {group:g, pit, walls, slab, roof:r};
-}
-function updateBlock(b, pct){
-  const s = pct < 10 ? 0 : pct < 35 ? 1 : pct < 65 ? 2 : pct < 90 ? 3 : 4;
-  b.pit.visible = s >= 1;
-  b.walls.forEach(w=>w.visible=s>=2);
-  b.slab.visible = s >= 2;
-  b.roof.visible = s >= 3;
-}
-
-// Project list
-document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`
-  <div class="project-card" data-id="${p.id}">
-    <strong>${p.name}</strong><br>
-    <small style="color:#64748b;">${format(calc(p.original).net)}</small>
-  </div>`).join('');
-
-document.getElementById('projectsList').onclick = e => {
-  const card = e.target.closest('.project-card');
-  if(card){
-    document.querySelectorAll('.project-card').forEach(c=>c.classList.remove('active'));
-    card.classList.add('active');
-    activeProject = card.dataset.id;
-    unitFilter = "";
-    document.getElementById('unitFilter').value = "";
-    refresh();
-  }
-};
-
+// UI Setup
+document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`<div class="project-card" data-id="${p.id}"><strong>${p.name}</strong><br><small style="color:#64748b;">${format(calc(p.original).net)}</small></div>`).join('');
+document.getElementById('projectsList').onclick = e => {const c=e.target.closest('.project-card'); if(c){document.querySelectorAll('.project-card').forEach(x=>x.classList.remove('active')); c.classList.add('active'); activeProject=c.dataset.id; unitFilter=""; document.getElementById('unitFilter').value=""; refresh();}};
 document.getElementById('unitFilter').onchange = e => {unitFilter=e.target.value; refresh();};
-document.getElementById('addExpense').onclick = () => {
-  if(!activeProject) return alert("Please select a project first");
-  currentEditId = null;
-  document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('modal').style.display = 'flex';
-};
-
-document.getElementById('downloadCSV').onclick = async () => {
-  let all = [];
-  for(const p of PROJECTS){
-    activeProject = p.id;
-    const r = await call("get");
-    if(r.success) all = all.concat(r.expenses.map(e=>({...e, project:p.name})));
-  }
-  if(!all.length) return alert("No data");
-  let csv = "Project,Date,Category,Description,Unit,Amount\n";
-  all.forEach(e=>csv += `"${e.project}","${e.date}","${e.category}","${(e.desc||'').replace(/"/g,'""')}","${e.unit?'Block '+e.unit[4]:'Shared'}","${e.amount}"\n`);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download = "NYLA_Projects.csv";
-  a.click();
-};
+document.getElementById('addExpense').onclick = () => {if(!activeProject)return alert("Select project first"); currentEditId=null; document.getElementById('expDate').value=new Date().toISOString().split('T')[0]; document.getElementById('modal').style.display='flex';};
+document.getElementById('downloadCSV').onclick = async () => {let all=[]; for(const p of PROJECTS){activeProject=p.id; const r=await call("get"); if(r.success)all=all.concat(r.expenses.map(e=>({...e,project:p.name})));} if(!all.length)return alert("No data"); let csv="Project,Date,Category,Description,Unit,Amount\n"; all.forEach(e=>csv+=`"${e.project}","${e.date}","${e.category}","${(e.desc||'').replace(/"/g,'""')}","${e.unit?'Block '+e.unit[4]:'Shared'}","${e.amount}"\n`); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download="NYLA_Projects.csv"; a.click();};
 
 init3D();
 </script>
