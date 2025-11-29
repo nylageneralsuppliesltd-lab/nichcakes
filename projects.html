@@ -2,48 +2,47 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NYLA PIT LATRINES – FINAL & PERFECT</title>
+<title>NYLA LATRINES • Compact Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
 <style>
   :root{--p:#00d4ff;--s:#28a745;--d:#e74c3c;--w:#f39c12;}
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff;min-height:100vh;}
-  .container{max-width:1600px;margin:20px auto;padding:20px;}
-  header{text-align:center;padding:40px;background:#fff;border-radius:25px;box-shadow:0 20px 60px rgba(0,0,0,0.4);margin-bottom:30px;}
-  h1{font-size:40px;background:linear-gradient(90deg,#00d4ff,#ff0066);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900;}
-  .grid{display:flex;flex-direction:column;gap:30px;}
-  @media(min-width:1100px){.grid{flex-direction:row;}
-    .sidebar{flex:0 0 420px;}
-  }
-  .sidebar{background:#fff;border-radius:25px;padding:35px;box-shadow:0 20px 60px rgba(0,0,0,0.3);color:#333;}
-  .project-card{background:#fff;padding:28px;border-radius:20px;margin-bottom:20px;cursor:pointer;transition:0.3s;box-shadow:0 12px 35px rgba(0,0,0,0.2);border:4px solid transparent;}
-  .project-card:hover{transform:translateY(-10px);}
-  .project-card.active{border-color:var(--p);background:#f0fbff;}
-  .project-card strong{font-size:24px;color:#1e3c72;}
-  .main{background:#fff;border-radius:25px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3);color:#333;}
-  .header-bar{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;align-items:center;margin-bottom:35px;}
-  select{padding:16px 28px;border:3px solid var(--p);border-radius:50px;font-size:18px;background:#fff;font-weight:600;}
-  .btn{background:var(--p);color:#fff;padding:16px 40px;border:none;border-radius:50px;font-weight:700;font-size:18px;cursor:pointer;box-shadow:0 10px 30px rgba(0,212,255,0.4);}
-  .btn:hover{background:#00aaff;transform:translateY(-3px);}
-  .btn-s{background:var(--s);}
-  .btn-d{background:var(--d);padding:8px 16px;font-size:14px;}
-  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:25px;margin:40px 0;}
-  .kpi{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:30px;border-radius:20px;text-align:center;box-shadow:0 15px 40px rgba(0,0,0,0.3);}
-  .kpi-value{font-size:34px;font-weight:900;}
-  .threejs-container{height:800px;background:linear-gradient(to bottom,#87CEEB,#e3f2fd);border-radius:25px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,0.5);margin:50px 0;}
-  .deductions,.budget-breakdown{background:#fff;padding:30px;border-radius:20px;margin:30px 0;box-shadow:0 10px 30px rgba(0,0,0,0.15);color:#333;}
-  .deduction-item,.budget-item{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #eee;font-size:18px;}
-  .deduction-item:last-child,.budget-item:last-child{border:none;}
-  .progress-container{height:34px;background:#eee;border-radius:17px;overflow:hidden;margin-top:8px;}
-  .progress-bar{height:100%;background:linear-gradient(90deg,var(--p),#ff0066);width:0%;transition:width 1.2s ease;}
-  .ledger table{width:100%;border-collapse:collapse;margin-top:20px;}
-  .ledger th{background:var(--p);color:#fff;padding:18px;}
-  .ledger td{padding:16px;border-bottom:1px solid #eee;text-align:center;}
+  body{font-family:'Poppins',sans-serif;background:#0f172a;color:#fff;min-height:100vh;overflow-x:hidden;}
+  .container{max-width:1400px;margin:0 auto;padding:12px;}
+  header{text-align:center;padding:16px 0;background:linear-gradient(135deg,#1e3a8a,#3b82f6);margin-bottom:12px;border-radius:0 0 20px 20px;}
+  h1{font-size:28px;background:linear-gradient(90deg,#00d4ff,#ff3366);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;}
+  .grid{display:grid;grid-template-columns:1fr;gap:12px;height:calc(100vh - 100px);}
+  @media(min-width:900px){.grid{grid-template-columns:340px 1fr;}}
+  .sidebar{background:#1e293b;padding:16px;border-radius:16px;height:fit-content;max-height:calc(100vh - 130px);overflow-y:auto;}
+  .project-card{background:#1e40af;padding:14px;border-radius:12px;margin-bottom:10px;cursor:pointer;transition:0.3s;border:3px solid transparent;font-size:15px;}
+  .project-card:hover{transform:scale(1.03);}
+  .project-card.active{border-color:var(--p);background:#1e3a8a;}
+  .main{background:#1e293b;padding:16px;border-radius:16px;display:flex;flex-direction:column;gap:14px;}
+  .header-bar{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;}
+  select{padding:10px 16px;border-radius:30px;border:2px solid var(--p);background:#0f172a;color:#fff;font-size:14px;}
+  .btn{padding:10px 20px;border:none;border-radius:30px;font-weight:600;font-size:14px;cursor:pointer;}
+  .btn{background:var(--p);color:#000;}
+  .btn:hover{background:#00aaff;}
+  .btn-s{background:var(--s);color:#fff;}
+  .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+  @media(min-width:640px){.kpi-grid{grid-template-columns:repeat(4,1fr);}}
+  .kpi{background:#1e40af;padding:12px;border-radius:12px;text-align:center;font-size:13px;}
+  .kpi-value{font-size:20px;font-weight:700;margin-top:4px;}
+  .threejs-container{height:380px !important;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.6);background:#87CEEB;}
+  .budget-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #334155;font-size:14px;}
+  .budget-item:last-child{border:none;}
+  .progress-container{height:8px;background:#334155;border-radius:4px;overflow:hidden;margin-top:4px;}
+  .progress-bar{height:100%;background:linear-gradient(90deg,var(--p),#ff3366);width:0%;transition:width 1s ease;}
+  .over-budget{color:#ef4444 !important;font-weight:700;}
+  .ledger table{width:100%;border-collapse:collapse;font-size:13px;}
+  .ledger th{background:var(--p);color:#000;padding:10px;font-size:13px;}
+  .ledger td{padding:10px;text-align:center;border-bottom:1px solid #334155;}
+  .btn-d{background:var(--d);color:#fff;padding:6px 12px;font-size:12px;border-radius:8px;}
   .modal{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;z-index:1000;}
-  .modal-box{background:#fff;padding:50px;border-radius:25px;width:90%;max-width:650px;box-shadow:0 30px 100px rgba(0,0,0,0.7);}
-  .input,select{width:100%;padding:18px;margin:15px 0;border-radius:15px;border:2px solid #ddd;font-size:18px;}
+  .modal-box{background:#1e293b;padding:24px;border-radius:16px;width:90%;max-width:420px;}
+  .input,select{width:100%;padding:12px;margin:8px 0;border-radius:12px;border:1px solid #475569;background:#0f172a;color:#fff;font-size:15px;}
 </style>
 </head>
 <body>
@@ -51,71 +50,69 @@
 <div class="container">
   <header>
     <h1>NYLA PIT LATRINES</h1>
-    <p style="font-size:22px;color:#555;margin-top:15px;">FINAL & PERFECT • No Errors • 3D Live • Works Forever</p>
+    <p style="font-size:15px;margin-top:6px;opacity:0.9;">Compact Pro • Live 3D • Mobile-First • Budget Alert</p>
   </header>
 
   <div class="grid">
     <div class="sidebar">
-      <h2 style="font-size:26px;color:#1e3c72;margin-bottom:30px;">SELECT PROJECT</h2>
+      <h2 style="font-size:18px;margin-bottom:12px;color:#60a5fa;">SELECT PROJECT</h2>
       <div id="projectsList"></div>
     </div>
 
     <div class="main">
       <div class="header-bar">
         <div>
-          <h2 id="projectTitle" style="font-size:32px;color:#1e3c72;">Select a project</h2>
-          <select id="unitFilter" style="margin-top:15px;">
+          <h2 id="projectTitle" style="font-size:22px;color:#60a5fa;">Select a project</h2>
+          <select id="unitFilter">
             <option value="">Both Blocks</option>
             <option value="unit1">Block 1 Only</option>
             <option value="unit2">Block 2 Only</option>
           </select>
         </div>
         <div>
-          <button class="btn" id="addExpense">+ Add Expense</button>
-          <button class="btn btn-s" id="downloadCSV">Download CSV</button>
+          <button class="btn" id="addExpense">+ Expense</button>
+          <button class="btn btn-s" id="downloadCSV">CSV</button>
         </div>
       </div>
 
-      <div class="deductions" id="deductionSummary"></div>
+      <!-- 3D ALWAYS VISIBLE AT THE TOP -->
+      <div class="threejs-container" id="threejs"></div>
 
       <div class="kpi-grid">
-        <div class="kpi"><div>Net Available</div><div class="kpi-value" id="net">KSh 0</div></div>
-        <div class="kpi"><div>Total Spent</div><div class="kpi-value" id="spent">KSh 0</div></div>
+        <div class="kpi"><div>Net Budget</div><div class="kpi-value" id="net">KSh 0</div></div>
+        <div class="kpi"><div>Spent</div><div class="kpi-value" id="spent">KSh 0</div></div>
         <div class="kpi"><div>Remaining</div><div class="kpi-value" id="remaining">KSh 0</div></div>
         <div class="kpi"><div>Progress</div><div class="kpi-value" id="percent">0%</div></div>
       </div>
 
-      <h2 style="font-size:28px;color:#1e3c72;margin:50px 0 20px;">Budget Breakdown</h2>
-      <div class="budget-breakdown" id="budgetBreakdown"></div>
+      <h3 style="font-size:17px;color:#60a5fa;margin:16px 0 8px;">Budget by Category</h3>
+      <div id="budgetBreakdown"></div>
 
-      <h2 style="font-size:28px;color:#1e3c72;margin:60px 0 20px;">Expense Ledger</h2>
+      <h3 style="font-size:17px;color:#60a5fa;margin:16px 0 8px;">Expense Ledger</h3>
       <div class="ledger">
-        <table>
-          <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Unit</th><th>Amount</th><th>Action</th></tr></thead>
-          <tbody id="ledgerBody"></tbody>
-        </table>
+        <table><thead><tr><th>Date</th><th>Cat</th><th>Desc</th><th>Unit</th><th>Amount</th><th></th></tr></thead>
+        <tbody id="ledgerBody"></tbody></table>
       </div>
-
-      <div class="threejs-container" id="threejs"></div>
     </div>
   </div>
 </div>
 
+<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-box">
-    <h2>Add New Expense</h2>
+    <h2 style="font-size:20px;margin-bottom:16px;color:#60a5fa;">Add Expense</h2>
     <select id="expUnit" class="input">
-      <option value="">Shared (Split 50/50)</option>
+      <option value="">Shared (50/50)</option>
       <option value="unit1">Block 1 Only</option>
       <option value="unit2">Block 2 Only</option>
     </select>
     <select id="expCategory" class="input">
-      <option value="">Select Category</option>
+      <option value="">Category</option>
       <option value="excavation">Excavation & Earthworks</option>
       <option value="concrete">Concrete Works</option>
       <option value="steel">Reinforcement Steel</option>
       <option value="pitwall">Pit Walling</option>
-      <option value="superwall">Superstructure Walling</option>
+      <option value="superwall">Superstructure</option>
       <option value="roofing">Roofing</option>
       <option value="doors">Doors & Carpentry</option>
       <option value="plaster">Plaster & Screed</option>
@@ -126,10 +123,10 @@
     </select>
     <input type="date" id="expDate" class="input">
     <input type="text" id="expDesc" class="input" placeholder="Description (optional)">
-    <input type="number" id="expAmount" class="input" placeholder="Amount in KSh" min="1">
-    <div style="margin-top:30px;text-align:right;">
-      <button class="btn" id="saveExpense">Save Expense</button>
-      <button class="btn" style="background:#666;margin-left:15px;" id="cancel">Cancel</button>
+    <input type="number" id="expAmount" class="input" placeholder="Amount (KSh)" min="1">
+    <div style="margin-top:20px;text-align:right;">
+      <button class="btn" id="saveExpense">Save</button>
+      <button class="btn" style="background:#64748b;margin-left:10px;" id="cancel">Cancel</button>
     </div>
   </div>
 </div>
@@ -147,33 +144,30 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// Fresh database every time — no version conflicts
-const DB_NAME = "NylaLatrines_" + Date.now();
+const DB_NAME = "NylaCompact_" + Date.now();
 const db = new Dexie(DB_NAME);
-db.version(1).stores({
-  expenses: "++id,project,unit,category,date,desc,amount"
-});
+db.version(1).stores({expenses:"++id,project,unit,category,date,desc,amount"});
 
 const PROJECTS = [
-  {id:"yedhi",name:"YEDHI PRIMARY (2-door)",doors:2,original:1029000},
-  {id:"sogorosa",name:"SOGOROSA PRIMARY (2-door)",doors:2,original:1029000},
-  {id:"sosoni",name:"SOSONI PRIMARY (3-door)",doors:3,original:1546000},
-  {id:"mugumoni",name:"MUGUMONI PRIMARY (3-door)",doors:3,original:1546000}
+  {id:"yedhi",name:"YEDHI PRIMARY",doors:2,original:1029000},
+  {id:"sogorosa",name:"SOGOROSA PRIMARY",doors:2,original:1029000},
+  {id:"sosoni",name:"SOSONI PRIMARY",doors:3,original:1546000},
+  {id:"mugumoni",name:"MUGUMONI PRIMARY",doors:3,original:1546000}
 ];
 
 const CATEGORIES = [
-  {key:"excavation",name:"Excavation & Earthworks",pct:12},
-  {key:"concrete",name:"Concrete Works",pct:18},
-  {key:"steel",name:"Reinforcement Steel",pct:5},
-  {key:"pitwall",name:"Pit Walling",pct:20},
-  {key:"superwall",name:"Superstructure Walling",pct:10},
+  {key:"excavation",name:"Excavation",pct:12},
+  {key:"concrete",name:"Concrete",pct:18},
+  {key:"steel",name:"Steel",pct:5},
+  {key:"pitwall",name:"Pit Wall",pct:20},
+  {key:"superwall",name:"Walls",pct:10},
   {key:"roofing",name:"Roofing",pct:12},
-  {key:"doors",name:"Doors & Carpentry",pct:5},
-  {key:"plaster",name:"Plaster & Screed",pct:6},
+  {key:"doors",name:"Doors",pct:5},
+  {key:"plaster",name:"Plaster",pct:6},
   {key:"painting",name:"Painting",pct:3},
-  {key:"vent",name:"Ventilation",pct:2},
+  {key:"vent",name:"Vent",pct:2},
   {key:"transport",name:"Transport",pct:5},
-  {key:"misc",name:"Miscellaneous",pct:2}
+  {key:"misc",name:"Misc",pct:2}
 ];
 
 let activeProject = null;
@@ -181,213 +175,162 @@ let unitFilter = "";
 let scene, camera, renderer, controls;
 let block1 = {}, block2 = {};
 
-function calc(amount){
-  const pmc = amount * 0.05;
-  const tax = amount * 0.19;
-  const upfront = amount * 0.10;
-  const contractor = amount * 0.15;
-  const retention = amount * 0.05;
-  const net = Math.round(amount - pmc - tax - upfront - contractor - retention);
-  return {pmc, tax, upfront, contractor, retention, net, perBlock: Math.round(net/2)};
+function calc(a){
+  const net = Math.round(a * (1-0.05-0.19-0.10-0.15-0.05));
+  return {net, perBlock: Math.round(net/2)};
 }
 
-function format(n){ return 'KSh ' + Number(Math.round(n)).toLocaleString(); }
+function format(n){ return 'KSh ' + n.toLocaleString(); }
 
-function getCategoryName(key){
-  return CATEGORIES.find(c => c.key === key)?.name || key;
-}
+function getCategoryName(k){ return CATEGORIES.find(c=>c.key===k)?.name || k; }
 
-function createBlock(xOffset, numDoors){
+function createBlock(x, doors){
   const group = new THREE.Group();
-  const coral = new THREE.MeshStandardMaterial({color:0xd4a574, roughness:0.95});
-  const steel = new THREE.MeshStandardMaterial({color:0x2c3e50, metalness:0.9});
-  const roofMat = new THREE.MeshStandardMaterial({color:0xc41e3a});
+  const mat = new THREE.MeshStandardMaterial({color:0xd4a574});
+  const steel = new THREE.MeshStandardMaterial({color:0x2c3e50});
+  const roof = new THREE.MeshStandardMaterial({color:0xc41e3a});
 
-  const pit = new THREE.Mesh(new THREE.CylinderGeometry(2,2.2,3,24,1,true), coral);
-  pit.position.set(xOffset, -1.5, 0); group.add(pit);
+  const pit = new THREE.Mesh(new THREE.CylinderGeometry(2,2.2,3,24,1,true), mat);
+  pit.position.set(x,-1.5,0); group.add(pit);
 
   const slab = new THREE.Mesh(new THREE.BoxGeometry(3.8,0.15,2.6), new THREE.MeshStandardMaterial({color:0x95a5a6}));
-  slab.position.set(xOffset, 0, 0); group.add(slab);
+  slab.position.set(x,0,0); group.add(slab);
 
   const walls = [];
-  const h = 2.2;
-  const addWall = (w,d,x,z) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), coral);
-    m.position.set(xOffset + x, h/2 + 0.075, z);
-    walls.push(m); group.add(m);
+  const add = (w,d,px,pz) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w,2.2,d), mat);
+    m.position.set(x+px,1.1,pz); walls.push(m); group.add(m);
   };
-  addWall(3.8, 0.2, 0, 1.2);
-  addWall(3.8, 0.2, 0, -1.2);
-  addWall(0.2, 0.2, -1.8, 0);
-  addWall(0.2, 0.2, 1.8, 0);
+  add(3.8,0.2,0,1.2); add(3.8,0.2,0,-1.2); add(0.2,0.2,-1.8,0); add(0.2,0.2,1.8,0);
 
   const doorMeshes = [];
-  if(numDoors === 2){
-    addWall(0.2, 1.8, 0, 0);
-    [-0.9, 0.9].forEach(dx => {
-      const d = new THREE.Mesh(new THREE.BoxGeometry(0.05, 2, 0.9), steel);
-      d.position.set(xOffset + dx, 1.075, 1.21);
-      doorMeshes.push(d); group.add(d);
-    });
-  } else {
-    addWall(0.2, 1.2, -0.9, 0);
-    addWall(0.2, 1.2, 0.9, 0);
-    [-1.2, 0, 1.2].forEach(dx => {
-      const d = new THREE.Mesh(new THREE.BoxGeometry(0.05, 2, 0.8), steel);
-      d.position.set(xOffset + dx*0.75, 1.075, 1.21);
-      doorMeshes.push(d); group.add(d);
-    });
+  if(doors===2){
+    add(0.2,1.8,0,0);
+    [-0.9,0.9].forEach(dx=>{const d=new THREE.Mesh(new THREE.BoxGeometry(0.05,2,0.9),steel);d.position.set(x+dx,1.075,1.21);doorMeshes.push(d);group.add(d);});
+  }else{
+    add(0.2,1.2,-0.9,0); add(0.2,1.2,0.9,0);
+    [-1.2,0,1.2].forEach(dx=>{const d=new THREE.Mesh(new THREE.BoxGeometry(0.05,2,0.8),steel);d.position.set(x+dx*0.75,1.075,1.21);doorMeshes.push(d);group.add(d);});
   }
 
-  const roof = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.15, 3.2), roofMat);
-  roof.position.set(xOffset, 2.6, 0);
-  roof.rotation.x = Math.PI * 0.18;
-  group.add(roof);
+  const r = new THREE.Mesh(new THREE.BoxGeometry(4.4,0.15,3.2), roof);
+  r.position.set(x,2.6,0); r.rotation.x = Math.PI*0.18; group.add(r);
 
-  pit.visible = slab.visible = roof.visible = false;
-  walls.forEach(w => w.visible = false);
-  doorMeshes.forEach(d => d.visible = false);
+  pit.visible = slab.visible = r.visible = false;
+  walls.forEach(w=>w.visible=false);
+  doorMeshes.forEach(d=>d.visible=false);
 
-  return {group, pit, walls, slab, roof, doorMeshes};
+  return {group,pit,walls,slab,roof:r,doorMeshes};
 }
 
 function init3D(){
-  const container = document.getElementById('threejs');
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xb3e5fc);
+  const c = document.getElementById('threejs');
+  scene = new THREE.Scene(); scene.background = new THREE.Color(0xb3e5fc);
+  camera = new THREE.PerspectiveCamera(50, c.clientWidth/380, 0.1, 1000);
+  camera.position.set(0,10,25);
 
-  camera = new THREE.PerspectiveCamera(55, container.clientWidth/800, 0.1, 1000);
-  camera.position.set(0, 12, 28);
-
-  renderer = new THREE.WebGLRenderer({antialias: true});
-  renderer.setSize(container.clientWidth, 800);
+  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(c.clientWidth,380);
   renderer.shadowMap.enabled = true;
-  container.appendChild(renderer.domElement);
+  c.appendChild(renderer.domElement);
 
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-  const sun = new THREE.DirectionalLight(0xffffff, 1.4);
-  sun.position.set(20, 40, 20);
-  sun.castShadow = true;
-  scene.add(sun);
+  scene.add(new THREE.AmbientLight(0xffffff,0.9));
+  const sun = new THREE.DirectionalLight(0xffffff,1.3);
+  sun.position.set(15,30,15); scene.add(sun);
 
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(100,100), new THREE.MeshLambertMaterial({color: 0x8BC34A}));
-  ground.rotation.x = -Math.PI/2;
-  ground.receiveShadow = true;
-  scene.add(ground);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(80,80), new THREE.MeshLambertMaterial({color:0x8bc34a}));
+  ground.rotation.x = -Math.PI/2; ground.receiveShadow=true; scene.add(ground);
 
-  const animate = () => {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-  };
+  const animate = ()=> {requestAnimationFrame(animate); controls.update(); renderer.render(scene,camera);};
   animate();
 
-  window.addEventListener('resize', () => {
-    camera.aspect = container.clientWidth / 800;
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, 800);
-  });
+  window.addEventListener('resize',()=>{camera.aspect=c.clientWidth/380; camera.updateProjectionMatrix(); renderer.setSize(c.clientWidth,380);});
 }
 
-function updateBlock(block, percent){
-  const stage = percent < 10 ? 0 : percent < 35 ? 1 : percent < 65 ? 2 : percent < 90 ? 3 : 4;
-  block.pit.visible = stage >= 1;
-  block.walls.forEach(w => w.visible = stage >= 2);
-  block.slab.visible = stage >= 2;
-  block.roof.visible = stage >= 3;
-  block.doorMeshes.forEach(d => d.visible = stage >= 4);
+function updateBlock(b,pct){
+  const s = pct<10?0:pct<35?1:pct<65?2:pct<90?3:4;
+  b.pit.visible=s>=1; b.walls.forEach(w=>w.visible=s>=2); b.slab.visible=s>=2;
+  b.roof.visible=s>=3; b.doorMeshes.forEach(d=>d.visible=s>=4);
 }
 
 async function refresh(){
   if(!activeProject) return;
+  const p = PROJECTS.find(x=>x.id===activeProject);
+  const {net, perBlock} = calc(p.original);
 
-  const project = PROJECTS.find(p => p.id === activeProject);
-  const ded = calc(project.original);
-
-  document.getElementById('deductionSummary').innerHTML = `
-    <div class="deduction-item"><span>Original Contract</span><span>${format(project.original)}</span></div>
-    <div class="deduction-item"><span>PMC 5%</span><span>-${format(ded.pmc)}</span></div>
-    <div class="deduction-item"><span>Tax 19%</span><span>-${format(ded.tax)}</span></div>
-    <div class="deduction-item"><span>Upfront 10%</span><span>-${format(ded.upfront)}</span></div>
-    <div class="deduction-item"><span>Contractor 15%</span><span>-${format(ded.contractor)}</span></div>
-    <div class="deduction-item" style="color:#f39c12;"><span>Retention 5%</span><span>-${format(ded.retention)}</span></div>
-    <div class="deduction-item"><span><strong>NET AVAILABLE</strong></span><span style="color:#28a745;font-size:26px"><strong>${format(ded.net)}</strong></span></div>`;
-
-  if(block1.group){
-    scene.remove(block1.group, block2.group);
-  }
-  block1 = createBlock(-9, project.doors);
-  block2 = createBlock(+9, project.doors);
+  // 3D
+  if(block1.group){scene.remove(block1.group,block2.group);}
+  block1 = createBlock(-8, p.doors);
+  block2 = createBlock(+8, p.doors);
   scene.add(block1.group, block2.group);
 
-  const expenses = await db.expenses.where({project:activeProject}).toArray();
+  const exp = await db.expenses.where({project:activeProject}).toArray();
+  const shared = exp.filter(e=>!e.unit).reduce((a,e)=>a+e.amount,0)/2 || 0;
+  const b1 = exp.filter(e=>e.unit==="unit1").reduce((a,e)=>a+e.amount,0) + shared;
+  const b2 = exp.filter(e=>e.unit==="unit2").reduce((a,e)=>a+e.amount,0) + shared;
 
-  const sharedCost = expenses.filter(e => !e.unit).reduce((a,e) => a + e.amount, 0) / 2 || 0;
-  const b1Spent = expenses.filter(e => e.unit==="unit1").reduce((a,e) => a + e.amount, 0) + sharedCost;
-  const b2Spent = expenses.filter(e => e.unit==="unit2").reduce((a,e) => a + e.amount, 0) + sharedCost;
+  updateBlock(block1, Math.min(100, Math.round(b1/perBlock*100)));
+  updateBlock(block2, Math.min(100, Math.round(b2/perBlock*100)));
 
-  updateBlock(block1, Math.min(100, Math.round(b1Spent / ded.perBlock * 100)));
-  updateBlock(block2, Math.min(100, Math.round(b2Spent / ded.perBlock * 100)));
+  block1.group.visible = !unitFilter || unitFilter==="unit1";
+  block2.group.visible = !unitFilter || unitFilter==="unit2";
 
-  block1.group.visible = !unitFilter || unitFilter === "unit1";
-  block2.group.visible = !unitFilter || unitFilter === "unit2";
+  const spent = unitFilter==="unit1"?b1 : unitFilter==="unit2"?b2 : b1+b2-shared;
+  const budget = unitFilter ? perBlock : net;
+  const percent = Math.round(spent/budget*100);
 
-  const currentSpent = unitFilter==="unit1" ? b1Spent : unitFilter==="unit2" ? b2Spent : b1Spent + b2Spent - sharedCost;
-  const currentBudget = unitFilter ? ded.perBlock : ded.net;
+  document.getElementById('net').textContent = format(budget);
+  document.getElementById('spent').textContent = format(spent);
+  document.getElementById('remaining').textContent = format(budget - spent);
+  document.getElementById('percent').textContent = percent + '%';
+  document.getElementById('percent').className = 'kpi-value' + (percent > 100 ? ' over-budget' : '');
 
-  document.getElementById('net').textContent = format(currentBudget);
-  document.getElementById('spent').textContent = format(currentSpent);
-  document.getElementById('remaining').textContent = format(currentBudget - currentSpent);
-  document.getElementById('percent').textContent = Math.round(currentSpent/currentBudget*100) + '%';
+  document.getElementById('projectTitle').textContent = p.name + (unitFilter ? ` • ${unitFilter==='unit1'?'Block 1':'Block 2'}` : '');
 
+  // Budget breakdown
   let html = '';
-  CATEGORIES.forEach(cat => {
-    const budget = unitFilter ? ded.perBlock * cat.pct/100 : ded.net * cat.pct/100;
-    const spent = expenses
-      .filter(e => e.category === cat.key && (!unitFilter || e.unit === unitFilter || !e.unit))
-      .reduce((a,e) => a + (e.unit ? e.amount : e.amount/2), 0);
-    const pct = budget > 0 ? spent/budget*100 : 0;
+  CATEGORIES.forEach(cat=>{
+    const catBudget = unitFilter ? perBlock * cat.pct/100 : net * cat.pct/100;
+    const catSpent = exp.filter(e=>e.category===cat.key && (!unitFilter || e.unit===unitFilter || !e.unit))
+                       .reduce((a,e)=>a + (e.unit?e.amount:e.amount/2),0);
+    const catPct = catBudget>0 ? catSpent/catBudget*100 : 0;
     html += `<div class="budget-item">
-      <div><strong>${cat.name}</strong><br><small>Budget: ${format(budget)}</small></div>
+      <div><strong>${cat.name}</strong></div>
       <div style="text-align:right;">
-        <div>${format(spent)} spent</div>
-        <div class="progress-container"><div class="progress-bar" style="width:${pct}%"></div></div>
-        <small>${Math.round(pct)}%</small>
+        <div>${format(catSpent)}</div>
+        <div class="progress-container"><div class="progress-bar" style="width:${catPct}%"></div></div>
+        <small${catPct>100?' style="color:#ef4444;font-weight:700"':''}>${Math.round(catPct)}%</small>
       </div>
     </div>`;
   });
   document.getElementById('budgetBreakdown').innerHTML = html;
 
-  const rows = expenses.map(e => `
+  // Ledger
+  document.getElementById('ledgerBody').innerHTML = exp.map(e=>`
     <tr>
-      <td>${e.date}</td>
-      <td>${getCategoryName(e.category)}</td>
-      <td>${e.desc || '-'}</td>
-      <td>${e.unit ? (e.unit==='unit1'?'Block 1':'Block 2') : 'Shared'}</td>
+      <td>${e.date.slice(5)}</td>
+      <td>${e.category.slice(0,6)}</td>
+      <td style="text-align:left;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.desc||'—'}</td>
+      <td>${e.unit?'B'+(e.unit[4]):'Shr'}</td>
       <td>${format(e.amount)}</td>
-      <td><button class="btn-d" onclick="db.expenses.delete(${e.id}).then(refresh)">Delete</button></td>
-    </tr>`).join('');
-  document.getElementById('ledgerBody').innerHTML = rows || '<tr><td colspan="6">No expenses yet</td></tr>';
-
-  document.getElementById('projectTitle').textContent = project.name + (unitFilter ? ` – ${unitFilter==='unit1'?'Block 1':'Block 2'}` : '');
+      <td><button class="btn-d" onclick="db.expenses.delete(${e.id}).then(refresh)">Del</button></td>
+    </tr>`).join('') || '<tr><td colspan="6" style="color:#64748b;">No expenses</td></tr>';
 }
 
-document.getElementById('projectsList').innerHTML = PROJECTS.map(p => `
+// Init projects
+document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`
   <div class="project-card" data-id="${p.id}">
-    <strong>${p.name}</strong>
-    <div style="margin-top:10px;color:#555;">
-      ${p.doors}-Door • Net: ${format(calc(p.original).net)}
-    </div>
+    <strong>${p.name}</strong><br>
+    <small>${p.doors}-Door • Net ${format(calc(p.original).net)}</small>
   </div>
 `).join('');
 
-document.getElementById('projectsList').onclick = e => {
+document.getElementById('projectsList').onclick = e=>{
   const card = e.target.closest('.project-card');
   if(!card) return;
-  document.querySelectorAll('.project-card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.project-card').forEach(c=>c.classList.remove('active'));
   card.classList.add('active');
   activeProject = card.dataset.id;
   unitFilter = "";
@@ -395,49 +338,38 @@ document.getElementById('projectsList').onclick = e => {
   refresh();
 };
 
-document.getElementById('unitFilter').onchange = e => { unitFilter = e.target.value; refresh(); };
+document.getElementById('unitFilter').onchange = e=>{ unitFilter=e.target.value; refresh(); };
 
-document.getElementById('addExpense').onclick = () => {
-  if(!activeProject) return alert("Select a project first");
-  document.getElementById('modal').style.display = 'flex';
+document.getElementById('addExpense').onclick = ()=>{
+  if(!activeProject) return alert("Select project first");
+  document.getElementById('modal').style.display='flex';
   document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
 };
 
-document.getElementById('cancel').onclick = () => document.getElementById('modal').style.display = 'none';
-
-document.getElementById('modal').onclick = e => {
-  if(e.target.id === 'modal') document.getElementById('modal').style.display = 'none';
+document.getElementById('cancel').onclick = 
+document.getElementById('modal').onclick = e=>{
+  if(e.target.id==='modal' || e.target.id==='cancel') document.getElementById('modal').style.display='none';
 };
 
-document.getElementById('saveExpense').onclick = async () => {
-  const amount = parseFloat(document.getElementById('expAmount').value);
+document.getElementById('saveExpense').onclick = async ()=>{
+  const amount = +document.getElementById('expAmount').value;
   const unit = document.getElementById('expUnit').value || null;
-  const category = document.getElementById('expCategory').value;
+  const cat = document.getElementById('expCategory').value;
   const date = document.getElementById('expDate').value;
-  const desc = document.getElementById('expDesc').value.trim();
-
-  if(!amount || !category || !date){
-    alert("Fill Amount, Category & Date");
-    return;
-  }
-
-  await db.expenses.add({project: activeProject, unit, category, date, desc, amount});
-  document.getElementById('modal').style.display = 'none';
+  if(!amount || !cat || !date) return alert("Fill all fields");
+  await db.expenses.add({project:activeProject, unit, category:cat, date, desc:document.getElementById('expDesc').value.trim(), amount});
+  document.getElementById('modal').style.display='none';
   refresh();
 };
 
-document.getElementById('downloadCSV').onclick = async () => {
+document.getElementById('downloadCSV').onclick = async ()=>{
   if(!activeProject) return alert("Select project");
   const data = await db.expenses.where({project:activeProject}).toArray();
-  let csv = "Date,Category,Description,Unit,Amount(KSh)\n";
-  data.forEach(r => {
-    csv += `${r.date},${getCategoryName(r.category)},"${r.desc||''}",${r.unit?(r.unit==='unit1'?'Block 1':'Block 2'):'Shared'},${r.amount}\n`;
-  });
-  const blob = new Blob([csv], {type: 'text/csv'});
-  const url = URL.createObjectURL(blob);
+  let csv = "Date,Category,Description,Unit,Amount\n";
+  data.forEach(r=>csv += `${r.date},${getCategoryName(r.category)},"${r.desc||''}",${r.unit?(r.unit==='unit1'?'Block 1':'Block 2'):'Shared'},${r.amount}\n`);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `${activeProject}_report.csv`;
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = activeProject + "_expenses.csv";
   a.click();
 };
 
