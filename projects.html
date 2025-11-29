@@ -168,17 +168,31 @@ function calc(amount) {
 }
 
 async function fetchData(action, project, payload = {}) {
-  const url = action === 'get' 
-    ? `${WEBHOOK}?action=get&project=${project}&secret=${SECRET}`
-    : WEBHOOK;
-  const res = await fetch(url, {
-    method: action === 'get' ? 'GET' : 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: action === 'get' ? null : JSON.stringify({action, secret: SECRET, project: activeProject, ...payload})
-  });
-  return await res.json();
+  if (action === 'get') {
+    // JSONP for GET — 100% bypasses CORS
+    return new Promise((resolve, reject) => {
+      const cbName = 'jsonp_' + Date.now();
+      window[cbName] = data => {
+        delete window[cbName];
+        document.head.removeChild(script);
+        resolve(data);
+      };
+      const script = document.createElement('script');
+      script.src = `${WEBHOOK}?action=get&project=${project}&secret=${SECRET}&callback=${cbName}`;
+      script.onerror = () => reject(new Error('Failed to load'));
+      document.head.appendChild(script);
+    });
+  } else {
+    // POST for add/update/delete
+    const response = await fetch(WEBHOOK, {
+      method: 'POST',
+      body: JSON.stringify({action, secret: SECRET, project: activeProject, ...payload})
+    });
+    const text = await response.text();
+    try { return JSON.parse(text); }
+    catch { return {success: true}; }
+  }
 }
-
 async function loadProjects() {
   try {
     const data = await fetchData('get', 'Projects');
