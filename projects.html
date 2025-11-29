@@ -168,53 +168,22 @@ function calc(amount) {
 }
 
 async function fetchData(action, project, payload = {}) {
-  if (action === 'get') {
-    return new Promise((resolve, reject) => {
-      const callbackName = 'jsonp_cb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
-      const url = `${WEBHOOK}?action=get&project=${project}&secret=${SECRET}&callback=${callbackName}`;
+  const url = WEBHOOK;
+  const options = {
+    method: 'POST',  // Use POST for everything (simple request)
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8'  // Key: text/plain bypasses preflight
+    },
+    body: JSON.stringify({action, project, secret: SECRET, ...payload})
+  };
 
-      // Define callback first
-      window[callbackName] = function(data) {
-        cleanup();
-        resolve(data);
-      };
-
-      const script = document.createElement('script');
-      script.src = url;
-      script.async = true;
-
-      const cleanup = () => {
-        delete window[callbackName];
-        if (script.parentNode) script.parentNode.removeChild(script);
-      };
-
-      script.onerror = () => {
-        cleanup();
-        reject(new Error('JSONP script failed to load'));
-      };
-
-      document.head.appendChild(script);
-
-      // Safety timeout (in case network is down)
-      setTimeout(() => {
-        if (window[callbackName]) {
-          cleanup();
-          reject(new Error('JSONP timeout'));
-        }
-      }, 15000);
-    });
-  } else {
-    // POST (add/update/delete)
-    const resp = await fetch(WEBHOOK, {
-      method: 'POST',
-      body: JSON.stringify({action, secret: SECRET, project: activeProject, ...payload})
-    });
-    const text = await resp.text();
-    try {
-      return JSON.parse(text);
-    } catch {
-      return {success: true};
-    }
+  try {
+    const res = await fetch(url, options);
+    const text = await res.text();
+    return JSON.parse(text);  // Parse the JSON response
+  } catch (err) {
+    console.error('Fetch failed:', err);
+    return {success: false, error: err.message};
   }
 }
 async function loadProjects() {
