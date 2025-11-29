@@ -72,7 +72,7 @@
 <div class="container">
   <header>
     <h1>NYLA PIT LATRINES</h1>
-    <p class="subtitle">Growing Strong • Real-Time Tracking</p>
+    <p class="subtitle">Real-Time Project Tracking</p>
   </header>
 
   <div class="grid">
@@ -94,8 +94,8 @@
           </select>
         </div>
         <div>
-          <button class="btn-primary" id="addExpense">+ Expense</button>
-          <button class="btn-success" id="downloadCSV">CSV</button>
+          <button class="btn-primary" id="addExpense">Add Expense</button>
+          <button class="btn-success" id="downloadCSV">Download CSV</button>
         </div>
       </div>
 
@@ -227,7 +227,7 @@ async function refresh() {
 
   // Show itemized deductions
   document.getElementById('deductionSummary').innerHTML = `
-    <div class="ded-item"><span>Original</span><span>${format(single ? p.original/2 : p.original)}</span></div>
+    <div class="ded-item"><span>Project Gross Amount</span><span>${format(single ? p.original/2 : p.original)}</span></div>
     <div class="ded-item"><span>PMC 5%</span><span>-${format(single ? d.pmc/2 : d.pmc)}</span></div>
     <div class="ded-item"><span>Tax 19%</span><span>-${format(single ? d.tax/2 : d.tax)}</span></div>
     <div class="ded-item"><span>Upfront 10%</span><span>-${format(single ? d.upfront/2 : d.upfront)}</span></div>
