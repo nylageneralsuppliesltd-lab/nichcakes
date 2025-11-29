@@ -62,11 +62,7 @@
   .ledger td:nth-child(5){width:15%;text-align:right;font-weight:600;}
   .ledger td:nth-child(6){width:14%;text-align:center;}
 
-  @media(max-width:640px){
-    .ledger td{padding:6px 4px;font-size:12px;}
-    .ledger th{font-size:11px;padding:6px;}
-  }
-
+  @media(max-width:640px){.ledger td{padding:6px 4px;font-size:12px;}.ledger th{font-size:11px;padding:6px;}}
   .action-btn{padding:4px 8px;border:none;border-radius:6px;font-size:11px;cursor:pointer;}
   .btn-edit{background:#f59e0b;color:white;}
   .btn-delete{background:#ef4444;color:white;}
@@ -89,13 +85,11 @@
   </header>
 
   <div class="grid">
-    <!-- LEFT SIDEBAR -->
     <div class="sidebar">
       <h2 style="font-size:17px;color:#06b6d4;margin-bottom:12px;">Projects</h2>
       <div id="projectsList"></div>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div class="main">
       <div class="header-bar">
         <div>
@@ -127,11 +121,7 @@
       <h3 class="section-title">Expense Ledger</h3>
       <div class="ledger">
         <table>
-          <thead>
-            <tr>
-              <th>Date</th><th>Category</th><th>Description</th><th>Unit</th><th>Amount</th><th>Actions</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Unit</th><th>Amount</th><th>Actions</th></tr></thead>
           <tbody id="ledgerBody"></tbody>
         </table>
       </div>
@@ -142,7 +132,6 @@
   </div>
 </div>
 
-<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-box">
     <h2 class="modal-title" id="modalTitle">Add Expense</h2>
@@ -199,12 +188,10 @@ const CATEGORIES = [
   {key:"concrete",name:"Concrete",pct:18},
   {key:"steel",name:"Steel",pct:5},
   {key:"pitwall",name:"Pit Wall",pct:20},
-  },
   {key:"superwall",name:"Super Wall",pct:10},
   {key:"roofing",name:"Roofing",pct:12},
   {key:"doors",name:"Doors",pct:5},
   {key:"plaster",name:"Plaster",pct:6},
-  },
   {key:"painting",name:"Painting",pct:3},
   {key:"vent",name:"Vent",pct:2},
   {key:"transport",name:"Transport",pct:5},
@@ -238,7 +225,6 @@ async function refresh() {
   const single = unitFilter === "unit1" || unitFilter === "unit2";
   const net = single ? d.perBlock : d.net;
 
-  // Itemized deductions
   document.getElementById('deductionSummary').innerHTML = `
     <div class="ded-item"><span>Project Gross Amount</span><span>${format(single ? p.original/2 : p.original)}</span></div>
     <div class="ded-item"><span>PMC 5%</span><span>-${format(single ? d.pmc/2 : d.pmc)}</span></div>
@@ -255,11 +241,10 @@ async function refresh() {
 
   const sharedTotal = exp.filter(e => !e.unit).reduce((a,e) => a + e.amount, 0);
   const sharedPerBlock = sharedTotal / 2;
-
   const block1Only = exp.filter(e => e.unit === "unit1").reduce((a,e) => a + e.amount, 0);
   const block2Only = exp.filter(e => e.unit === "unit2").reduce((a,e) => a + e.amount, 0);
 
-  let b1, b2, spent;
+  let b1 = 0, b2 = 0, spent = 0;
   if (single) {
     if (unitFilter === "unit1") { b1 = sharedPerBlock + block1Only; spent = b1; }
     else { b2 = sharedPerBlock + block2Only; spent = b2; }
@@ -275,16 +260,13 @@ async function refresh() {
   document.getElementById('percent').textContent = Math.round(spent/net*100) + '%';
   document.getElementById('projectTitle').textContent = p.name + (single ? ' • ' + (unitFilter === 'unit1' ? 'Block 1' : 'Block 2') : '');
 
-  // Budget cards
   let html = '';
   CATEGORIES.forEach(c => {
     const budget = net * c.pct / 100;
-    const spentCat = exp
-      .filter(e => e.category === c.key)
-      .reduce((s,e) => {
-        if (e.unit && single && e.unit !== unitFilter) return s;
-        return s + e.amount / (e.unit ? 1 : 2);
-      }, 0);
+    const spentCat = exp.filter(e => e.category === c.key).reduce((s,e) => {
+      if (e.unit && single && e.unit !== unitFilter) return s;
+      return s + e.amount / (e.unit ? 1 : 2);
+    }, 0);
     const pct = Math.round(spentCat / budget * 100) || 0;
     const over = pct > 100;
     html += `<div class="budget-card ${over?'over':''}">
@@ -296,7 +278,6 @@ async function refresh() {
   });
   document.getElementById('budgetBreakdown').innerHTML = html;
 
-  // Ledger
   const list = single ? exp.filter(e => !e.unit || e.unit === unitFilter) : exp;
   document.getElementById('ledgerBody').innerHTML = list.map(e => `
     <tr>
@@ -311,7 +292,6 @@ async function refresh() {
       </td>
     </tr>`).join('');
 
-  // Edit/Delete
   document.querySelectorAll('.btn-edit').forEach(b => b.onclick = () => {
     currentEditId = b.dataset.id;
     document.getElementById('modalTitle').textContent = "Edit Expense";
@@ -331,16 +311,14 @@ async function refresh() {
     }
   });
 
-  // 3D
   if (block1 && block2) {
-    updateBlock(block1, Math.round((b1 || 0) / d.perBlock * 100));
-    updateBlock(block2, Math.round((b2 || 0) / d.perBlock * 100));
+    updateBlock(block1, Math.round(b1 / d.perBlock * 100));
+    updateBlock(block2, Math.round(b2 / d.perBlock * 100));
     block1.group.visible = !single || unitFilter === "unit1";
     block2.group.visible = !single || unitFilter === "unit2";
   }
 }
 
-// Save expense
 document.getElementById('saveExpense').onclick = async () => {
   const payload = {
     date: document.getElementById('expDate').value,
@@ -356,7 +334,6 @@ document.getElementById('saveExpense').onclick = async () => {
 
 document.getElementById('cancelModal').onclick = () => document.getElementById('modal').style.display = 'none';
 
-// 3D Setup (same beautiful one)
 let scene, camera, renderer, controls;
 function init3D() {
   const c = document.getElementById('threejs');
@@ -390,13 +367,9 @@ function makeBlock(x){
 }
 function updateBlock(b,pct){
   const s=pct<10?0:pct<35?1:pct<65?2:pct<90?3:4;
-  b.pit.visible=s>=1;
-  b.walls.forEach(w=>w.visible=s>=2);
-  b.slab.visible=s>=2;
-  b.roof.visible=s>=3;
+  b.pit.visible=s>=1; b.walls.forEach(w=>w.visible=s>=2); b.slab.visible=s>=2; b.roof.visible=s>=3;
 }
 
-// UI Events
 document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`<div class="project-card" data-id="${p.id}"><strong>${p.name}</strong><br><small style="color:#64748b;">${format(calc(p.original).net)}</small></div>`).join('');
 
 document.getElementById('projectsList').onclick = e => {
@@ -412,13 +385,7 @@ document.getElementById('projectsList').onclick = e => {
 };
 
 document.getElementById('unitFilter').onchange = e => { unitFilter = e.target.value; refresh(); };
-
-document.getElementById('addExpense').onclick = () => {
-  if(!activeProject) return alert("Select project first");
-  currentEditId = null;
-  document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('modal').style.display = 'flex';
-};
+document.getElementById('addExpense').onclick = () => { if(!activeProject) return alert("Select project first"); currentEditId=null; document.getElementById('expDate').value=new Date().toISOString().split('T')[0]; document.getElementById('modal').style.display='flex'; };
 
 document.getElementById('downloadCSV').onclick = async () => {
   let all = [];
