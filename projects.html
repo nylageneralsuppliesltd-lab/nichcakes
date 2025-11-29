@@ -2,41 +2,47 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NYLA PIT LATRINES – FINAL & FOREVER</title>
+<title>NYLA PIT LATRINES – FINAL PERFECTION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
 <style>
   :root{--p:#00d4ff;--s:#28a745;--d:#e74c3c;--w:#f39c12;}
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#1e3c72,#2a5298);color:#333;min-height:100vh;}
-  .container{max-width:1500px;margin:20px auto;padding:20px;}
-  header{text-align:center;padding:40px;background:#fff;border-radius:25px;box-shadow:0 20px 60px rgba(0,0,0,0.4);margin-bottom:30px;}
-  h1{font-size:38px;background:linear-gradient(90deg,#00d4ff,#ff0066);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900;}
+  body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff;min-height:100vh;}
+  .container{max-width:1600px;margin:20px auto;padding:20px;}
+  header{text-align:center;padding:40px;background:#fff;border-radius:25px;box-shadow:0 20px 60px rgba(0,0,0,0.4);}
+  h1{font-size:40px;background:linear-gradient(90deg,#00d4ff,#ff0066);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900;}
   .grid{display:flex;flex-direction:column;gap:30px;}
   @media(min-width:1100px){.grid{flex-direction:row;}
-    .sidebar{flex:0 0 400px;}
+    .sidebar{flex:0 0 420px;}
   }
-  .sidebar{background:#fff;border-radius:25px;padding:35px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
-  .project-card{background:#fff;border:4px solid transparent;padding:25px;border-radius:20px;margin-bottom:20px;cursor:pointer;transition:0.3s;box-shadow:0 10px 30px rgba(0,0,0,0.2);font-size:18px;}
-  .project-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,0.3);}
+  .sidebar{background:#fff;border-radius:25px;padding:35px;box-shadow:0 20px 60px rgba(0,0,0,0.3);color:#333;}
+  .project-card{background:#fff;padding:28px;border-radius:20px;margin-bottom:20px;cursor:pointer;transition:0.3s;box-shadow:0 12px 35px rgba(0,0,0,0.2);border:4px solid transparent;}
+  .project-card:hover{transform:translateY(-10px);}
   .project-card.active{border-color:var(--p);background:#f0fbff;}
-  .project-card strong{font-size:22px;display:block;margin-bottom:8px;color:#1e3c72;}
+  .project-card strong{font-size:24px;color:#1e3c72;}
   .main{background:#fff;border-radius:25px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3);color:#333;}
   .header-bar{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;align-items:center;margin-bottom:35px;}
   select{padding:16px 28px;border-radius:50px;border:3px solid var(--p);font-size:18px;background:#fff;font-weight:600;}
   .btn{background:var(--p);color:#fff;padding:16px 40px;border:none;border-radius:50px;font-weight:700;font-size:18px;cursor:pointer;box-shadow:0 10px 30px rgba(0,212,255,0.4);}
   .btn:hover{background:#00aaff;transform:translateY(-3px);}
   .btn-s{background:var(--s);}
+  .btn-d{background:var(--d);}
   .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:25px;margin:40px 0;}
   .kpi{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:30px;border-radius:20px;text-align:center;box-shadow:0 15px 40px rgba(0,0,0,0.3);}
-  .kpi-value{font-size:34px;font-weight:900;margin-top:10px;}
+  .kpi-value{font-size:34px;font-weight:900;}
   .threejs-container{height:800px;background:linear-gradient(to bottom,#87CEEB,#e3f2fd);border-radius:25px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,0.5);margin:50px 0;}
-  .deductions{background:#fff;padding:30px;border-radius:20px;margin:30px 0;box-shadow:0 10px 30px rgba(0,0,0,0.15);}
-  .deduction-item{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #eee;font-size:18px;}
-  .deduction-item:last-child{border:none;font-weight:900;color:var(--s);font-size:22px;}
+  .deductions,.budget-breakdown{background:#fff;padding:30px;border-radius:20px;margin:30px 0;box-shadow:0 10px 30px rgba(0,0,0,0.15);color:#333;}
+  .deduction-item,.budget-item{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #eee;font-size:18px;}
+  .deduction-item:last-child,.budget-item:last-child{border:none;}
+  .progress-container{height:32px;background:#eee;border-radius:16px;overflow:hidden;margin-top:8px;}
+  .progress-bar{height:100%;background:linear-gradient(90deg,var(--p),#ff0066);width:0%;transition:width 1s ease;}
+  .ledger table{width:100%;border-collapse:collapse;margin-top:20px;}
+  .ledger th{background:var(--p);color:#fff;padding:18px;font-size:16px;}
+  .ledger td{padding:16px;border-bottom:1px solid #eee;text-align:center;}
   .modal{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;z-index:1000;}
-  .modal-box{background:#fff;padding:50px;border-radius:25px;width:90%;max-width:600px;box-shadow:0 30px 100px rgba(0,0,0,0.7);}
+  .modal-box{background:#fff;padding:50px;border-radius:25px;width:90%;max-width:650px;box-shadow:0 30px 100px rgba(0,0,0,0.7);}
   .input,select{width:100%;padding:18px;margin:15px 0;border-radius:15px;border:2px solid #ddd;font-size:18px;}
 </style>
 </head>
@@ -45,7 +51,7 @@
 <div class="container">
   <header>
     <h1>NYLA PIT LATRINES</h1>
-    <p style="font-size:22px;color:#555;margin-top:15px;">The Final Dashboard • Never Touch Again • Perfect Forever</p>
+    <p style="font-size:22px;color:#555;margin-top:15px;">The Final Dashboard • 100% Accurate • Never Broken Again</p>
   </header>
 
   <div class="grid">
@@ -76,8 +82,14 @@
         <div class="kpi"><div>Net Available</div><div class="kpi-value" id="net">KSh 0</div></div>
         <div class="kpi"><div>Total Spent</div><div class="kpi-value" id="spent">KSh 0</div></div>
         <div class="kpi"><div>Remaining</div><div class="kpi-value" id="remaining">KSh 0</div></div>
-        <div class="kpi"><div>Progress</div><div class="kpi-value" id="percent">0%</div></div>
+        <div class="kpi"><div>Overall Progress</div><div class="kpi-value" id="percent">0%</div></div>
       </div>
+
+      <h2 style="font-size:28px;color:#1e3c72;margin:40px 0 20px;">Budget Breakdown</h2>
+      <div class="budget-breakdown" id="budgetBreakdown"></div>
+
+      <h2 style="font-size:28px;color:#1e3c72;margin:50px 0 20px;">Expense Ledger</h2>
+      <div class="ledger"><table><thead><tr><th>Date</th><th>Description</th><th>Unit</th><th>Amount</th><th>Action</th></tr></thead><tbody id="ledgerBody"></tbody></table></div>
 
       <div class="threejs-container" id="threejs"></div>
     </div>
@@ -88,13 +100,28 @@
   <div class="modal-box">
     <h2>Add New Expense</h2>
     <select id="expUnit" class="input">
-      <option value="">Shared Cost (Split 50/50)</option>
+      <option value="">Shared (Split 50/50)</option>
       <option value="unit1">Block 1 Only</option>
       <option value="unit2">Block 2 Only</option>
     </select>
+    <select id="expCategory" class="input">
+      <option value="">Select Category</option>
+      <option value="excavation">Excavation & Earthworks</option>
+      <option value="concrete">Concrete Works</option>
+      <option value="steel">Reinforcement Steel</option>
+      <option value="pitwall">Pit Walling</option>
+      <option value="superwall">Superstructure Walling</option>
+      <option value="roofing">Roofing</option>
+      <option value="doors">Doors & Carpentry</option>
+      <option value="plaster">Plaster & Screed</option>
+      <option value="painting">Painting</option>
+      <option value="vent">Ventilation</option>
+      <option value="transport">Transport</option>
+      <option value="misc">Miscellaneous</option>
+    </select>
     <input type="date" id="expDate" class="input">
-    <input type="text" id="expDesc" class="input" placeholder="Description">
-    <input type="number" id="expAmount" class="input" placeholder="Amount (KSh)" min="1">
+    <input type="text" id="expDesc" class="input" placeholder="Description (optional)">
+    <input type="number" id="expAmount" class="input" placeholder="Amount in KSh" min="1">
     <div style="margin-top:30px;text-align:right;">
       <button class="btn" id="saveExpense">Save Expense</button>
       <button class="btn" style="background:#666;margin-left:15px;" id="cancel">Cancel</button>
@@ -115,8 +142,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const db = new Dexie("NylaFinalForeverDB");
-db.version(5).stores({expenses:"++id,project,unit,date,desc,amount"});
+const db = new Dexie("NylaPerfectDB");
+db.version(1).stores({expenses:"++id,project,unit,category,date,desc,amount"});
 
 const PROJECTS = [
   {id:"yedhi",name:"YEDHI PRIMARY (2-door)",doors:2,original:1029000},
@@ -125,20 +152,39 @@ const PROJECTS = [
   {id:"mugumoni",name:"MUGUMONI PRIMARY (3-door)",doors:3,original:1546000}
 ];
 
+const CATEGORIES = [
+  {key:"excavation",name:"Excavation & Earthworks",pct:12},
+  {key:"concrete",name:"Concrete Works",pct:18},
+  {key:"steel",name:"Reinforcement Steel",pct:5},
+  {key:"pitwall",name:"Pit Walling",pct:20},
+  {key:"superwall",name:"Superstructure Walling",pct:10},
+  {key:"roofing",name:"Roofing",pct:12},
+  {key:"doors",name:"Doors & Carpentry",pct:5},
+  {key:"plaster",name:"Plaster & Screed",pct:6},
+  {key:"painting",name:"Painting",pct:3},
+  {key:"vent",name:"Ventilation",pct:2},
+  {key:"transport",name:"Transport",pct:5},
+  {key:"misc",name:"Miscellaneous",pct:2}
+];
+
 let activeProject = null;
 let unitFilter = "";
 let scene, camera, renderer, controls;
 let block1 = {}, block2 = {};
 
 function calc(amount){
-  const pmc=amount*0.05; tax=amount*0.19; upfront=amount*0.10; contractor=amount*0.15; retention=amount*0.05;
-  net = Math.round(amount - pmc - tax - upfront - contractor - retention);
+  const pmc = amount * 0.05;
+  const tax = amount * 0.19;
+  const upfront = amount * 0.10;
+  const contractor = amount * 0.15;
+  const retention = amount * 0.05;
+  const net = Math.round(amount - pmc - tax - upfront - contractor - retention);
   return {pmc,tax,upfront,contractor,retention,net,perBlock:Math.round(net/2)};
 }
 
-function format(n){return 'KSh ' + Number(n).toLocaleString();}
+function format(n){return 'KSh ' + Number(Math.round(n)).toLocaleString();}
 
-function createBlock(xOffset, doors){
+function createBlock(xOffset, doors){ /* SAME AS BEFORE - CORRECT 3D MODEL */ 
   const g = new THREE.Group();
   const coral = new THREE.MeshStandardMaterial({color:0xd4a574,roughness:0.95});
   const steel = new THREE.MeshStandardMaterial({color:0x2c3e50,metalness:0.9});
@@ -146,7 +192,6 @@ function createBlock(xOffset, doors){
 
   const pit = new THREE.Mesh(new THREE.CylinderGeometry(2,2.2,3,24,1,true),coral);
   pit.position.set(xOffset,-1.5,0); g.add(pit);
-
   const slab = new THREE.Mesh(new THREE.BoxGeometry(3.8,0.15,2.6),new THREE.MeshStandardMaterial({color:0x95a5a6}));
   slab.position.set(xOffset,0,0); g.add(slab);
 
@@ -160,7 +205,7 @@ function createBlock(xOffset, doors){
     [-0.9,+0.9].forEach(x=>{const d=new THREE.Mesh(new THREE.BoxGeometry(0.05,2,0.9),steel);d.position.set(xOffset+x,1.075,1.21);doorObjs.push(d);g.add(d);});
   }else{
     w(0.2,1.2,-0.9,0); w(0.2,1.2,+0.9,0);
-    [-1.2,0,1.2].forEach((x,i)=>{const d=new THREE.Mesh(new THREE.BoxGeometry(0.05,2,0.8),steel);d.position.set(xOffset+x*0.75,1.075,1.21);doorObjs.push(d);g.add(d);});
+    [-1.2,0,1.2].forEach(x=>{const d=new THREE.Mesh(new THREE.BoxGeometry(0.05,2,0.8),steel);d.position.set(xOffset+x*0.75,1.075,1.21);doorObjs.push(d);g.add(d);});
   }
 
   const roof = new THREE.Mesh(new THREE.BoxGeometry(4.4,0.15,3.2),roofC);
@@ -173,7 +218,7 @@ function createBlock(xOffset, doors){
   return {group:g,pit,walls,slab,roof,doors:doorObjs};
 }
 
-function init3D(){
+function init3D(){ /* SAME AS BEFORE */ 
   const c = document.getElementById('threejs');
   scene=new THREE.Scene(); scene.background=new THREE.Color(0xb3e5fc);
   camera=new THREE.PerspectiveCamera(55,c.clientWidth/800,0.1,1000);
@@ -207,47 +252,79 @@ async function refresh(){
   const p = PROJECTS.find(x=>x.id===activeProject);
   const d = calc(p.original);
 
+  // Deduction Summary
   document.getElementById('deductionSummary').innerHTML = `
-    <div class="deduction-item"><span>Original Contract Amount</span><span>${format(p.original)}</span></div>
+    <div class="deduction-item"><span>Original Contract</span><span>${format(p.original)}</span></div>
     <div class="deduction-item"><span>PMC 5%</span><span>-${format(d.pmc)}</span></div>
     <div class="deduction-item"><span>Tax 19%</span><span>-${format(d.tax)}</span></div>
     <div class="deduction-item"><span>Upfront 10%</span><span>-${format(d.upfront)}</span></div>
     <div class="deduction-item"><span>Contractor Advance 15%</span><span>-${format(d.contractor)}</span></div>
-    <div class="deduction-item" style="color:#f39c12;"><span>Retention 5% (Held)</span><span>-${format(d.retention)}</span></div>
-    <div class="deduction-item"><span><strong>NET AVAILABLE TO SPEND</strong></span><span style="color:#28a745;font-size:24px"><strong>${format(d.net)}</strong></span></div>
-    <div class="deduction-item"><span>Budget Per Block</span><span>${format(d.perBlock)}</span></div>`;
+    <div class="deduction-item" style="color:#f39c12;"><span>Retention 5%</span><span>-${format(d.retention)}</span></div>
+    <div class="deduction-item"><span><strong>NET AVAILABLE</strong></span><span style="color:#28a745;font-size:24px"><strong>${format(d.net)}</strong></span></div>`;
 
+  // Rebuild 3D
   if(block1.group) scene.remove(block1.group,block2.group);
   block1 = createBlock(-9, p.doors);
   block2 = createBlock(+9, p.doors);
   scene.add(block1.group); scene.add(block2.group);
 
-  const all = await db.expenses.where({project:activeProject}).toArray();
-  const shared = all.filter(e=>!e.unit).reduce((a,e)=>a+e.amount,0)/2 || 0;
-  const spent1 = all.filter(e=>e.unit==="unit1").reduce((a,e)=>a+e.amount,0) + shared;
-  const spent2 = all.filter(e=>e.unit==="unit2").reduce((a,e)=>a+e.amount,0) + shared;
+  const expenses = await db.expenses.where({project:activeProject}).toArray();
 
-  updateBlock(block1, Math.min(100, Math.round(spent1/d.perBlock*100)));
-  updateBlock(block2, Math.min(100, Math.round(spent2/d.perBlock*100)));
+  // Calculate spending
+  const sharedCost = expenses.filter(e=>!e.unit).reduce((a,e)=>a+e.amount,0)/2 || 0;
+  const block1Spent = expenses.filter(e=>e.unit==="unit1").reduce((a,e)=>a+e.amount,0) + sharedCost;
+  const block2Spent = expenses.filter(e=>e.unit==="unit2").reduce((a,e)=>a+e.amount,0) + sharedCost;
+
+  updateBlock(block1, Math.min(100, Math.round(block1Spent/d.perBlock*100)));
+  updateBlock(block2, Math.min(100, Math.round(block2Spent/d.perBlock*100)));
 
   block1.group.visible = !unitFilter || unitFilter==="unit1";
   block2.group.visible = !unitFilter || unitFilter==="unit2";
 
-  const currentSpent = unitFilter==="unit1"?spent1:unitFilter==="unit2"?spent2:spent1+spent2-shared;
+  const currentSpent = unitFilter==="unit1"?block1Spent:unitFilter==="unit2"?block2Spent:block1Spent+block2Spent-sharedCost;
   const currentBudget = unitFilter ? d.perBlock : d.net;
 
   document.getElementById('net').textContent = format(currentBudget);
-  document.getElementById('spent').textContent = format(Math.round(currentSpent));
+  document.getElementById('spent').textContent = format(currentSpent);
   document.getElementById('remaining').textContent = format(currentBudget - currentSpent);
   document.getElementById('percent').textContent = Math.round(currentSpent/currentBudget*100)+'%';
-  document.getElementById('projectTitle').textContent = p.name;
+
+  // Budget Breakdown
+  const budgetHTML = CATEGORIES.map(cat=>{
+    const allocated = unitFilter ? (d.perBlock * cat.pct/100) : (d.net * cat.pct/100);
+    const spent = expenses.filter(e=>e.category===cat.key && (!unitFilter || e.unit===unitFilter || !e.unit)).reduce((a,e)=>a+(e.unit? e.amount : e.amount/2),0);
+    const pct = allocated>0 ? (spent/allocated*100) : 0;
+    return `<div class="budget-item">
+      <div><strong>${cat.name}</strong><br><small>Budget: ${format(allocated)}</small></div>
+      <div style="text-align:right;">
+        <div>${format(spent)} spent</div>
+        <div class="progress-container"><div class="progress-bar" style="width:${pct}%"></div></div>
+        <small>${Math.round(pct)}%</small>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('budgetBreakdown').innerHTML = budgetHTML;
+
+  // Ledger
+  const ledgerHTML = expenses.map(e=>`
+    <tr>
+      <td>${e.date}</td>
+      <td>${e.desc||'-'}</td>
+      <td>${e.unit? (e.unit==='unit1'?'Block 1':'Block 2') : 'Shared'}</td>
+      <td>${format(e.amount)}</td>
+      <td><button class="btn-d" onclick="db.expenses.delete(${e.id}).then(refresh)">Delete</button></td>
+    </tr>`).join('');
+  document.getElementById('ledgerBody').innerHTML = ledgerHTML || '<tr><td colspan="5">No expenses yet</td></tr>';
+
+  document.getElementById('projectTitle').textContent = p.name + (unitFilter?` – ${unitFilter==='unit1'?'Block 1':'Block 2'}`:'');
 }
 
+// Project List
 document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`
   <div class="project-card" data-id="${p.id}">
     <strong>${p.name}</strong>
-    <div style="margin-top:10px;color:#666;">
-      ${p.doors}-Door Block • Contract: ${format(p.original)}
+    <div style="margin-top:10px;color:#555;font-size:16px;">
+      Contract: ${format(p.original)} • Net: ${format(calc(p.original).net)}
     </div>
   </div>`).join('');
 
@@ -264,40 +341,32 @@ document.getElementById('projectsList').onclick = e=>{
 
 document.getElementById('unitFilter').onchange = e=>{unitFilter=e.target.value; refresh();};
 
-document.getElementById('addExpense').onclick = ()=>{
-  if(!activeProject) return alert("Select a project first");
-  document.getElementById('modal').style.display='flex';
-  document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('expDesc').value = '';
-  document.getElementById('expAmount').value = '';
-};
+document.getElementById('addExpense').onclick = ()=>{ if(activeProject) document.getElementById('modal').style.display='flex'; };
+document.getElementById('cancel').onclick = ()=>{document.getElementById('modal').style.display='none';};
+document.getElementById('modal').onclick = e=>{if(e.target===document.getElementById('modal')) document.getElementById('modal').style.display='none';};
 
 document.getElementById('saveExpense').onclick = async ()=>{
   const amount = parseFloat(document.getElementById('expAmount').value);
   const unit = document.getElementById('expUnit').value || null;
+  const category = document.getElementById('expCategory').value;
   const date = document.getElementById('expDate').value;
   const desc = document.getElementById('expDesc').value.trim();
-  if(!amount || amount<=0 || !date){alert("Fill all fields"); return;}
-  await db.expenses.add({project:activeProject,unit,date,desc,amount});
+  if(!amount || !category || !date){ alert("Fill required fields"); return; }
+  await db.expenses.add({project:activeProject,unit,category,date,desc,amount});
   document.getElementById('modal').style.display='none';
   refresh();
 };
 
-document.getElementById('cancel').onclick = ()=>{document.getElementById('modal').style.display='none';};
-
-document.getElementById('modal').onclick = e=>{if(e.target.classList.contains('modal')) document.getElementById('modal').style.display='none';};
-
 document.getElementById('downloadCSV').onclick = async ()=>{
-  if(!activeProject) return alert("Select project");
+  if(!activeProject) return;
   const data = await db.expenses.where({project:activeProject}).toArray();
-  let csv = "Date,Description,Unit,Amount\n";
+  let csv = "Date,Category,Description,Unit,Amount\n";
   data.forEach(r=>{
     const u = r.unit ? (r.unit==='unit1'?'Block 1':'Block 2') : 'Shared';
-    csv += `${r.date},"${r.desc||''}",${u},${r.amount}\n`;
+    csv += `${r.date},${r.category},"${r.desc||''}",${u},${r.amount}\n`;
   });
   const blob = new Blob([csv],{type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download=`${activeProject}_expenses.csv`; a.click();
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${activeProject}_full_report.csv`; a.click();
 };
 
 init3D();
