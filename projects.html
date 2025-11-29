@@ -187,23 +187,37 @@ async function fetchData(action, project, payload = {}) {
   }
 }
 async function loadProjects() {
-  try {
-    const data = await fetchData('get', 'Projects');
-    if (data.success) PROJECTS = data.expenses.map(p => ({id:p.id, name:p.name, doors:Number(p.doors), original:Number(p.original)}));
-  } catch(e) {}
-  if (PROJECTS.length === 0) {
-    PROJECTS = [{id:"yedhi",name:"YEDHI PRIMARY (2-door)",doors:2,original:1029000},
-                {id:"sogorosa",name:"SOGOROSA PRIMARY (2-door)",doors:2,original:1029000},
-                {id:"sosoni",name:"SOSONI PRIMARY (3-door)",doors:3,original:1546000},
-                {id:"mugumoni",name:"MUGUMONI PRIMARY (3-door)",doors:3,original:1546000}];
+  const list = document.getElementById('projectsList');
+  list.innerHTML = '<div class="loading">Loading projects...</div>';
+
+  const result = await fetchData('get', 'Projects');
+
+  if (result.success && result.expenses && result.expenses.length > 0) {
+    PROJECTS = result.expenses.map(p => ({
+      id: p.id,
+      name: p.name,
+      doors: Number(p.doors),
+      original: Number(p.original)
+    }));
+  } else {
+    // Fallback if sheet is empty
+    PROJECTS = [
+      {id:"yedhi",    name:"YEDHI PRIMARY (2-door)",    doors:2, original:1029000},
+      {id:"sogorosa", name:"SOGOROSA PRIMARY (2-door)", doors:2, original:1029000},
+      {id:"sosoni",   name:"SOSONI PRIMARY (3-door)",   doors:3, original:1546000},
+      {id:"mugumoni", name:"MUGUMONI PRIMARY (3-door)", doors:3, original:1546000}
+    ];
   }
-  document.getElementById('projectsList').innerHTML = PROJECTS.map(p => `
+
+  list.innerHTML = PROJECTS.map(p => `
     <div class="project-card" data-id="${p.id}">
       <strong>${p.name}</strong>
-      <div style="margin-top:10px;font-size:15px;">${p.doors}-Door • Net: ${format(calc(p.original).net)}</div>
-    </div>`).join('');
+      <div style="margin-top:10px;font-size:15px;">
+        ${p.doors}-Door • Net: ${format(calc(p.original).net)}
+      </div>
+    </div>
+  `).join('');
 }
-
 async function refresh() {
   if (!activeProject) return;
   const project = PROJECTS.find(p => p.id === activeProject);
