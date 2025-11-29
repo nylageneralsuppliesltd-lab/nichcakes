@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NYLA PIT LATRINES – GRANULAR UNIT TRACKING</title>
+<title>NYLA PIT LATRINES – FINAL GRANULAR DASHBOARD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
@@ -24,7 +24,7 @@
   .project-card.active{border-color:var(--p);background:#f0fbff;}
   .main{background:rgba(255,255,255,0.97);border-radius:20px;padding:32px;box-shadow:0 15px 40px rgba(0,0,0,0.25);}
   .header-bar{display:flex;flex-wrap:wrap;gap:15px;justify-content:space-between;align-items:center;margin-bottom:30px;}
-  .unit-selector select{padding:12px 20px;border-radius:50px;border:2px solid var(--p);font-size:16px;font-weight:600;}
+  .unit-selector select{padding:12px 20px;border-radius:50px;border:2px solid var(--p);font-size:16px;font-weight:600;background:#fff;}
   .btn{background:var(--p);color:#fff;padding:14px 32px;border:none;border-radius:50px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 25px rgba(0,212,255,0.4);}
   .btn:hover{background:#00b8d4;transform:translateY(-3px);}
   .btn-s{background:var(--s);}
@@ -58,7 +58,7 @@
 <div class="container">
   <header>
     <h1>NYLA PIT LATRINES</h1>
-    <p style="font-size:20px;color:#555;margin-top:12px;">Granular Unit-Level Tracking • 5% Retention • Stunning 3D</p>
+    <p style="font-size:20px;color:#555;margin-top:12px;">Granular Unit-Level Tracking • 5% Retention • 3D View</p>
   </header>
 
   <div class="grid">
@@ -73,7 +73,7 @@
           <h2 id="projectTitle" style="font-size:27px;color:#2c3e50;">Select a project</h2>
           <div class="unit-selector" style="margin-top:12px;">
             <select id="unitFilter">
-              <option value="">Both Units (Shared + Individual)</option>
+              <option value="">Both Units (All Costs)</option>
               <option value="unit1">Unit 1 Only</option>
               <option value="unit2">Unit 2 Only</option>
             </select>
@@ -107,7 +107,7 @@
         </div>
       </div>
 
-      <h2 class="section-title">3D Construction Progress (Per Unit View)</h2>
+      <h2 class="section-title">3D Construction Progress</h2>
       <div class="threejs-container" id="threejs"></div>
     </div>
   </div>
@@ -117,7 +117,7 @@
   <div class="modal-box">
     <h2 id="modalTitle">Add New Expense</h2>
     <select id="expUnitSelect" class="input">
-      <option value="">Both Units (Shared Cost)</option>
+      <option value="">Both Units (Shared)</option>
       <option value="unit1">Unit 1 Only</option>
       <option value="unit2">Unit 2 Only</option>
     </select>
@@ -145,7 +145,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const db = new Dexie("NylaGranularDB");
+const db = new Dexie("NylaFinalGranularDB");
 db.version(3).stores({expenses: "++id,project,unit,date,category,desc,amount"});
 
 const PROJECTS = [
@@ -166,8 +166,8 @@ const CATEGORIES = [
   {key:"plaster",name:"Plaster & Screed",pct:6},
   {key:"painting",name:"Painting",pct:3},
   {key:"vent",name:"Ventilation",pct:2},
-  {key:"transport",name:"Transport",pct:5, shared:true},
-  {key:"misc",name:"Miscellaneous",pct:2, shared:true}
+  {key:"transport",name:"Transport",pct:5},
+  {key:"misc",name:"Miscellaneous",pct:2}
 ];
 
 let activeProject = null;
@@ -202,8 +202,7 @@ function init3D() {
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-  scene.add(ambient);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
   const sun = new THREE.DirectionalLight(0xffffff, 1.2);
   sun.position.set(15, 30, 15);
   sun.castShadow = true;
@@ -214,13 +213,9 @@ function init3D() {
   ground.receiveShadow = true;
   scene.add(ground);
 
-  // Pit
   pit = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.6, 6, 32, 1, true), new THREE.MeshStandardMaterial({color: 0x654321, side: THREE.DoubleSide}));
-  pit.position.y = -0.5;
-  pit.castShadow = true;
-  scene.add(pit);
+  pit.position.y = -0.5; pit.castShadow = true; scene.add(pit);
 
-  // Walls
   const wallMat = new THREE.MeshStandardMaterial({color: 0xc1440e});
   const addWall = (w,h,d,x,y,z) => {
     const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), wallMat);
@@ -232,15 +227,12 @@ function init3D() {
   addWall(0.4, 4.5, 7, -3.7, 2.25, 0);
   addWall(0.4, 4.5, 7, 3.7, 2.25, 0);
 
-  // Slab
   slab = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.5, 7.8), new THREE.MeshStandardMaterial({color: 0x888888}));
   slab.position.y = 4.5; slab.castShadow = true; scene.add(slab);
 
-  // Roof
   roof = new THREE.Mesh(new THREE.BoxGeometry(9, 0.4, 9), new THREE.MeshStandardMaterial({color: 0xdc143c}));
   roof.position.y = 7.2; roof.rotation.x = Math.PI * 0.12; roof.castShadow = true; scene.add(roof);
 
-  // Door
   door = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.6, 1.4), new THREE.MeshStandardMaterial({color: 0x2c3e50, metalness: 0.9}));
   door.position.set(0, 3.5, 3.51); scene.add(door);
 
@@ -272,6 +264,18 @@ function update3DProgress(pct) {
 
 function format(n) { return 'KSh ' + Number(n||0).toLocaleString(); }
 
+async function getFilteredExpenses() {
+  if (!activeProject) return [];
+  let expenses = await db.expenses.where({project: activeProject}).toArray();
+  if (activeUnitFilter) {
+    expenses = expenses.filter(e => e.unit === activeUnitFilter);
+  } else {
+    // Include both shared and unit-specific
+    expenses = expenses.filter(e => !e.unit || e.unit === 'unit1' || e.unit === 'unit2');
+  }
+  return expenses;
+}
+
 async function refreshAll() {
   renderSidebar();
   renderHeader();
@@ -281,13 +285,182 @@ async function refreshAll() {
   await renderLedger();
 }
 
+function renderSidebar() {
+  const list = document.getElementById('projectsList');
+  list.innerHTML = '';
+  PROJECTS.forEach(p => {
+    const c = calculateNet(p.original);
+    const div = document.createElement('div');
+    div.className = 'project-card' + (activeProject === p.id ? ' active' : '');
+    div.innerHTML = `<strong>${p.name}</strong><br><small>Net: ${format(c.net)}</small>`;
+    div.onclick = () => { activeProject = p.id; activeUnitFilter = ""; document.getElementById('unitFilter').value = ""; refreshAll(); };
+    list.appendChild(div);
+  });
+}
+
+function renderHeader() {
+  const title = activeProject ? PROJECTS.find(p=>p.id===activeProject).name : 'Select a project';
+  const unitText = activeUnitFilter ? (activeUnitFilter === 'unit1' ? 'Unit 1 Only' : 'Unit 2 Only') : 'Both Units';
+  document.getElementById('projectTitle').textContent = title + (activeProject ? ` – ${unitText}` : '');
+}
+
+function renderContractSummary() {
+  if (!activeProject) { document.getElementById('contractSummary').innerHTML = ''; return; }
+  const p = PROJECTS.find(x=>x.id===activeProject);
+  const c = calculateNet(p.original);
+  document.getElementById('contractSummary').innerHTML = `
+    <div class="deduction-item"><span>Original Contract</span><span>${format(p.original)}</span></div>
+    <div class="deduction-item"><span>PMC 5%</span><span>-${format(c.pmc)}</span></div>
+    <div class="deduction-item"><span>Tax 19%</span><span>-${format(c.tax)}</span></div>
+    <div class="deduction-item"><span>Upfront 10%</span><span>-${format(c.upfront)}</span></div>
+    <div class="deduction-item"><span>Contractor 15%</span><span>-${format(c.contractor)}</span></div>
+    <div class="deduction-item" style="color:#f39c12;"><span><strong>Retention 5% (held)</strong></span><span><strong>-${format(c.retention)}</strong></span></div>
+    <div class="deduction-item"><span><strong>Net Available</strong></span><span style="color:#28a745;font-size:22px"><strong>${format(c.net)}</strong></span></div>`;
+}
+
+async function renderKPIs() {
+  if (!activeProject) return;
+  const p = PROJECTS.find(x=>x.id===activeProject);
+  const c = calculateNet(p.original);
+  const expenses = await getFilteredExpenses();
+  const spent = expenses.reduce((a,e)=>a+e.amount,0);
+  const pct = c.net > 0 ? Math.round(spent / c.net * 100) : 0;
+
+  document.getElementById('net').textContent = format(c.net);
+  document.getElementById('spent').textContent = format(spent);
+  document.getElementById('remaining').textContent = format(c.net - spent);
+  document.getElementById('percent').textContent = pct + '%';
+  update3DProgress(pct);
+}
+
+async function renderBudget() {
+  const container = document.getElementById('fullBudget');
+  container.innerHTML = '';
+  if (!activeProject) return;
+  const p = PROJECTS.find(x=>x.id===activeProject);
+  const c = calculateNet(p.original);
+  const expenses = await getFilteredExpenses();
+
+  CATEGORIES.forEach(cat => {
+    const budget = Math.round(c.net * cat.pct / 100);
+    const spent = expenses.filter(e=>e.category===cat.key).reduce((a,e)=>a+e.amount,0);
+    const pct = budget > 0 ? Math.round(spent/budget*100) : 0;
+    const div = document.createElement('div');
+    div.className = 'category';
+    div.innerHTML = `
+      <div style="font-weight:700;font-size:19px;">${cat.name}</div>
+      <div style="margin:14px 0;font-size:16px;">Budget: ${format(budget)} | Spent: ${format(spent)}</div>
+      <div class="progress-container"><div class="progress-bar" style="width:${pct}%"></div></div>
+      <div style="text-align:right;font-weight:700;color:${pct>100?'#e74c3c':pct>80?'#f39c12':'#27ae60'}">${pct}%</div>`;
+    container.appendChild(div);
+  });
+}
+
+async function renderLedger() {
+  const tbody = document.getElementById('ledger');
+  tbody.innerHTML = '';
+  if (!activeProject) return;
+  const expenses = await getFilteredExpenses();
+  expenses.sort((a,b) => b.date.localeCompare(a.date)).forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.date}</td>
+      <td>${CATEGORIES.find(c=>c.key===r.category)?.name || r.category}</td>
+      <td>${r.desc || '-'}</td>
+      <td>${r.unit ? (r.unit==='unit1'?'Unit 1':'Unit 2') : 'Both'}</td>
+      <td>${format(r.amount)}</td>
+      <td class="actions">
+        <button class="btn" onclick="editExpense(${r.id})">Edit</button>
+        <button class="btn btn-d" onclick="deleteExpense(${r.id})">Delete</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+window.editExpense = async (id) => {
+  const exp = await db.expenses.get(id);
+  editingId = id;
+  document.getElementById('modalTitle').textContent = 'Edit Expense';
+  document.getElementById('expUnitSelect').value = exp.unit || '';
+  document.getElementById('expCategory').value = exp.category;
+  document.getElementById('expDate').value = exp.date;
+  document.getElementById('expDesc').value = exp.desc || '';
+  document.getElementById('expAmount').value = exp.amount;
+  document.getElementById('modal').style.display = 'flex';
+};
+
+window.deleteExpense = async (id) => {
+  if (confirm('Delete permanently?')) {
+    await db.expenses.delete(id);
+    refreshAll();
+  }
+};
+
 document.getElementById('unitFilter').onchange = (e) => {
   activeUnitFilter = e.target.value;
   refreshAll();
 };
 
-// All other functions same as before but now respect activeUnitFilter
-// (Full code with granular logic below — 100% working)
+document.getElementById('addExpense').onclick = () => {
+  if (!activeProject) return alert('Select a project first');
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'Add New Expense';
+  document.getElementById('expUnitSelect').value = '';
+  const catSel = document.getElementById('expCategory');
+  catSel.innerHTML = '<option value="">Select Category</option>';
+  CATEGORIES.forEach(c => catSel.add(new Option(c.name, c.key)));
+  document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('expDesc').value = '';
+  document.getElementById('expAmount').value = '';
+  document.getElementById('modal').style.display = 'flex';
+};
+
+document.getElementById('saveExpense').onclick = async () => {
+  const amount = parseFloat(document.getElementById('expAmount').value);
+  const category = document.getElementById('expCategory').value;
+  const unit = document.getElementById('expUnitSelect').value || null;
+  const date = document.getElementById('expDate').value;
+  const desc = document.getElementById('expDesc').value.trim();
+
+  if (!category || !amount || amount <= 0 || !date) {
+    alert('Fill all required fields');
+    return;
+  }
+
+  if (editingId) {
+    await db.expenses.update(editingId, {unit, date, category, desc, amount});
+  } else {
+    await db.expenses.add({project: activeProject, unit, date, category, desc, amount});
+  }
+  document.getElementById('modal').style.display = 'none';
+  refreshAll();
+};
+
+document.getElementById('cancelEdit').onclick = () => {
+  document.getElementById('modal').style.display = 'none';
+  editingId = null;
+};
+
+document.getElementById('downloadCSV').onclick = async () => {
+  if (!activeProject) return alert('Select project');
+  const data = await getFilteredExpenses();
+  let csv = "Date,Category,Description,Unit,Amount\n";
+  data.forEach(r => {
+    const unit = r.unit ? (r.unit==='unit1'?'Unit 1':'Unit 2') : 'Both';
+    const cat = CATEGORIES.find(c=>c.key===r.category)?.name || r.category;
+    csv += `${r.date},${cat},${r.desc||''},${unit},${r.amount}\n`;
+  });
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${activeProject}_${activeUnitFilter||'all'}_expenses.csv`;
+  a.click();
+};
+
+document.querySelector('.modal').onclick = e => {
+  if (e.target.classList.contains('modal')) document.getElementById('modal').style.display = 'none';
+};
 
 init3D();
 refreshAll();
