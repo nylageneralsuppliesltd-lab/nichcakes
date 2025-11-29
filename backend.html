@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>NYLA Backend Proxy</title>
+  <script>
+    const SECRET = "nyla2025";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjZV7O5sRKDxe1MkrbVLJkHis4bL4gg_2Hl60YiqMTyKvNR1nUZKKU9_rqfMBVKI3Jpg/exec";
+
+    // Listen for messages from your dashboard
+    window.addEventListener("message", async (event) => {
+      // Only accept messages from your dashboard (change if you host elsewhere)
+      if (!event.origin.includes("github.io") && event.origin !== "file://" && location.origin !== event.origin) return;
+
+      const {id, action, project, payload} = event.data;
+
+      try {
+        let url = SCRIPT_URL;
+        let options = {};
+
+        if (action === "get") {
+          url += `?action=get&project=${project}&secret=${SECRET}`;
+        } else {
+          options = {
+            method: "POST",
+            mode: "no-cors", // important
+            body: JSON.stringify({action, project, secret: SECRET, ...payload})
+          };
+        }
+
+        const res = await fetch(url, options);
+        const text = await res.text();
+
+        let data;
+        try { data = JSON.parse(text); }
+        catch(e) { data = {success: false, error: "Invalid JSON", raw: text}; }
+
+        // Send result back
+        event.source.postMessage({id, success: true, data}, event.origin);
+      } catch (err) => {
+        event.source.postMessage({id, success: false, error: err.message}, event.origin);
+      };
+    });
+
+    // Let parent know we are ready
+    window.parent.postMessage({type: "BACKEND_READY"}, "*");
+  </script>
+</head>
+<body style="margin:0;background:#000;color:#0f0;font-family:monospace;padding:20px;">
+  NYLA Backend Proxy Active<br>
+  Do not close this tab while using the dashboard
+</body>
+</html>
