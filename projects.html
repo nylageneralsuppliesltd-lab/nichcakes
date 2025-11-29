@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NYLA PIT LATRINES – Final Professional Dashboard</title>
+<title>NYLA PIT LATRINES – FINAL PROFESSIONAL DASHBOARD</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
@@ -13,6 +13,7 @@
   .container{max-width:1400px;margin:15px auto;padding:15px;}
   header{text-align:center;padding:28px;background:rgba(255,255,255,0.97);border-radius:20px;box-shadow:0 15px 40px rgba(0,0,0,0.3);}
   h1{font-size:30px;background:linear-gradient(90deg,#00d4ff,#ff3355);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .subtitle{font-size:19px;color:#555;margin-top:12px;}
   .grid{display:flex;flex-direction:column;gap:20px;}
   @media(min-width:900px){.grid{flex-direction:row;}
     .sidebar{flex:0 0 340px;}
@@ -42,7 +43,7 @@
   th{background:var(--p);color:#fff;padding:18px 12px;font-size:15px;text-align:left;}
   td{padding:15px 12px;font-size:14px;border-bottom:1px solid #eee;}
   .actions button{margin:3px 6px;padding:8px 14px;font-size:13px;border-radius:8px;}
-  .threejs-container{height:460px;background:#e3f2fd;border-radius:20px;overflow:hidden;margin:70px 0 40px;box-shadow:0 25px 60 Scheme:rgba(0,0,0,0.35);}
+  .threejs-container{height:460px;background:#e3f2fd;border-radius:20px;overflow:hidden;margin:70px 0 40px;box-shadow:0 25px 60px rgba(0,0,0,0.35);}
   @media(min-width:768px){.threejs-container{height:620px;}}
   .modal{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
   .modal-box{background:#fff;padding:40px;border-radius:20px;width:100%;max-width:540px;box-shadow:0 25px 60px rgba(0,0,0,0.5);}
@@ -57,7 +58,7 @@
 <div class="container">
   <header>
     <h1>NYLA PIT LATRINES</h1>
-    <p style="font-size:19px;color:#555;margin-top:12px;">Professional Construction Dashboard with 5% Retention</p>
+    <p class="subtitle">Professional Dashboard • 5% Retention • Works Offline Forever</p>
   </header>
 
   <div class="grid">
@@ -70,7 +71,6 @@
       <div class="header-bar">
         <div>
           <h2 id="projectTitle" style="font-size:26px;color:#2c3e50;">Select a project</h2>
-          <p id="unitDisplay" style="font-size:17px;color:#666;margin-top:8px;"></p>
         </div>
         <div>
           <button class="btn" id="addExpense">+ Add Expense</button>
@@ -78,7 +78,6 @@
         </div>
       </div>
 
-      <!-- ACCURATE CONTRACT SUMMARY WITH 5% RETENTION -->
       <div class="deductions" id="contractSummary"></div>
 
       <div class="kpi-grid">
@@ -101,14 +100,12 @@
         </div>
       </div>
 
-      <!-- 3D AT THE VERY BOTTOM -->
       <h2 class="section-title">Live 3D Construction Progress</h2>
       <div class="threejs-container" id="threejs"></div>
     </div>
   </div>
 </div>
 
-<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-box">
     <h2 id="modalTitle">Add New Expense</h2>
@@ -141,14 +138,15 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+// DATABASE – DATA SAVED FOREVER
 const db = new Dexie("NylaFinalDB");
-db.version(2).stores({expenses: "++id,project,unit,date,category,desc,amount"});
+db.version(3).stores({expenses: "++id,project,unit,date,category,desc,amount"});
 
 const PROJECTS = [
-  {id:"yedhi",   name:"YEDHI PRIMARY (2-door)",      original:1029000},
-  {id:"sogorosa",name:"SOGOROSA PRIMARY (2-door)",   original:1029000},
-  {id:"sosoni",  name:"SOSONI PRIMARY (3-door)",     original:1546000},
-  {id:"mugumoni",name:"MUGUMONI PRIMARY (3-door)",   original:1546000}
+  {id:"yedhi",    name:"YEDHI PRIMARY (2-door)",    original:1029000},
+  {id:"sogorosa", name:"SOGOROSA PRIMARY (2-door)", original:1029000},
+  {id:"sosoni",   name:"SOSONI PRIMARY (3-door)",   original:1546000},
+  {id:"mugumoni", name:"MUGUMONI PRIMARY (3-door)", original:1546000}
 ];
 
 const CATEGORIES = [
@@ -169,74 +167,119 @@ const CATEGORIES = [
 let activeProject = null;
 let scene, camera, renderer, controls;
 let pit, walls = [], slab, roof, door;
+let editingId = null;
 
 function calculateNet(original) {
-  const pmc = original * 0.05;           // 5%
-  const tax = original * 0.19;           // 19%
-  const upfront = original * 0.10;       // 10%
-  const contractorFee = original * 0.15; // 15%
-  const retention = original * 0.05;     // 5% RETENTION (held until end)
-  const net = original - pmc - tax - upfront - contractorFee - retention;
-  return {pmc, tax, upfront, contractorFee, retention, net: Math.round(net)};
+  const pmc = original * 0.05;
+  const tax = original * 0.19;
+  const upfront = original * 0.10;
+  const contractor = original * 0.15;
+  const retention = original * 0.05;  // 5% held till completion
+  const net = original - pmc - tax - upfront - contractor - retention;
+  return {pmc, tax, upfront, contractor, retention, net: Math.round(net)};
 }
 
 function init3D() {
   const container = document.getElementById('threejs');
-  scene = new THREE.Scene(); scene.background = new THREE.Color(0xe3f2fd);
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xe3f2fd);
+
   camera = new THREE.PerspectiveCamera(50, container.clientWidth / 460, 0.1, 1000);
   camera.position.set(8, 8, 14);
-  renderer = new THREE.WebGLRenderer({antialias:true});
-  renderer.setSize(container.clientWidth, 460); container.appendChild(renderer.domElement);
-  controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true;
 
+  renderer = new THREE.WebGLRenderer({antialias: true});
+  renderer.setSize(container.clientWidth, 460);
+  container.appendChild(renderer.domElement);
+
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+
+  // LIGHTS – FIXED
   scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-  scene.add(new THREE.DirectionalLight(0xffffff, 1).setPosition(10,20,10));
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+  dirLight.position.set(10, 20, 10);
+  scene.add(dirLight);
 
-  pit = new THREE.Mesh(new THREE.BoxGeometry(3.4,4.5,3), new THREE.MeshStandardMaterial({color:0x8B4513})); pit.position.y=2.25; scene.add(pit);
-  const mat = new THREE.MeshStandardMaterial({color:0xa0522d});
-  const w = (w,h,d,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat); m.position.set(x,y,z); walls.push(m); scene.add(m);};
-  w(3.8,3.5,0.3,0,4,-1.75); w(3.8,3.5,0.3,0,4,1.75); w(0.3,3.5,3.5,-2.05,4,0); w(0.3,3.5,3.5,2.05,4,0);
-  slab = new THREE.Mesh(new THREE.BoxGeometry(4.2,0.4,3.8), new THREE.MeshStandardMaterial({color:0x666})); slab.position.y=4.7; scene.add(slab);
-  roof = new THREE.Mesh(new THREE.BoxGeometry(4.6,0.4,4.2), new THREE.MeshStandardMaterial({color:0xe74c3c})); roof.position.y=6.5; roof.rotation.x=-0.4; scene.add(roof);
-  door = new THREE.Mesh(new THREE.BoxGeometry(0.1,2.2,1), new THREE.MeshStandardMaterial({color:0x2c3e50})); door.position.set(2.1,3.6,1); scene.add(door);
+  // 3D MODEL
+  pit = new THREE.Mesh(new THREE.BoxGeometry(3.4,4.5,3), new THREE.MeshStandardMaterial({color:0x8B4513}));
+  pit.position.y = 2.25; scene.add(pit);
+
+  const wallMat = new THREE.MeshStandardMaterial({color:0xa0522d});
+  const addWall = (w,h,d,x,y,z) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), wallMat);
+    m.position.set(x,y,z); walls.push(m); scene.add(m);
+  };
+  addWall(3.8,3.5,0.3,0,4,-1.75);
+  addWall(3.8,3.5,0.3,0,4,1.75);
+  addWall(0.3,3.5,3.5,-2.05,4,0);
+  addWall(0.3,3.5,3.5,2.05,4,0);
+
+  slab = new THREE.Mesh(new THREE.BoxGeometry(4.2,0.4,3.8), new THREE.MeshStandardMaterial({color:0x666666}));
+  slab.position.y = 4.7; scene.add(slab);
+
+  roof = new THREE.Mesh(new THREE.BoxGeometry(4.6,0.4,4.2), new THREE.MeshStandardMaterial({color:0xe74c3c}));
+  roof.position.y = 6.5; roof.rotation.x = -0.4; scene.add(roof);
+
+  door = new THREE.Mesh(new THREE.BoxGeometry(0.1,2.2,1), new THREE.MeshStandardMaterial({color:0x2c3e50}));
+  door.position.set(2.1,3.6,1); scene.add(door);
 
   pit.visible = slab.visible = roof.visible = door.visible = false;
-  walls.forEach(w=>w.visible=false);
+  walls.forEach(w => w.visible = false);
 
-  const anim = ()=>{requestAnimationFrame(anim); controls.update(); renderer.render(scene,camera);}; anim();
-  window.addEventListener('resize',()=>{camera.aspect=container.clientWidth/460; camera.updateProjectionMatrix(); renderer.setSize(container.clientWidth,460);});
+  function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = container.clientWidth / 460;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, 460);
+  });
 }
 
-function update3DProgress(pct){
+function update3DProgress(pct) {
   const s = pct<15?0 : pct<35?1 : pct<65?2 : pct<90?3 : 4;
-  pit.visible=s>=1; walls.forEach(w=>w.visible=s>=2); slab.visible=s>=2; roof.visible=s>=3; door.visible=s>=4;
+  pit.visible = s>=1;
+  walls.forEach(w=>w.visible=s>=2);
+  slab.visible = s>=2;
+  roof.visible = s>=3;
+  door.visible = s>=4;
 }
 
-function format(n){return 'KSh '+Number(n||0).toLocaleString();}
+function format(n) { return 'KSh ' + Number(n||0).toLocaleString(); }
 
-async function refreshAll(){
-  renderSidebar(); renderHeader(); renderContractSummary(); await renderKPIs(); await renderBudget(); await renderLedger();
+async function refreshAll() {
+  renderSidebar();
+  renderHeader();
+  renderContractSummary();
+  await renderKPIs();
+  await renderBudget();
+  await renderLedger();
 }
 
-function renderSidebar(){
-  const list = document.getElementById('projectsList'); list.innerHTML='';
-  PROJECTS.forEach(p=>{
-    const calc = calculateNet(p.original);
+function renderSidebar() {
+  const list = document.getElementById('projectsList');
+  list.innerHTML = '';
+  PROJECTS.forEach(p => {
+    const c = calculateNet(p.original);
     const div = document.createElement('div');
-    div.className = 'project-card'+(activeProject===p.id?' active':'');
-    div.innerHTML = `<strong>${p.name}</strong><br><small>Original: ${format(p.original)} → Net: ${format(calc.net)}</small>`;
-    div.onclick = ()=>{activeProject=p.id; refreshAll();};
+    div.className = 'project-card' + (activeProject === p.id ? ' active' : '');
+    div.innerHTML = `<strong>${p.name}</strong><br><small>Original: ${format(p.original)} → Net: ${format(c.net)}</small>`;
+    div.onclick = () => { activeProject = p.id; refreshAll(); };
     list.appendChild(div);
   });
 }
 
-function renderHeader(){
+function renderHeader() {
   const title = activeProject ? PROJECTS.find(p=>p.id===activeProject).name : 'Select a project';
   document.getElementById('projectTitle').textContent = title;
 }
 
-function renderContractSummary(){
-  if(!activeProject){document.getElementById('contractSummary').innerHTML='';return;}
+function renderContractSummary() {
+  if (!activeProject) { document.getElementById('contractSummary').innerHTML = ''; return; }
   const p = PROJECTS.find(x=>x.id===activeProject);
   const c = calculateNet(p.original);
   document.getElementById('contractSummary').innerHTML = `
@@ -244,38 +287,40 @@ function renderContractSummary(){
     <div class="deduction-item"><span>PMC (5%)</span><span>-${format(c.pmc)}</span></div>
     <div class="deduction-item"><span>Tax (19%)</span><span>-${format(c.tax)}</span></div>
     <div class="deduction-item"><span>Upfront Payment (10%)</span><span>-${format(c.upfront)}</span></div>
-    <div class="deduction-item"><span>Contractor Fee (15%)</span><span>-${format(c.contractorFee)}</span></div>
+    <div class="deduction-item"><span>Contractor Fee (15%)</span><span>-${format(c.contractor)}</span></div>
     <div class="deduction-item" style="color:#f39c12;"><span><strong>Retention (5% – held until completion)</strong></span><span><strong>-${format(c.retention)}</strong></span></div>
     <div class="deduction-item"><span><strong>Net Available for Works</strong></span><span style="color:#28a745;font-size:20px"><strong>${format(c.net)}</strong></span></div>`;
 }
 
-async function renderKPIs(){
-  if(!activeProject)return;
+async function renderKPIs() {
+  if (!activeProject) return;
   const p = PROJECTS.find(x=>x.id===activeProject);
   const c = calculateNet(p.original);
-  const expenses = await db.expenses.where({project:activeProject}).toArray();
+  const expenses = await db.expenses.where({project: activeProject}).toArray();
   const spent = expenses.reduce((a,e)=>a+e.amount,0);
-  const pct = Math.round(spent/c.net*100);
+  const pct = Math.round(spent / c.net * 100);
 
   document.getElementById('net').textContent = format(c.net);
   document.getElementById('spent').textContent = format(spent);
-  document.getElementById('remaining').textContent = format(c.net-spent);
-  document.getElementById('percent').textContent = pct+'%';
+  document.getElementById('remaining').textContent = format(c.net - spent);
+  document.getElementById('percent').textContent = pct + '%';
   update3DProgress(pct);
 }
 
-async function renderBudget(){
-  const container = document.getElementById('fullBudget'); container.innerHTML='';
-  if(!activeProject)return;
+async function renderBudget() {
+  const container = document.getElementById('fullBudget');
+  container.innerHTML = '';
+  if (!activeProject) return;
   const p = PROJECTS.find(x=>x.id===activeProject);
   const c = calculateNet(p.original);
-  const expenses = await db.expenses.where({project:activeProject}).toArray();
+  const expenses = await db.expenses.where({project: activeProject}).toArray();
 
-  CATEGORIES.forEach(cat=>{
+  CATEGORIES.forEach(cat => {
     const budget = Math.round(c.net * cat.pct / 100);
     const spent = expenses.filter(e=>e.category===cat.key).reduce((a,e)=>a+e.amount,0);
-    const pct = budget>0?Math.round(spent/budget*100):0;
-    const div = document.createElement('div'); div.className='category';
+    const pct = budget > 0 ? Math.round(spent/budget*100) : 0;
+    const div = document.createElement('div');
+    div.className = 'category';
     div.innerHTML = `
       <div style="font-weight:700;font-size:18px;">${cat.name}</div>
       <div style="margin:12px 0;">Budget: ${format(budget)} | Spent: ${format(spent)}</div>
@@ -285,16 +330,18 @@ async function renderBudget(){
   });
 }
 
-async function renderLedger(){
-  const tbody = document.getElementById('ledger'); tbody.innerHTML='';
-  if(!activeProject)return;
-  const rows = await db.expenses.where({project:activeProject}).toArray();
-  rows.sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{
+async function renderLedger() {
+  const tbody = document.getElementById('ledger');
+  tbody.innerHTML = '';
+  if (!activeProject) return;
+  const rows = await db.expenses.where({project: activeProject}).toArray();
+  rows.sort((a,b) => b.date.localeCompare(a.date)).forEach(r => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${r.date}</td>
-      <td>${CATEGORIES.find(c=>c.key===r.category)?.name||r.category}</td>
-      <td>${r.desc||'-'}</td>
-      <td>${r.unit?(r.unit==='unit1'?'Unit 1':'Unit 2'):'Both'}</td>
+    tr.innerHTML = `
+      <td>${r.date}</td>
+      <td>${CATEGORIES.find(c=>c.key===r.category)?.name || r.category}</td>
+      <td>${r.desc || '-'}</td>
+      <td>${r.unit ? (r.unit==='unit1'?'Unit 1':'Unit 2') : 'Both'}</td>
       <td>${format(r.amount)}</td>
       <td class="actions">
         <button class="btn" onclick="editExpense(${r.id})">Edit</button>
@@ -304,16 +351,91 @@ async function renderLedger(){
   });
 }
 
-let editingId = null;
-window.editExpense = async(id)=>{ /* same as before */ };
-window.deleteExpense = async(id)=>{if(confirm('Delete forever?')){await db.expenses.delete(id);refreshAll();}};
+// EDIT / DELETE
+window.editExpense = async (id) => {
+  const exp = await db.expenses.get(id);
+  editingId = id;
+  document.getElementById('modalTitle').textContent = 'Edit Expense';
+  document.getElementById('expUnitSelect').value = exp.unit || '';
+  document.getElementById('expCategory').value = exp.category;
+  document.getElementById('expDate').value = exp.date;
+  document.getElementById('expDesc').value = exp.desc || '';
+  document.getElementById('expAmount').value = exp.amount;
+  document.getElementById('modal').style.display = 'flex';
+};
 
-document.getElementById('addExpense').onclick = () => { /* same modal open code as before */ };
-document.getElementById('saveExpense').onclick = async() => { /* same save code */ };
-document.getElementById('cancelEdit').onclick = () => document.getElementById('modal').style.display='none';
-document.getElementById('downloadCSV').onclick = async() => { /* same CSV code */ };
-document.querySelector('.modal').onclick = e => {if(e.target.classList.contains('modal')) document.getElementById('modal').style.display='none';};
+window.deleteExpense = async (id) => {
+  if (confirm('Delete this expense forever?')) {
+    await db.expenses.delete(id);
+    refreshAll();
+  }
+};
 
+// MODAL & SAVE
+document.getElementById('addExpense').onclick = () => {
+  if (!activeProject) return alert('Please select a project first');
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'Add New Expense';
+  document.getElementById('expUnitSelect').value = '';
+  const catSel = document.getElementById('expCategory');
+  catSel.innerHTML = '<option value="">Select Category</option>';
+  CATEGORIES.forEach(c => catSel.add(new Option(c.name, c.key)));
+  document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('expDesc').value = '';
+  document.getElementById('expAmount').value = '';
+  document.getElementById('modal').style.display = 'flex';
+};
+
+document.getElementById('saveExpense').onclick = async () => {
+  const amount = parseFloat(document.getElementById('expAmount').value);
+  const category = document.getElementById('expCategory').value;
+  const unit = document.getElementById('expUnitSelect').value || null;
+  const date = document.getElementById('expDate').value;
+  const desc = document.getElementById('expDesc').value.trim();
+
+  if (!category || !amount || amount <= 0 || !date) {
+    alert('Please fill all required fields');
+    return;
+  }
+
+  if (editingId) {
+    await db.expenses.update(editingId, {unit, date, category, desc, amount});
+  } else {
+    await db.expenses.add({project: activeProject, unit, date, category, desc, amount});
+  }
+  document.getElementById('modal').style.display = 'none';
+  refreshAll();
+};
+
+document.getElementById('cancelEdit').onclick = () => {
+  document.getElementById('modal').style.display = 'none';
+  editingId = null;
+};
+
+// CSV DOWNLOAD
+document.getElementById('downloadCSV').onclick = async () => {
+  if (!activeProject) return alert('Select a project first');
+  const data = await db.expenses.where({project: activeProject}).toArray();
+  let csv = "Date,Category,Description,Unit,Amount\n";
+  data.forEach(r => {
+    const unit = r.unit ? (r.unit==='unit1'?'Unit 1':'Unit 2') : 'Both';
+    const cat = CATEGORIES.find(c=>c.key===r.category)?.name || r.category;
+    csv += `${r.date},${cat},${r.desc||''},${unit},${r.amount}\n`;
+  });
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${activeProject}_expenses_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+};
+
+// Close modal on background click
+document.querySelector('.modal').onclick = (e) => {
+  if (e.target.classList.contains('modal')) document.getElementById('modal').style.display = 'none';
+};
+
+// START
 init3D();
 refreshAll();
 </script>
