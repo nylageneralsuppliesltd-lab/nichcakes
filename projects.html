@@ -11,10 +11,9 @@
   body{font-family:'Poppins',sans-serif;background:#0f172a;color:#fff;min-height:100vh;overflow-x:hidden;}
   .container{max-width:1400px;margin:0 auto;padding:20px;}
   header{text-align:center;padding:30px 0;background:linear-gradient(135deg,#1e3a8a,#3b82f6);border-radius:0 0 30px 30px;box-shadow:0 10px 30px rgba(0,212,255,0.3);}
-  ;}
   h1{font-size:38px;background:linear-gradient(90deg,#00d4ff,#ff3366);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;}
   .grid{display:grid;grid-template-columns:1fr;gap:20px;}
-  @media(min-width:900px{.grid{grid-template-columns:380px 1fr;gap:24px;}}
+  @media(min-width:900px){.grid{grid-template-columns:380px 1fr;gap:24px;}}
   .sidebar{background:#1e293b;padding:24px;border-radius:20px;box-shadow:0 8px 25px rgba(0,0,0,0.4);}
   .project-card{background:#1e40af;padding:20px;border-radius:16px;margin-bottom:16px;cursor:pointer;transition:all 0.3s;border:3px solid transparent;}
   .project-card:hover{transform:translateY(-5px);box-shadow:0 10px 25px rgba(0,212,255,0.3);}
@@ -35,7 +34,6 @@
   .deduction-item:last-child{border:none;}
   .budget-item{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #334155;font-size:16px;align-items:center;}
   .progress-container{height:12px;background:#334155;border-radius:6px;overflow:hidden;margin-top:8px;}
-  ;}
   .progress-bar{height:100%;background:linear-gradient(90deg,var(--p),#ff3366);border-radius:6px;transition:width 1.5s ease;}
   .over-budget{color:#fca5a5 !important;font-weight:700;}
   .ledger table{width:100%;border-collapse:collapse;margin-top:15px;font-size:15px;}
@@ -57,7 +55,7 @@
 <div class="container">
   <header>
     <h1>NYLA PIT LATRINES</h1>
-    <p style="font-size:18px;margin-top:10px;opacity:0.9;">Live Real-Time Dashboard</p>
+    <p style="font-size:18px;margin-top:10px;opacity:0.9;">Live Real-Time Dashboard • Google Sheet Sync • 3D Progress</p>
   </header>
 
   <div class="grid">
@@ -174,24 +172,20 @@ const CATEGORIES = [
 function format(n) { return 'KSh ' + Number(Math.round(n)).toLocaleString(); }
 
 function calc(amount) {
-  const pmc = amount * 0.05;
-  const tax = amount * 0.19;
-  const upfront = amount * 0.10;
-  const contractor = amount * 0.15;
-  const retention = amount * 0.05;
+  const pmc = amount * 0.05, tax = amount * 0.19, upfront = amount * 0.10,
+      contractor = amount * 0.15, retention = amount * 0.05;
   const net = Math.round(amount - pmc - tax - upfront - contractor - retention);
   return {pmc, tax, upfront, contractor, retention, net, perBlock: Math.round(net/2)};
 }
 
 async function fetchData(action, project, payload = {}) {
-  const url = WEBHOOK;
   const options = {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({action, project, secret: SECRET, ...payload})
   };
   try {
-    const res = await fetch(url, options);
+    const res = await fetch(WEBHOOK, options);
     const text = await res.text();
     return JSON.parse(text);
   } catch (err) {
@@ -241,7 +235,6 @@ async function refresh() {
   const data = await fetchData('get', activeProject);
   const expenses = data.success ? data.expenses || [] : [];
 
-  // Calculate spending per block
   const sharedTotal = expenses.filter(e => !e.unit).reduce((a,e) => a + e.amount, 0);
   const sharedPerBlock = sharedTotal / 2;
 
@@ -252,13 +245,13 @@ async function refresh() {
     ? (unitFilter === 'unit1' ? block1Spent : block2Spent)
     : block1Spent + block2Spent;
 
-  // === DEDUCTIONS SECTION ===
+  // Deductions
   document.getElementById('deductionSummary').innerHTML = `
     <div class="deduction-item"><span>Original Contract Amount</span><span>${format(project.original)}</span></div>
     <div class="deduction-item"><span>PMC (5%)</span><span>-${format(ded.pmc)}</span></div>
     <div class="deduction-item"><span>Tax (19%)</span><span>-${format(ded.tax)}</span></div>
-    <div class="deduction-item"><span>Upfront Payment (10%)</span><span>-${format(ded.upfront)}</span></div>
-    <div class="deduction-item"><span>Contractor Fee (15%)</span><span>-${format(ded.contractor)}</span></div>
+    <div class="deduction-item"><span>Upfront (10%)</span><span>-${format(ded.upfront)}</span></div>
+    <div class="deduction-item"><span>Contractor (15%)</span><span>-${format(ded.contractor)}</span></div>
     <div class="deduction-item" style="color:#f39c12;"><span>Retention (5%)</span><span>-${format(ded.retention)}</span></div>
     <div class="deduction-item" style="font-size:20px;color:#28a745;font-weight:700;">
       <span>NET AVAILABLE ${isSingleUnit ? '(per block)' : '(total)'}</span>
@@ -271,7 +264,7 @@ async function refresh() {
   document.getElementById('remaining').textContent = format(currentNet - totalSpent);
   document.getElementById('percent').textContent = currentNet > 0 ? Math.round((totalSpent / currentNet) * 100) + '%' : '0%';
 
-  // === BUDGET BY CATEGORY ===
+  // Budget by Category
   let budgetHTML = '';
   CATEGORIES.forEach(cat => {
     const budgetAmount = currentNet * (cat.pct / 100);
@@ -302,7 +295,7 @@ async function refresh() {
   });
   document.getElementById('budgetBreakdown').innerHTML = budgetHTML;
 
-  // === LEDGER ===
+  // Ledger
   const rows = expenses.map(e => `
     <tr>
       <td>${e.date}</td>
@@ -310,17 +303,15 @@ async function refresh() {
       <td>${e.desc || '-'}</td>
       <td>${e.unit ? 'Block ' + (e.unit==='unit1'?'1':'2') : 'Shared'}</td>
       <td>${format(e.amount)}</td>
-      >
       <td>
         <button class="btn-e" onclick="editExpense(${e.id},'${e.date}','${e.category}','${e.desc||''}','${e.unit||''}',${e.amount})">Edit</button>
-        <button class="btn-d" onclick="if(confirm('Delete expense?')) fetchData('delete',null,{id:${e.id}}).then(refresh)">Delete</button>
+        <button class="btn-d" onclick="if(confirm('Delete?')) fetchData('delete',null,{id:${e.id}}).then(refresh)">Delete</button>
       </td>
     </tr>
   `).join('');
+  document.getElementById('ledgerBody').innerHTML = rows || '<tr><td colspan="6" style="padding:30px;color:#64748b;">No expenses yet</td></tr>';
 
-  document.getElementById('ledgerBody').innerHTML = rows || '<tr><td colspan="6" style="padding:30px;color:#64748b;">No expenses recorded yet</td></tr>';
-
-  // === 3D VIEW UPDATE ===
+  // 3D Update
   if (block1 && block2) {
     updateBlock(block1, Math.min(100, (block1Spent / ded.perBlock) * 100));
     updateBlock(block2, Math.min(100, (block2Spent / ded.perBlock) * 100));
@@ -329,7 +320,7 @@ async function refresh() {
   }
 }
 
-// === 3D SETUP (Beautiful Latrines) ===
+// 3D Setup
 function init3D() {
   const container = document.getElementById('threejs');
   scene = new THREE.Scene();
@@ -344,8 +335,6 @@ function init3D() {
 
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
-  controls.minDistance = 15;
-  controls.maxDistance = 60;
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.8));
   const sun = new THREE.DirectionalLight(0xffffff, 1.4);
@@ -383,38 +372,29 @@ function createBlock(xOffset) {
   const concrete = new THREE.MeshStandardMaterial({color:0x95a5a6});
   const roof = new THREE.MeshStandardMaterial({color:0xc41e3a});
 
-  // Pit
   const pit = new THREE.Mesh(new THREE.CylinderGeometry(2, 2.2, 3, 24), brick);
   pit.position.set(xOffset, -1.5, 0);
   group.add(pit);
 
-  // Slab
   const slab = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.15, 2.6), concrete);
   slab.position.set(xOffset, 0, 0);
   group.add(slab);
 
-  // Walls
   const wallHeight = 2.2;
-  const walls = [];
   const addWall = (w,d,x,z) => {
     const wall = new THREE.Mesh(new THREE.BoxGeometry(w, wallHeight, d), brick);
     wall.position.set(xOffset + x, wallHeight/2, z);
-    walls.push(wall);
     group.add(wall);
+    return wall;
   };
-  addWall(3.8, 0.2, 0, 1.2);
-  addWall(3.8, 0.2, 0, -1.2);
-  addWall(0.2, 0.2, -1.8, 0);
-  addWall(0.2, 0.2, 1.8, 0);
+  const walls = [
+    addWall(3.8, 0.2, 0, 1.2), addWall(3.8, 0.2, 0, -1.2),
+                addWall(0.2, 0.2, -1.8, 0), addWall(0.2, 0.2, 1.8, 0)];
 
-  // Roof
   const roofMesh = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.15, 3.2), roof);
   roofMesh.position.set(xOffset, 2.6, 0);
-  );
-  roofMesh.rotation.x = Math.PI * 0.18;
   group.add(roofMesh);
 
-  // Initially hidden
   pit.visible = slab.visible = roofMesh.visible = false;
   walls.forEach(w => w.visible = false);
 
@@ -429,7 +409,7 @@ function updateBlock(block, percent) {
   block.roof.visible = stage >= 3;
 }
 
-// === UI EVENTS ===
+// UI Events
 document.getElementById('projectsList').onclick = e => {
   const card = e.target.closest('.project-card');
   if (!card) return;
@@ -447,7 +427,7 @@ document.getElementById('unitFilter').onchange = e => {
 };
 
 document.getElementById('addExpense').onclick = () => {
-  if (!activeProject) return alert("Please select a project first");
+  if (!activeProject) return alert("Select a project first");
   document.getElementById('modal').style.display = 'flex';
   document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
 };
@@ -479,14 +459,7 @@ window.editExpense = (id, date, cat, desc, unit, amount) => {
   document.getElementById('saveExpense').textContent = "Update Expense";
   const oldClick = document.getElementById('saveExpense').onclick;
   document.getElementById('saveExpense').onclick = async () => {
-    await fetchData('update', null, {
-      id, 
-      date: document.getElementById('expDate').value,
-      category: document.getElementById('expCategory').value,
-      desc: document.getElementById('expDesc').value,
-      unit: document.getElementById('expUnit').value,
-      amount: Number(document.getElementById('expAmount').value)
-    });
+    await fetchData('update', null, {id, date:document.getElementById('expDate').value, category:document.getElementById('expCategory').value, desc:document.getElementById('expDesc').value, unit:document.getElementById('expUnit').value, amount:Number(document.getElementById('expAmount').value)});
     document.getElementById('modal').style.display = 'none';
     document.getElementById('saveExpense').textContent = "Save Expense";
     document.getElementById('saveExpense').onclick = oldClick;
@@ -495,7 +468,7 @@ window.editExpense = (id, date, cat, desc, unit, amount) => {
   document.getElementById('modal').style.display = 'flex';
 };
 
-// Start everything
+// Start
 init3D();
 loadProjects();
 </script>
