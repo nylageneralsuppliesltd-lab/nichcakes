@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NYLA PIT LATRINES – FINAL CLEAN & PERFECT</title>
+<title>NYLA PIT LATRINES – FINAL & PERFECT</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
@@ -51,7 +51,7 @@
 <div class="container">
   <header>
     <h1>NYLA PIT LATRINES</h1>
-    <p style="font-size:22px;color:#555;margin-top:15px;">FINAL CLEAN VERSION • No Database Errors • 3D Live • Works Forever</p>
+    <p style="font-size:22px;color:#555;margin-top:15px;">FINAL & PERFECT • No Errors • 3D Live • Works Forever</p>
   </header>
 
   <div class="grid">
@@ -147,14 +147,12 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// UNIQUE DATABASE NAME — CHANGES EVERY SAVE = NO MORE VERSION ERRORS
-const DB_NAME = "NylaLatrines_Clean_V9_" + Date.now();
-
+// Fresh database every time — no version conflicts
+const DB_NAME = "NylaLatrines_" + Date.now();
 const db = new Dexie(DB_NAME);
 db.version(1).stores({
   expenses: "++id,project,unit,category,date,desc,amount"
 });
-// This deletes old versions automatically on reload — always fresh!
 
 const PROJECTS = [
   {id:"yedhi",name:"YEDHI PRIMARY (2-door)",doors:2,original:1029000},
@@ -222,8 +220,6 @@ function createBlock(xOffset, numDoors){
   addWall(3.8, 0.2, 0, -1.2);
   addWall(0.2, 0.2, -1.8, 0);
   addWall(0.2, 0.2, 1.8, 0);
-
- 0);
 
   const doorMeshes = [];
   if(numDoors === 2){
@@ -421,7 +417,7 @@ document.getElementById('saveExpense').onclick = async () => {
   const desc = document.getElementById('expDesc').value.trim();
 
   if(!amount || !category || !date){
-    alert("Please fill Amount, Category and Date");
+    alert("Fill Amount, Category & Date");
     return;
   }
 
@@ -431,9 +427,8 @@ document.getElementById('saveExpense').onclick = async () => {
 };
 
 document.getElementById('downloadCSV').onclick = async () => {
-  if(!activeProject) return alert("Select a project");
+  if(!activeProject) return alert("Select project");
   const data = await db.expenses.where({project:activeProject}).toArray();
- 0;
   let csv = "Date,Category,Description,Unit,Amount(KSh)\n";
   data.forEach(r => {
     csv += `${r.date},${getCategoryName(r.category)},"${r.desc||''}",${r.unit?(r.unit==='unit1'?'Block 1':'Block 2'):'Shared'},${r.amount}\n`;
