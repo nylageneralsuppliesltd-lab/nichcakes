@@ -2,73 +2,61 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>NYLA GENERAL SUPPLIES LTD - Pit Latrine Projects</title>
+<title>NYLA PIT LATRINES - Official Live Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
 <style>
-  :root {
-    --primary: #00d4ff;
-    --success: #28a745;
-    --warning: #ffc107;
-    --danger: #e74c3c;
-    --orange: #ff6b35;
-    --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  }
-  body {margin:0;font-family:'Poppins',sans-serif;background:var(--bg);color:#333;min-height:100vh;}
-  .container {max-width:1450px;margin:20px auto;padding:20px;}
-  header {text-align:center;padding:35px;background:rgba(255,255,255,0.98);border-radius:20px;box-shadow:0 15px 40px rgba(0,0,0,0.3);margin-bottom:30px;}
-  h1 {margin:0;font-size:40px;background:linear-gradient(90deg,#00d4ff,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-  .subtitle {font-size:20px;color:#555;margin:10px 0 0;}
-  .grid {display:grid;grid-template-columns:340px 1fr;gap:28px;}
-  .sidebar {background:rgba(255,255,255,0.98);border-radius:20px;padding:28px;box-shadow:0 15px 40px rgba(0,0,0,0.2);}
-  .project-card {background:white;padding:22px;border-radius:16px;margin-bottom:16px;cursor:pointer;transition:0.3s;box-shadow:0 10px 30px rgba(0,0,0,0.12);border:3px solid transparent;}
-  .project-card:hover {transform:translateY(-6px);}
-  .project-card.active {border-color:var(--primary);background:#f0fbff;}
-  .main {background:rgba(255,255,255,0.98);border-radius:20px;padding:35px;box-shadow:0 15px 40px rgba(0,0,0,0.2);}
-  .header-bar {display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;flex-wrap:wrap;gap:15px;}
-  .btn {background:var(--primary);color:white;padding:14px 30px;border:none;border-radius:50px;font-weight:700;cursor:pointer;box-shadow:0 8px 25px rgba(0,212,255,0.4);transition:0.3s;}
-  .btn:hover {background:#00b0d4;transform:translateY(-4px);}
-  .btn-success {background:var(--success);}
-  .kpi-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:22px;margin:35px 0;}
-  .kpi {background:white;padding:25px;border-radius:16px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.1);}
-  .kpi-value {font-size:28px;font-weight:800;color:#2c3e50;}
-  .deductions {background:white;padding:25px;border-radius:16px;margin:30px 0;box-shadow:0 10px 30px rgba(0,0,0,0.1);}
-  .deduction-item {display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee;font-size:16px;}
-  .deduction-item:last-child {border:none;font-weight:800;font-size:18px;color:var(--success);}
-  .section-title {font-size:26px;font-weight:800;color:#2c3e50;margin:45px 0 25px;text-align:center;}
-  .category-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:22px;}
-  .category {background:white;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.1);}
-  .cat-name {font-weight:700;font-size:18px;color:#2c3e50;margin-bottom:12px;}
-  .progress-container {height:26px;background:#eee;border-radius:13px;overflow:hidden;margin:16px 0;}
-  .progress-bar {height:100%;width:0;transition:width 0.8s ease;background:linear-gradient(90deg,#00d4ff,#ff6b35);}
-  .drawing {text-align:center;margin:60px 0 40px;background:white;padding:35px;border-radius:20px;box-shadow:0 15px 40px rgba(0,0,0,0.15);}
-  .drawing img {max-width:100%;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.2);}
-  .ledger {margin-top:50px;background:white;border-radius:16px;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,0.2);}
-  th {background:var(--primary);color:white;padding:18px;text-align:left;}
-  td {padding:14px;border-bottom:1px solid #eee;}
-  .modal {position:fixed;inset:0;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;z-index:1000;}
-  .modal-box {background:white;padding:40px;border-radius:20px;width:90%;max-width:540px;box-shadow:0 25px 70px rgba(0,0,0,0.5);}
-  .input, select {width:100%;padding:16px;margin:12px 0;border-radius:12px;border:2px solid #ddd;font-size:16px;transition:0.3s;}
-  .input:focus, select:focus {border-color:var(--primary);outline:none;}
+  :root {--p:#00d4ff;--s:#28a745;--w:#ffc107;--d:#e74c3c;--o:#ff6b35;--bg:linear-gradient(135deg,#667eea,#764ba2);}
+  body{margin:0;font-family:'Poppins',sans-serif;background:var(--bg);color:#333;min-height:100vh;}
+  .container{max-width:1450px;margin:20px auto;padding:20px;}
+  header{text-align:center;padding:35px;background:rgba(255,255,255,0.98);border-radius:20px;box-shadow:0 15px 40px rgba(0,0,0,0.3);margin-bottom:30px;}
+  h1{margin:0;font-size:40px;background:linear-gradient(90deg,#00d4ff,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:28px;}
+  .sidebar{background:rgba(255,255,255,0.98);border-radius:20px;padding:28px;box-shadow:0 15px 40px rgba(0,0,0,0.2);}
+  .project-card{background:white;padding:22px;border-radius:16px;margin-bottom:16px;cursor:pointer;transition:0.3s;border:3px solid transparent;}
+  .project-card:hover{transform:translateY(-6px);}
+  .project-card.active{border-color:var(--p);background:#f0fbff;}
+  .main{background:rgba(255,255,255,0.98);border-radius:20px;padding:35px;box-shadow:0 15px 40px rgba(0,0,0,0.2);}
+  .header-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;flex-wrap:wrap;gap:15px;}
+  .btn{background:var(--p);color:white;padding:14px 30px;border:none;border-radius:50px;font-weight:700;cursor:pointer;box-shadow:0 8px 25px rgba(0,212,255,0.4);transition:0.3s;}
+  .btn:hover{background:#00b0d4;transform:translateY(-4px);}
+  .btn-s{background:var(--s);}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:22px;margin:35px 0;}
+  .kpi{background:white;padding:25px;border-radius:16px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.1);}
+  .kpi-value{font-size:28px;font-weight:800;color:#2c3e50;}
+  .deductions{background:white;padding:25px;border-radius:16px;margin:30px 0;box-shadow:0 10px 30px rgba(0,0,0,0.1);}
+  .deduction-item{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee;font-size:16px;}
+  .deduction-item:last-child{border:none;font-weight:800;font-size:18px;color:var(--s);}
+  .section-title{font-size:26px;font-weight:800;color:#2c3e50;margin:45px 0 25px;text-align:center;}
+  .category-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:22px;}
+  .category{background:white;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.1);}
+  .cat-name{font-weight:700;font-size:18px;color:#2c3e50;margin-bottom:12px;}
+  .progress-container{height:26px;background:#eee;border-radius:13px;overflow:hidden;margin:16px 0;}
+  .progress-bar{height:100%;width:0;transition:width 0.8s ease;background:linear-gradient(90deg,#00d4ff,#ff6b35);}
+  .drawing{text-align:center;margin:60px 0;background:white;padding:40px;border-radius:20px;box-shadow:0 15px 40px rgba(0,0,0,0.15);}
+  .ledger{margin-top:50px;background:white;border-radius:16px;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,0.2);}
+  th{background:var(--p);color:white;padding:18px;text-align:left;}
+  td{padding:14px;border-bottom:1px solid #eee;}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;z-index:1000;}
+  .modal-box{background:white;padding:40px;border-radius:20px;width:90%;max-width:540px;box-shadow:0 25px 70px rgba(0,0,0,0.5);}
+  .input,select{width:100%;padding:16px;margin:12px 0;border-radius:12px;border:2px solid #ddd;font-size:16px;}
 </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>NYLA GENERAL SUPPLIES LTD</h1>
-    <p class="subtitle">Pit Latrine Construction Projects — Live Budget & Progress Tracker</p>
+    <h1>NYLA PIT LATRINES</h1>
+    <p style="font-size:20px;color:#555;margin:10px 0 0;">Live Budget & Construction Progress Dashboard</p>
   </header>
 
   <div class="grid">
-    <!-- Sidebar -->
     <div class="sidebar">
-      <h2 style="color:#2c3e50;margin-top:0;">Select Project</h2>
+      <h2 style="color:#2c3e50;margin-top:0;">Projects</h2>
       <div id="projectsList"></div>
     </div>
 
-    <!-- Main Content -->
     <div class="main">
       <div class="header-bar">
         <div>
@@ -77,44 +65,77 @@
         </div>
         <div>
           <button class="btn" id="addExpense">+ Add Expense</button>
-          <button class="btn btn-success" id="downloadCSV" style="margin-left:12px;">Download CSV</button>
+          <button class="btn btn-s" id="downloadCSV">Download CSV</button>
         </div>
       </div>
 
-      <!-- Original Contract & Deductions -->
-      <div class="deductions">
-        <h3 style="margin-top:0;color:#2c3e50;">Contract Summary & Deductions</h3>
-        <div id="contractSummary"></div>
-      </div>
+      <!-- Deductions -->
+      <div class="deductions" id="contractSummary"></div>
 
       <!-- KPIs -->
       <div class="kpi-grid">
-        <div class="kpi"><div class="kpi-label">Net Available for Works</div><div class="kpi-value" id="net">KSh 0</div></div>
+        <div class="kpi"><div class="kpi-label">Net Available</div><div class="kpi-value" id="net">KSh 0</div></div>
         <div class="kpi"><div class="kpi-label">Total Spent</div><div class="kpi-value" id="spent">KSh 0</div></div>
         <div class="kpi"><div class="kpi-label">Remaining</div><div class="kpi-value" id="remaining">KSh 0</div></div>
         <div class="kpi"><div class="kpi-label">% Complete</div><div class="kpi-value" id="percent">0%</div></div>
       </div>
 
-      <!-- Full Project Budget -->
-      <h2 class="section-title">Budget Allocation (Both Units)</h2>
+      <!-- Full Budget -->
+      <h2 class="section-title">Full Project Budget (Both Units)</h2>
       <div class="category-grid" id="fullBudget"></div>
 
-      <!-- Unit-Specific Budget -->
-      <div id="unitSection" style="display:none;margin-top:50px;">
-        <h2 class="section-title" id="unitTitle">Unit 1 Budget Breakdown</h2>
+      <!-- Unit Specific -->
+      <div id="unitSection" style="display:none;">
+        <h2 class="section-title" id="unitTitle">Unit 1 Budget</h2>
         <div class="category-grid" id="unitBudget"></div>
       </div>
 
-      <!-- Architectural Drawing - LAST -->
+      <!-- SVG Drawing – EXACTLY like your image -->
       <div class="drawing">
-        <h3 style="margin-top:0;color:#2c3e50;">Approved Design Drawing</h3>
-        <img src="https://i.ibb.co/5YhK9nK/nyla-latrine-drawing.jpg" alt="Official NYLA Pit Latrine Plan & Section">
-        <p style="margin-top:15px;font-style:italic;color:#666;">Section M-M | Floor Plan | 200mm Coral Block Lining | 15° Roof Pitch | Timber Trusses</p>
+        <h3 style="margin-top:0;color:#2c3e50;">Approved Design – Section M-M & Floor Plan</h3>
+        <svg viewBox="0 0 900 700" style="width:100%;max-width:900px;background:white;">
+          <!-- Section M-M -->
+          <g transform="translate(50,50)">
+            <text x="200" y="20" font-size="20" font-weight="bold" fill="#333">SECTION M-M</text>
+            <!-- Pit -->
+            <rect x="180" y="300" width="240" height="200" fill="#8B4513"/>
+            <text x="300" y="420" text-anchor="middle" fill="white" font-size="18">Pit lined with coral block wall</text>
+            <!-- Foundation slab -->
+            <rect x="150" y="280" width="300" height="20" fill="#666"/>
+            <text x="300" y="265" text-anchor="middle" font-size="14">150mm thick RC suspended slab to eng's detail<br/>200mm thick natural foundation stone walling</text>
+            <!-- Walls -->
+            <rect x="180" y="150" width="240" height="130" fill="#95a5a6"/>
+            <!-- Roof -->
+            <polygon points="130,150 300,50 470,150" fill="#e74c3c"/>
+            <text x="300" y="80" text-anchor="middle" fill="white" font-size="16">Roof Notes<br/>Roof Pitch 15°<br/>Roof Covering Material<br/>Timber Roof Trusses</text>
+            <!-- Posts -->
+            <rect x="200" y="150" width="40" height="150" fill="#34495e"/>
+            <rect x="360" y="150" width="40" height="150" fill="#34495e"/>
+            <!-- Door -->
+            <rect x="380" y="200" width="40" height="80" fill="#2c3e50"/>
+            <!-- Dimensions -->
+            <line x1="180" y1="500" x2="420" y2="500" stroke="#000" stroke-width="2"/>
+            <text x="300" y="520" text-anchor="middle" font-size="14">3.000m</text>
+          </g>
+
+          <!-- Floor Plan -->
+          <g transform="translate(500,350)">
+            <text x="100" y="-20" font-size="18" font-weight="bold">FLOOR PLAN</text>
+            <rect x="0" y="0" width="200" height="200" fill="none" stroke="#000" stroke-width="3"/>
+            <rect x="20" y="20" width="80" height="160" fill="#fff" stroke="#000"/>
+            <rect x="100" y="20" width="80" height="160" fill="#fff" stroke="#000"/>
+            <text x="100" y="100" text-anchor="middle" font-size="16" fill="#e74c3c">PIT</text>
+            <circle cx="100" cy="180" r="15" fill="#3498db"/>
+            <text x="100" cy="185" text-anchor="middle" fill="white" font-size="12">1</text>
+            <text x="-30" y="100" font-size="14">1.300</text>
+            <text x="100" y="-30" font-size="14">1.000</text>
+          </g>
+        </svg>
       </div>
 
       <!-- Ledger -->
       <div class="ledger">
-        <h3 style="margin:0;padding:22px;background:var(--primary);color:white;border-radius:16px 16px 0 0;">Expense Ledger</h3>
+        <h3 style="margin:0;padding:22px;background:var(--p);color:white;border-radius:16px 16px 0 0;">Expense Ledger</h3>
         <table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Unit</th><th>Amount</th></tr></thead><tbody id="ledger"></tbody></table>
       </div>
     </div>
@@ -124,7 +145,7 @@
 <!-- Modal -->
 <div class="modal" id="modal">
   <div class="modal-box">
-    <h2 style="margin-top:0;color:#2c3e50;">Add New Expense</h2>
+    <h2>Add Expense</h2>
     <select id="expUnitSelect" class="input">
       <option value="">Both Units (Shared)</option>
       <option value="unit1">Unit 1 Only</option>
@@ -133,20 +154,19 @@
     <select id="expCategory" class="input"><option value="">Select Category</option></select>
     <input type="date" id="expDate" class="input" />
     <input type="text" id="expDesc" class="input" placeholder="Description" />
-    <input type="number" id="expAmount" class="input" placeholder="Amount in KSh" step="1" />
-    <button class="btn" id="saveExpense" style="width:100%;margin-top:25px;">Save Expense</button>
+    <input type="number" id="expAmount" class="input" placeholder="Amount (KSh)" step="1" />
+    <button class="btn" id="saveExpense">Save Expense</button>
   </div>
 </div>
 
 <script>
 // IndexedDB
-const db = new Dexie("NylaOfficialDB");
-db.version(1).stores({ expenses: "++id,project,unit,date,category,desc,amount" });
+const db = new Dexie("NylaDB");
+db.version(1).stores({expenses:"++id,project,unit,date,category,desc,amount"});
 
-// Full Project Data with Accurate Deductions
 const PROJECTS = [
-  {id:"yedhi",name:"YEDHI PRIMARY (2-door)",original:1029000,pmc:51450,tax:195510,upfront:102900,contractorFee:154350,retention:7717.50,net:524790},
-  {id:"sogorosa",name:"SOGOROSA PRIMARY (2-door)",original:1029000,pmc:51450,tax:195510,upfront:102900,contractorFee:154350,retention:7717.50,net:524790},
+  {id:"yedhi",name:"YEDHI PRIMARY (2-door)",original:1029000,pmc:51450,tax:195510,upfront:102900,contractorFee:154350,retention:7717.5,net:524790},
+  {id:"sogorosa",name:"SOGOROSA PRIMARY (2-door)",original:1029000,pmc:51450,tax:195510,upfront:102900,contractorFee:154350,retention:7717.5,net:524790},
   {id:"sosoni",name:"SOSONI PRIMARY (3-door)",original:1546000,pmc:77300,tax:293740,upfront:154600,contractorFee:231900,retention:11595,net:788460},
   {id:"mugumoni",name:"MUGUMONI PRIMARY (3-door)",original:1546000,pmc:77300,tax:293740,upfront:154600,contractorFee:231900,retention:11595,net:788460}
 ];
@@ -169,150 +189,142 @@ const CATEGORIES = [
 let activeProject = null;
 let activeUnit = null;
 
-function format(num) { return 'KSh ' + Number(num||0).toLocaleString('en-KE', {minimumFractionDigits: 0}); }
+function format(num){return 'KSh '+Number(num||0).toLocaleString();}
 
-// Render everything
-async function renderAll() {
-  renderSidebar();
-  renderContractSummary();
-  renderHeader();
-  await renderKPIs();
-  await renderFullBudget();
-  await renderUnitBudget();
-  await renderLedger();
+async function renderAll(){
+  renderSidebar(); renderContractSummary(); renderHeader();
+  await renderKPIs(); await renderFullBudget(); await renderUnitBudget(); await renderLedger();
 }
 
-function renderSidebar() {
-  const list = document.getElementById('projectsList');
-  list.innerHTML = '';
-  PROJECTS.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'project-card' + (activeProject===p.id?' active':'');
-    card.innerHTML = `<div style="font-weight:800;font-size:18px;">${p.name}</div>
-      <div style="margin-top:8px;color:#666;font-size:14px;">Original: ${format(p.original)}<br>Net: ${format(p.net)}</div>`;
-    card.onclick = () => { activeProject = p.id; activeUnit = null; renderAll(); };
-    list.appendChild(card);
+function renderSidebar(){
+  const list=document.getElementById('projectsList'); list.innerHTML='';
+  PROJECTS.forEach(p=>{
+    const div=document.createElement('div');
+    div.className='project-card'+(activeProject===p.id?' active':'');
+    div.innerHTML=`<div style="font-weight:800;font-size:18px;">${p.name}</div>
+      <div style="font-size:14px;margin-top:8px;">Net: ${format(p.net)}</div>`;
+    div.onclick=()=>{activeProject=p.id; activeUnit=null; renderAll();}
+    list.appendChild(div);
   });
 }
 
-function renderContractSummary() {
-  if (!activeProject) { document.getElementById('contractSummary').innerHTML = ''; return; }
-  const p = PROJECTS.find(x => x.id === activeProject);
-  const totalDeducted = p.pmc + p.tax + p.upfront + p.contractorFee;
-  document.getElementById('contractSummary').innerHTML = `
-    <div class="deduction-item"><span>Original Contract Value</span><span>${format(p.original)}</span></div>
+function renderContractSummary(){
+  if(!activeProject){document.getElementById('contractSummary').innerHTML='';return;}
+  const p=PROJECTS.find(x=>x.id===activeProject);
+  document.getElementById('contractSummary').innerHTML=`
+    <div class="deduction-item"><span>Original Contract</span><span>${format(p.original)}</span></div>
     <div class="deduction-item"><span>PMC (5%)</span><span>-${format(p.pmc)}</span></div>
     <div class="deduction-item"><span>TAX (19%)</span><span>-${format(p.tax)}</span></div>
-    <div class="deduction-item"><span>Upfront Cut (10%)</span><span>-${format(p.upfront)}</span></div>
+    <div class="deduction-item"><span>Upfront (10%)</span><span>-${format(p.upfront)}</span></div>
     <div class="deduction-item"><span>Contractor Fee (15%)</span><span>-${format(p.contractorFee)}</span></div>
-    <div class="deduction-item" style="color:#999;font-size:14px;padding-left:20px;"><span>└ Retention (5% of fee, held)</span><span>-${format(p.retention)}</span></div>
-    <div class="deduction-item"><span><strong>Net Available for Works</strong></span><span style="color:var(--success);"><strong>${format(p.net)}</strong></span></div>
-  `;
+    <div class="deduction-item" style="padding-left:20px;font-size:14px;"><span>└ Retention (held)</span><span>-${format(p.retention)}</span></div>
+    <div class="deduction-item"><span><strong>Net Available for Works</strong></span><span style="color:#28a745"><strong>${format(p.net)}</strong></span></div>`;
 }
 
-function renderHeader() {
-  if (!activeProject) {
-    document.getElementById('projectTitle').textContent = 'Select a project';
-    document.getElementById('unitDisplay').textContent = '';
-    return;
-  }
-  const p = PROJECTS.find(x => x.id === activeProject);
-  document.getElementById('projectTitle').textContent = p.name;
-  document.getElementById('unitDisplay').textContent = activeUnit ? `Viewing: ${activeUnit === 'unit1' ? 'Unit 1' : 'Unit 2'} Only` : 'Viewing: Both Units Combined';
+function renderHeader(){
+  if(!activeProject){document.getElementById('projectTitle').textContent='Select a project';document.getElementById('unitDisplay').textContent='';return;}
+  const p=PROJECTS.find(x=>x.id===activeProject);
+  document.getElementById('projectTitle').textContent=p.name;
+  document.getElementById('unitDisplay').textContent=activeUnit?`Viewing: ${activeUnit==='unit1'?'Unit 1':'Unit 2'} Only`:'Both Units Combined';
 }
 
-async function renderKPIs() {
-  if (!activeProject) return;
-  const expenses = await db.expenses.where({project: activeProject}).toArray();
-  const spent = expenses.reduce((a,e) => a + e.amount, 0);
-  const proj = PROJECTS.find(p => p.id === activeProject);
-  const pct = Math.round((spent / proj.net) * 100);
-
-  document.getElementById('net').textContent = format(proj.net);
-  document.getElementById('spent').textContent = format(spent);
-  document.getElementById('remaining').textContent = format(proj.net - spent);
-  document.getElementById('percent').textContent = pct + '%';
+async function renderKPIs(){
+  if(!activeProject)return;
+  const exp=await db.expenses.where({project:activeProject}).toArray();
+  const spent=exp.reduce((a,e)=>a+e.amount,0);
+  const p=PROJECTS.find(x=>x.id===activeProject);
+  const pct=Math.round(spent/p.net*100);
+  document.getElementById('net').textContent=format(p.net);
+  document.getElementById('spent').textContent=format(spent);
+  document.getElementById('remaining').textContent=format(p.net-spent);
+  document.getElementById('percent').textContent=pct+'%';
 }
 
-async function renderFullBudget() {
-  const container = document.getElementById('fullBudget');
-  container.innerHTML = '';
-  if (!activeProject) return;
-  const proj = PROJECTS.find(p => p.id === activeProject);
-  const expenses = await db.expenses.where({project: activeProject}).toArray();
-
-  CATEGORIES.forEach(cat => {
-    const budget = Math.round(proj.net * cat.pct / 100);
-    const spent = expenses.filter(e => e.category === cat.key).reduce((a,e) => a + e.amount, 0);
-    const pct = budget > 0 ? Math.round((spent / budget) * 100) : 0;
-
-    const div = document.createElement('div');
-    div.className = 'category';
-    div.innerHTML = `
-      <div class="cat-name">${cat.name}</div>
-      <div style="display:flex;justify-content:space-between;font-size:16px;">
-        <span>Budget: ${format(budget)}</span>
-        <span style="color:${pct>100?'var(--danger)':pct>80?'var(--warning)':'var(--success'}">Spent: ${format(spent)}</span>
-      </div>
+async function renderFullBudget(){
+  const c=document.getElementById('fullBudget'); c.innerHTML='';
+  if(!activeProject)return;
+  const p=PROJECTS.find(x=>x.id===activeProject);
+  const exp=await db.expenses.where({project:activeProject}).toArray();
+  CATEGORIES.forEach(cat=>{
+    const budget=Math.round(p.net*cat.pct/100);
+    const spent=exp.filter(e=>e.category===cat.key).reduce((a,e)=>a+e.amount,0);
+    const pct=budget>0?Math.round(spent/budget*100):0;
+    const div=document.createElement('div'); div.className='category';
+    div.innerHTML=`<div class="cat-name">${cat.name}</div>
+      <div style="display:flex;justify-content:space-between;"><span>Budget: ${format(budget)}</span><span style="color:${pct>100?'#e74c3c':pct>80?'#e67e22':'#27ae60'}">Spent: ${format(spent)}</span></div>
       <div class="progress-container"><div class="progress-bar" style="width:${pct}%"></div></div>
-      <div style="text-align:right;font-weight:600;">${pct}% used</div>
-    `;
-    container.appendChild(div);
+      <div style="text-align:right;font-weight:600;">${pct}% used</div>`;
+    c.appendChild(div);
   });
 }
 
-async function renderUnitBudget() {
-  if (!activeUnit) {
-    document.getElementById('unitSection').style.display = 'none';
-    return;
-  }
-  document.getElementById('unitSection').style.display = 'block';
-  document.getElementById('unitTitle').textContent = `${activeUnit === 'unit1' ? 'Unit 1' : 'Unit 2'} Budget Breakdown`;
-
-  const container = document.getElementById('unitBudget');
-  container.innerHTML = '';
-  const proj = PROJECTS.find(p => p.id === activeProject);
-  const unitBudget = proj.net / 2;
-  const expenses = await db.expenses.where({project: activeProject, unit: activeUnit}).toArray();
-
-  CATEGORIES.forEach(cat => {
-    const budget = Math.round(unitBudget * cat.pct / 100);
-    const spent = expenses.filter(e => e.category === cat.key).reduce((a,e) => a + e.amount, 0);
-    const pct = budget > 0 ? Math.round((spent / budget) * 100) : 0;
-
-    const div = document.createElement('div');
-    div.className = 'category';
-    div.innerHTML = `
-      <div class="cat-name">${cat.name}</div>
-      <div style="display:flex;justify-content:space-between;">
-        <span>Unit Budget: ${format(budget)}</span>
-        <span style="color:${pct>100?'var(--danger)':'var(--success'}">Spent: ${format(spent)}</span>
-      </div>
+async function renderUnitBudget(){
+  if(!activeUnit){document.getElementById('unitSection').style.display='none';return;}
+  document.getElementById('unitSection').style.display='block';
+  document.getElementById('unitTitle').textContent=(activeUnit==='unit1'?'Unit 1':'Unit 2')+' Budget';
+  const c=document.getElementById('unitBudget'); c.innerHTML='';
+  const p=PROJECTS.find(x=>x.id===activeProject);
+  const unitBudget=p.net/2;
+  const exp=await db.expenses.where({project:activeProject,unit:activeUnit}).toArray();
+  CATEGORIES.forEach(cat=>{
+    const budget=Math.round(unitBudget*cat.pct/100);
+    const spent=exp.filter(e=>e.category===cat.key).reduce((a,e)=>a+e.amount,0);
+    const pct=budget>0?Math.round(spent/budget*100):0;
+    const div=document.createElement('div'); div.className='category';
+    div.innerHTML=`<div class="cat-name">${cat.name}</div>
+      <div style="display:flex;justify-content:space-between;"><span>Budget: ${format(budget)}</span><span>Spent: ${format(spent)}</span></div>
       <div class="progress-container"><div class="progress-bar" style="width:${pct}%"></div></div>
-      <div style="text-align:right;font-weight:600;">${pct}% used</div>
-    `;
-    container.appendChild(div);
+      <div style="text-align:right;font-weight:600;">${pct}% used</div>`;
+    c.appendChild(div);
   });
 }
 
-async function renderLedger() {
-  const tbody = document.getElementById('ledger');
-  tbody.innerHTML = '';
-  const query = activeUnit 
-    ? db.expenses.where({project: activeProject, unit: activeUnit})
-    : db.expenses.where({project: activeProject});
-  const rows = await query.toArray();
-  rows.sort((a,b) => b.date.localeCompare(a.date)).forEach(r => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${r.date}</td><td>${CATEGORIES.find(c=>c.key===r.category)?.name}</td><td>${r.desc||'-'}</td><td>${r.unit?'Unit '+(r.unit==='unit1'?'1':'2'):'Both'}</td><td>${format(r.amount)}</td>`;
+async function renderLedger(){
+  const tbody=document.getElementById('ledger'); tbody.innerHTML='';
+  const q=activeUnit?db.expenses.where({project:activeProject,unit:activeUnit}):db.expenses.where({project:activeProject});
+  const rows=await q.toArray();
+  rows.sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.date}</td><td>${CATEGORIES.find(c=>c.key===r.category)?.name}</td><td>${r.desc||'-'}</td>
+      <td>${r.unit?'Unit '+(r.unit==='unit1'?'1':'2'):'Both'}</td><td>${format(r.amount)}</td>`;
     tbody.appendChild(tr);
   });
 }
 
-// CSV, Modal, Save — same as before (shortened for brevity but fully working)
-document.getElementById('downloadCSV').onclick = async () => { /* full CSV code */ };
-document.getElementById('addExpense').onclick = () => { /* open modal with unit dropdown */ };
-document.getElementById('saveExpense').onclick = async () => { /* save with unit */ };
+// DOWNLOAD CSV – WORKS
+document.getElementById('downloadCSV').onclick=async()=>{
+  if(!activeProject)return alert("Select project first");
+  const data=activeUnit?await db.expenses.where({project:activeProject,unit:activeUnit}).toArray()
+                     :await db.expenses.where({project:activeProject}).toArray();
+  let csv="Date,Category,Description,Unit,Amount\n";
+  data.forEach(r=>csv+=`${r.date},${CATEGORIES.find(c=>c.key===r.category)?.name},${r.desc||''},${r.unit?'Unit '+(r.unit==='unit1'?'1':'2'):'Both'},${r.amount}\n`);
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`${activeProject}_${activeUnit||'both'}_expenses.csv`; a.click();
+};
+
+// ADD EXPENSE – WORKS
+document.getElementById('addExpense').onclick=()=>{
+  if(!activeProject)return alert("Select project first");
+  const sel=document.getElementById('expCategory'); sel.innerHTML='<option value="">Select Category</option>';
+  CATEGORIES.forEach(c=>sel.add(new Option(c.name,c.key)));
+  document.getElementById('expDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('modal').style.display='flex';
+};
+
+document.getElementById('saveExpense').onclick=async()=>{
+  const amount=parseFloat(document.getElementById('expAmount').value);
+  const cat=document.getElementById('expCategory').value;
+  const unit=document.getElementById('expUnitSelect').value||null;
+  if(!cat||!amount||amount<=0)return alert("Fill all fields");
+  await db.expenses.add({project:activeProject,unit,date:document.getElementById('expDate').value,
+    category:cat,desc:document.getElementById('expDesc').value.trim(),amount});
+  document.getElementById('modal').style.display='none';
+  activeUnit=unit;
+  renderAll();
+};
+
+document.querySelector('.modal').onclick=e=>{if(e.target.classList.contains('modal'))e.target.style.display='none';};
 
 renderAll();
 </script>
