@@ -47,14 +47,7 @@
   .modal{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;z-index:1000;}
   .modal-box{background:#1e293b;padding:30px;border-radius:18px;width:90%;max-width:460px;}
   .input,select{width:100%;padding:14px;margin:10px 0;border-radius:14px;border:1px solid #475569;background:#0f172a;color:#fff;font-size:16px;}
-  @media(max-width:768px){
-    .container{padding:4px;}
-    header{padding:12px 0;}
-    .sidebar,.main{padding:12px;}
-    .header-bar{flex-direction:column;align-items:stretch;}
-    .kpi-grid{grid-template-columns:1fr 1fr;}
-    .ledger th,.ledger td{padding:6px;font-size:12px;}
-  }
+  .loading{text-align:center;padding:40px;color:#60a5fa;font-size:18px;}
 </style>
 </head>
 <body>
@@ -68,14 +61,14 @@
   <div class="grid">
     <div class="sidebar">
       <h2 style="font-size:20px;margin-bottom:16px;color:#60a5fa;">SELECT PROJECT</h2>
-      <div id="projectsList"></div>
+      <div id="projectsList" class="loading">Loading projects from Google Sheets...</div>
     </div>
 
     <div class="main">
       <div class="header-bar">
         <div>
           <h2 id="projectTitle" style="font-size:24px;color:#60a5fa;">Select a project</h2>
-          <select id="unitFilter" aria-label="Filter by block">
+          <select id="unitFilter">
             <option value="">Both Blocks</option>
             <option value="unit1">Block 1 Only</option>
             <option value="unit2">Block 2 Only</option>
@@ -103,7 +96,7 @@
       <div class="ledger">
         <table>
           <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Unit</th><th>Amount</th><th>Action</th></tr></thead>
-          <tbody id="ledgerBody"></tbody>
+          <tbody id="ledgerBody"><tr><td colspan="6" style="padding:20px;color:#64748b;">Select a project to see expenses</td></tr></tbody>
         </table>
       </div>
 
@@ -113,7 +106,7 @@
   </div>
 </div>
 
-<!-- Modals -->
+<!-- Add Expense Modal -->
 <div class="modal" id="modal">
   <div class="modal-box">
     <h2 style="font-size:22px;margin-bottom:20px;color:#60a5fa;">Add New Expense</h2>
@@ -147,40 +140,6 @@
   </div>
 </div>
 
-<div class="modal" id="editModal">
-  <div class="modal-box">
-    <h2 style="font-size:22px;margin-bottom:20px;color:#60a5fa;">Edit Expense</h2>
-    <input type="hidden" id="editId">
-    <select id="editUnit" class="input">
-      <option value="">Shared (Split 50/50)</option>
-      <option value="unit1">Block 1 Only</option>
-      <option value="unit2">Block 2 Only</option>
-    </select>
-    <select id="editCategory" class="input">
-      <option value="">Select Category</option>
-      <option value="excavation">Excavation & Earthworks</option>
-      <option value="concrete">Concrete Works</option>
-      <option value="steel">Reinforcement Steel</option>
-      <option value="pitwall">Pit Walling</option>
-      <option value="superwall">Superstructure Walling</option>
-      <option value="roofing">Roofing</option>
-      <option value="doors">Doors & Carpentry</option>
-      <option value="plaster">Plaster & Screed</option>
-      <option value="painting">Painting</option>
-      <option value="vent">Ventilation</option>
-      <option value="transport">Transport</option>
-      <option value="misc">Miscellaneous</option>
-    </select>
-    <input type="date" id="editDate" class="input">
-    <input type="text" id="editDesc" class="input" placeholder="Description (optional)">
-    <input type="number" id="editAmount" class="input" placeholder="Amount in KSh" min="1">
-    <div style="margin-top:30px;text-align:right;">
-      <button class="btn" id="updateExpense">Update Expense</button>
-      <button class="btn" style="background:#64748b;margin-left:12px;" id="editCancel">Cancel</button>
-    </div>
-  </div>
-</div>
-
 <script type="importmap">
 {
   "imports": {
@@ -194,154 +153,22 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// ==================== CONFIG ====================
+// ==================== SETTINGS ====================
 const SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbwjZV7O5sRKDxe1MkrbVLJkHis4bL4gg_2Hl60YiqMTyKvNR1nUZKKU9_rqfMBVKI3Jpg/exec';
 const SECRET = 'nyla2025';
 
-const PROJECTS = [
-  {id:"yedhi",    name:"YEDHI PRIMARY (2-door)",    doors:2, original:1029000},
-  {id:"sogorosa", name:"SOGOROSA PRIMARY (2-door)", doors:2, original:1029000},
-  {id:"sosoni",   name:"SOSONI PRIMARY (3-door)",   doors:3, original:1546000},
-  {id:"mugumoni", name:"MUGUMONI PRIMARY (3-door)", doors:3, original:1546000}
-];
-
-const CATEGORIES = [
-  {key:"excavation",name:"Excavation & Earthworks",pct:12},
-  {key:"concrete",name:"Concrete Works",pct:18},
-  {key:"steel",name:"Reinforcement Steel",pct:5},
-  {key:"pitwall",name:"Pit Walling",pct:20},
-  {key:"superwall",name:"Superstructure Walling",pct:10},
-  {key:"roofing",name:"Roofing",pct:12},
-  {key:"doors",name:"Doors & Carpentry",pct:5},
-  {key:"plaster",name:"Plaster & Screed",pct:6},
-  {key:"painting",name:"Painting",pct:3},
-  {key:"vent",name:"Ventilation",pct:2},
-  {key:"transport",name:"Transport",pct:5},
-  {key:"misc",name:"Miscellaneous",pct:2}
-];
-
+let PROJECTS = [];
 let activeProject = null;
 let unitFilter = "";
+
+// ==================== 3D SETUP ====================
 let scene, camera, renderer, controls;
-let block1 = null, block2 = null;
-
-// ==================== GOOGLE SHEET (ROBUST) ====================
-async function loadExpenses(projectId) {
-  try {
-    const res = await fetch(`${SHEET_WEBHOOK}?action=get&project=${projectId}&secret=${SECRET}`, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || "Server error");
-    return data.expenses || [];
-  } catch (err) {
-    console.error("Load failed:", err);
-    alert("No internet – showing cached/offline view");
-    return [];
-  }
-}
-
-async function saveToSheet(action, payload = {}) {
-  const body = { action, secret: SECRET, project: activeProject, ...payload };
-  for (let i = 0; i < 5; i++) {
-    try {
-      const res = await fetch(SHEET_WEBHOOK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      const data = await res.json();
-      if (res.ok && data.success) return data;
-    } catch (e) {
-      console.error("Save attempt failed:", e);
-    }
-    await new Promise(r => setTimeout(r, 2000 * (i + 1)));
-  }
-  alert("Failed to save – check internet and try again");
-}
-
-// ==================== HELPERS ====================
-function calc(amount) {
-  const pmc = amount * 0.05;
-  const tax = amount * 0.19;
-  const upfront = amount * 0.10;
-  const contractor = amount * 0.15;
-  const retention = amount * 0.05;
-  const net = Math.round(amount - pmc - tax - upfront - contractor - retention);
-  return {pmc, tax, upfront, contractor, retention, net, perBlock: Math.round(net/2)};
-}
-
-function format(n) { return 'KSh ' + Number(Math.round(n)).toLocaleString(); }
-
-// 3D Block Creator
-function createBlock(xOffset, numDoors) {
-  const group = new THREE.Group();
-  const coral = new THREE.MeshStandardMaterial({color:0xd4a574, roughness:0.95});
-  const steel = new THREE.MeshStandardMaterial({color:0x2c3e50, metalness:0.9});
-  const roofMat = new THREE.MeshStandardMaterial({color:0xc41e3a});
-
-  const pit = new THREE.Mesh(new THREE.CylinderGeometry(2,2.2,3,24,1,true), coral);
-  pit.position.set(xOffset, -1.5, 0); group.add(pit);
-
-  const slab = new THREE.Mesh(new THREE.BoxGeometry(3.8,0.15,2.6), new THREE.MeshStandardMaterial({color:0x95a5a6}));
-  slab.position.set(xOffset, 0, 0); group.add(slab);
-
-  const walls = [];
-  const h = 2.2;
-  const addWall = (w,d,x,z) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), coral);
-    m.position.set(xOffset + x, h/2 + 0.075, z);
-    walls.push(m); group.add(m);
-  };
-  addWall(3.8, 0.2, 0, 1.2);
-  addWall(3.8, 0.2, 0, -1.2);
-  addWall(0.2, 0.2, -1.8, 0);
-  addWall(0.2, 0.2, 1.8, 0);
-
-  const doorMeshes = [];
-  if(numDoors === 2){
-    addWall(0.2, 1.8, 0, 0);
-    [-0.9, 0.9].forEach(dx => {
-      const d = new THREE.Mesh(new THREE.BoxGeometry(0.05, 2, 0.9), steel);
-      d.position.set(xOffset + dx, 1.075, 1.21);
-      doorMeshes.push(d); group.add(d);
-    });
-  } else {
-    addWall(0.2, 1.2, -0.9, 0);
-    addWall(0.2, 1.2, 0.9, 0);
-    [-1.2, 0, 1.2].forEach(dx => {
-      const d = new THREE.Mesh(new THREE.BoxGeometry(0.05, 2, 0.8), steel);
-      d.position.set(xOffset + dx*0.75, 1.075, 1.21);
-      doorMeshes.push(d); group.add(d);
-    });
-  }
-
-  const roof = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.15, 3.2), roofMat);
-  roof.position.set(xOffset, 2.6, 0);
-  roof.rotation.x = Math.PI * 0.18;
-  group.add(roof);
-
-  pit.visible = slab.visible = roof.visible = false;
-  walls.forEach(w => w.visible = false);
-  doorMeshes.forEach(d => d.visible = false);
-
-  group.doorCount = numDoors;
-  return {group, pit, walls, slab, roof, doorMeshes, doorCount: numDoors};
-}
-
-function updateBlock(block, percent) {
-  const stage = percent < 10 ? 0 : percent < 35 ? 1 : percent < 65 ? 2 : percent < 90 ? 3 : 4;
-  block.pit.visible = stage >= 1;
-  block.walls.forEach(w => w.visible = stage >= 2);
-  block.slab.visible = stage >= 2;
-  block.roof.visible = stage >= 3;
-  block.doorMeshes.forEach(d => d.visible = stage >= 4);
-}
+let block1, block2;
 
 function init3D() {
   const container = document.getElementById('threejs');
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xb3e5fc);
-
   camera = new THREE.PerspectiveCamera(55, container.clientWidth / container.clientHeight, 0.1, 1000);
   camera.position.set(0, 12, 28);
 
@@ -352,151 +179,183 @@ function init3D() {
 
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
-  controls.maxPolarAngle = Math.PI / 2.1;
   controls.minDistance = 15;
   controls.maxDistance = 60;
-  controls.target.set(0,0,0);
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.8));
   const sun = new THREE.DirectionalLight(0xffffff, 1.4);
   sun.position.set(20,40,20);
-  sun.castShadow = true;
   scene.add(sun);
 
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(100,100), new THREE.MeshLambertMaterial({color:0x8BC34A}));
   ground.rotation.x = -Math.PI/2;
-  ground.receiveShadow = true;
   scene.add(ground);
 
   block1 = createBlock(-9, 2);
   block2 = createBlock(+9, 2);
   scene.add(block1.group, block2.group);
 
-  const animate = () => {
+  function animate() {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
-  };
+  }
   animate();
 
   window.addEventListener('resize', () => {
-    const rect = container.getBoundingClientRect();
-    camera.aspect = rect.width / rect.height;
+    camera.aspect = container.clientWidth / container.clientHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(rect.width, rect.height);
+    renderer.setSize(container.clientWidth, container.clientHeight);
   });
 }
+
+function createBlock(xOffset, doors) {
+  const group = new THREE.Group();
+  const brick = new THREE.MeshStandardMaterial({color:0xd4a574});
+  const metal = new THREE.MeshStandardMaterial({color:0x2c3e50, metalness:0.9});
+  const roof = new THREE.MeshStandardMaterial({color:0xc41e3a});
+
+  // Basic structure (simplified for speed)
+  const pit = new THREE.Mesh(new THREE.CylinderGeometry(2,2.2,3,24), brick);
+  pit.position.set(xOffset, -1.5, 0);
+  group.add(pit);
+
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(3.8,0.15,2.6), new THREE.MeshStandardMaterial({color:0x95a5a6}));
+  slab.position.set(xOffset, 0, 0);
+  group.add(slab);
+
+  const wallHeight = 2.2;
+  const walls = [];
+  const addWall = (w,d,x,z) => {
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(w, wallHeight, d), brick);
+    wall.position.set(xOffset + x, wallHeight/2, z);
+    walls.push(wall);
+    group.add(wall);
+  };
+  addWall(3.8, 0.2, 0, 1.2);
+  addWall(3.8, 0.2, 0, -1.2);
+  addWall(0.2, 0.2, -1.8, 0);
+  addWall(0.2, 0.2, 1.8, 0);
+
+  const roofMesh = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.15, 3.2), roof);
+  roofMesh.position.set(xOffset, 2.6, 0);
+  roofMesh.rotation.x = Math.PI * 0.18;
+  group.add(roofMesh);
+
+  // Hide everything initially
+  pit.visible = slab.visible = roofMesh.visible = false;
+  walls.forEach(w => w.visible = false);
+
+  return {group, pit, walls, slab, roof: roofMesh};
+}
+
+function updateBlock(block, percent) {
+  const stage = percent < 10 ? 0 : percent < 35 ? 1 : percent < 65 ? 2 : percent < 90 ? 3 : 4;
+  block.pit.visible = stage >= 1;
+  block.walls.forEach(w => w.visible = stage >= 2);
+  block.slab.visible = stage >= 2;
+  block.roof.visible = stage >= 3;
+}
+
+// Start 3D
 init3D();
 
-// ==================== MAIN REFRESH (PERFECT UNIT FILTERING) ====================
-async function refresh() {
-  if (!activeProject) return;
+// ==================== HELPERS ====================
+function format(n) { return 'KSh ' + Number(Math.round(n)).toLocaleString(); }
 
-  const project = PROJECTS.find(p => p.id === activeProject);
-  const ded = calc(project.original);
-  const isSingleUnit = unitFilter === "unit1" || unitFilter === "unit2";
+function calc(amount) {
+  const pmc = amount * 0.05;
+  const tax = amount * 0.19;
+  const upfront = amount * 0.10;
+  const contractor = amount * 0.15;
+  const retention = amount * 0.05;
+  const net = Math.round(amount - pmc - tax - upfront - contractor - retention);
+  return {net, perBlock: Math.round(net/2)};
+}
 
-  const displayDed = {
-    original: isSingleUnit ? project.original / 2 : project.original,
-    pmc: isSingleUnit ? ded.pmc / 2 : ded.pmc,
-    tax: isSingleUnit ? ded.tax / 2 : ded.tax,
-    upfront: isSingleUnit ? ded.upfront / 2 : ded.upfront,
-    contractor: isSingleUnit ? ded.contractor / 2 : ded.contractor,
-    retention: isSingleUnit ? ded.retention / 2 : ded.retention,
-    net: isSingleUnit ? ded.perBlock : ded.net
-  };
-
-  document.getElementById('deductionSummary').innerHTML = `
-    <div class="deduction-item"><span>Original Contract</span><span>${format(displayDed.original)}</span></div>
-    <div class="deduction-item"><span>PMC 5%</span><span>-${format(displayDed.pmc)}</span></div>
-    <div class="deduction-item"><span>Tax 19%</span><span>-${format(displayDed.tax)}</span></div>
-    <div class="deduction-item"><span>Upfront 10%</span><span>-${format(displayDed.upfront)}</span></div>
-    <div class="deduction-item"><span>Contractor 15%</span><span>-${format(displayDed.contractor)}</span></div>
-    <div class="deduction-item" style="color:#f39c12;"><span>Retention 5%</span><span>-${format(displayDed.retention)}</span></div>
-    <div class="deduction-item" style="font-size:18px;color:#28a745;font-weight:700;"><span>NET AVAILABLE</span><span>${format(displayDed.net)}</span></div>`;
-
-  if (!block1 || block1.doorCount !== project.doors) {
-    if (block1) scene.remove(block1.group, block2.group);
-    block1 = createBlock(-9, project.doors);
-    block2 = createBlock(+9, project.doors);
-    scene.add(block1.group, block2.group);
+// ==================== LOAD PROJECTS FROM GOOGLE SHEET ====================
+async function loadProjects() {
+  const list = document.getElementById('projectsList');
+  try {
+    const res = await fetch(`${SHEET_WEBHOOK}?action=get&project=Projects&secret=${SECRET}`);
+    const data = await res.json();
+    if (data.success && data.expenses) {
+      PROJECTS = data.expenses.map(p => ({
+        id: p.id,
+        name: p.name,
+        doors: Number(p.doors),
+        original: Number(p.original)
+      })).filter(p => p.id && p.name);
+    }
+  } catch(e) {
+    console.log("Using built-in projects");
   }
 
+  if (PROJECTS.length === 0) {
+    PROJECTS = [
+      {id:"yedhi", name:"YEDHI PRIMARY (2-door)", doors:2, original:1029000},
+      {id:"sogorosa", name:"SOGOROSA PRIMARY (2-door)", doors:2, original:1029000},
+      {id:"sosoni", name:"SOSONI PRIMARY (3-door)", doors:3, original:1546000},
+      {id:"mugumoni", name:"MUGUMONI PRIMARY (3-door)", doors:3, original:1546000}
+    ];
+  }
+
+  list.innerHTML = PROJECTS.map(p => `
+    <div class="project-card" data-id="${p.id}">
+      <strong>${p.name}</strong>
+      <div style="margin-top:8px;font-size:14px;">
+        ${p.doors}-Door • Net: ${format(calc(p.original).net)}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ==================== LOAD EXPENSES ====================
+async function loadExpenses(id) {
+  try {
+    const res = await fetch(`${SHEET_WEBHOOK}?action=get&project=${id}&secret=${SECRET}`);
+    const data = await res.json();
+    return data.success ? data.expenses || [] : [];
+  } catch(e) {
+    return [];
+  }
+}
+
+// ==================== REFRESH DASHBOARD ====================
+async function refresh() {
+  if (!activeProject) return;
+  const project = PROJECTS.find(p => p.id === activeProject);
+  if (!project) return;
+
+  const ded = calc(project.original);
   const expenses = await loadExpenses(activeProject);
 
-  const sharedTotal = expenses.filter(e => !e.unit).reduce((a,e) => a + e.amount, 0);
-  const sharedPerBlock = sharedTotal / 2;
+  const shared = expenses.filter(e => !e.unit).reduce((a,e) => a + e.amount, 0) / 2;
+  const block1Spent = shared + expenses.filter(e => e.unit === "unit1").reduce((a,e) => a + e.amount, 0);
+  const block2Spent = shared + expenses.filter(e => e.unit === "unit2").reduce((a,e) => a + e.amount, 0);
 
-  const b1Exclusive = expenses.filter(e => e.unit === "unit1").reduce((a,e) => a + e.amount, 0);
-  const b2Exclusive = expenses.filter(e => e.unit === "unit2").reduce((a,e) => a + e.amount, 0);
-
-  const b1Spent = b1Exclusive + sharedPerBlock;
-  const b2Spent = b2Exclusive + sharedPerBlock;
-
-  updateBlock(block1, Math.min(100, Math.round(b1Spent / ded.perBlock * 100)));
-  updateBlock(block2, Math.min(100, Math.round(b2Spent / ded.perBlock * 100)));
+  updateBlock(block1, Math.min(100, (block1Spent / ded.perBlock) * 100));
+  updateBlock(block2, Math.min(100, (block2Spent / ded.perBlock) * 100));
 
   block1.group.visible = !unitFilter || unitFilter === "unit1";
   block2.group.visible = !unitFilter || unitFilter === "unit2";
 
-  const currentSpent = unitFilter === "unit1" ? b1Spent : unitFilter === "unit2" ? b2Spent : b1Spent + b2Spent;
-  const currentBudget = displayDed.net;
-  const percent = currentBudget > 0 ? Math.round(currentSpent / currentBudget * 100) : 0;
+  document.getElementById('projectTitle').textContent = project.name;
+  document.getElementById('net').textContent = format(ded.net);
+  document.getElementById('ledgerBody').innerHTML = expenses.length === 0 
+    ? '<tr><td colspan="6" style="padding:20px;color:#64748b;">No expenses recorded yet</td></tr>'
+    : expenses.map(e => `<tr><td>${e.date}</td><td>${e.category}</td><td>${e.desc||'-'}</td><td>${e.unit?'Block '+(e.unit==='unit1'?'1':'2'):'Shared'}</td><td>${format(e.amount)}</td><td><button class="btn-d" onclick="if(confirm('Delete?'))saveToSheet('delete',{id:${e.id}}).then(refresh)">Delete</button></td></tr>`).join('');
+}
 
-  document.getElementById('net').textContent = format(currentBudget);
-  document.getElementById('spent').textContent = format(currentSpent);
-  document.getElementById('remaining').textContent = format(currentBudget - currentSpent);
-  document.getElementById('percent').textContent = percent + '%';
-  document.getElementById('percent').classList.toggle('over-budget', currentSpent > currentBudget);
-
-  document.getElementById('projectTitle').textContent = project.name + (unitFilter ? ` – ${unitFilter==='unit1'?'Block 1':'Block 2'}` : '');
-
-  // Budget Breakdown
-  let html = '';
-  CATEGORIES.forEach(cat => {
-    const budget = isSingleUnit ? ded.perBlock * cat.pct/100 : ded.net * cat.pct/100;
-    const spent = expenses
-      .filter(e => e.category === cat.key && (!unitFilter || e.unit === unitFilter || !e.unit))
-      .reduce((a,e) => a + (e.unit ? e.amount : e.amount/2), 0);
-    const pct = budget > 0 ? Math.min(100, Math.round(spent / budget * 100)) : 0;
-
-    html += `<div class="budget-item">
-      <div><strong>${cat.name}</strong><br><small>Budget: ${format(budget)}</small></div>
-      <div style="text-align:right;">
-        <div>${format(spent)} spent</div>
-        <div class="progress-container"><div class="progress-bar" style="width:${pct}%"></div></div>
-        <small${spent>budget?' style="color:#ef4444;font-weight:700"':''}>${pct}%</small>
-      </div>
-    </div>`;
+// ==================== SAVE EXPENSE ====================
+async function saveToSheet(action, payload) {
+  await fetch(SHEET_WEBHOOK, {
+    method: 'POST',
+    body: JSON.stringify({action, secret: SECRET, project: activeProject, ...payload})
   });
-  document.getElementById('budgetBreakdown').innerHTML = html;
-
-  // Ledger (filtered)
-  const filtered = expenses.filter(e => !unitFilter || e.unit === unitFilter || !e.unit);
-  const rows = filtered.map(e => `
-    <tr>
-      <td>${e.date}</td>
-      <td>${CATEGORIES.find(c=>c.key===e.category)?.name || e.category}</td>
-      <td>${e.desc || '-'}</td>
-      <td>${e.unit ? (e.unit==='unit1'?'Block 1':'Block 2') : 'Shared'}</td>
-      <td>${format(e.amount)}</td>
-      <td>
-        <button class="btn-e" onclick="editExpense(${e.id})">Edit</button>
-        <button class="btn-d" onclick="if(confirm('Delete?')) saveToSheet('delete',{id:${e.id}}).then(()=>refresh())">Delete</button>
-      </td>
-    </tr>`).join('');
-  document.getElementById('ledgerBody').innerHTML = rows || '<tr><td colspan="6" style="padding:20px;color:#64748b;">No expenses yet</td></tr>';
 }
 
 // ==================== UI ====================
-document.getElementById('projectsList').innerHTML = PROJECTS.map(p => `
-  <div class="project-card" data-id="${p.id}">
-    <strong>${p.name}</strong>
-    <div style="margin-top:8px;font-size:14px;">
-      ${p.doors}-Door • Net: ${format(calc(p.original).net)}
-    </div>
-  </div>`).join('');
-
 document.getElementById('projectsList').onclick = e => {
   const card = e.target.closest('.project-card');
   if (!card) return;
@@ -508,79 +367,46 @@ document.getElementById('projectsList').onclick = e => {
   refresh();
 };
 
-document.getElementById('unitFilter').onchange = e => { unitFilter = e.target.value; refresh(); };
+document.getElementById('unitFilter').onchange = e => {
+  unitFilter = e.target.value;
+  refresh();
+};
 
 document.getElementById('addExpense').onclick = () => {
-  if (!activeProject) return alert("Select a project first");
+  if (!activeProject) return alert("Please select a project first");
   document.getElementById('modal').style.display = 'flex';
   document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
 };
 
 document.getElementById('saveExpense').onclick = async () => {
   const amount = parseFloat(document.getElementById('expAmount').value);
-  const unit = document.getElementById('expUnit').value || '';
   const category = document.getElementById('expCategory').value;
   const date = document.getElementById('expDate').value;
-  const desc = document.getElementById('expDesc').value.trim();
+  if (!amount || !category || !date) return alert("Please fill all fields");
 
-  if (!amount || !category || !date) return alert("Fill Amount, Category & Date");
-
-  await saveToSheet('add', { unit, category, date, desc, amount });
-  document.getElementById('modal').style.display = 'none';
-  ['expUnit','expCategory','expDesc','expAmount','expDate'].forEach(id => document.getElementById(id).value = '');
-  refresh();
-};
-
-window.editExpense = async function(id) {
-  const expenses = await loadExpenses(activeProject);
-  const exp = expenses.find(e => e.id === id);
-  if (!exp) return;
-
-  document.getElementById('editId').value = id;
-  document.getElementById('editUnit').value = exp.unit || '';
-  document.getElementById('editCategory').value = exp.category;
-  document.getElementById('editDate').value = exp.date;
-  document.getElementById('editDesc').value = exp.desc || '';
-  document.getElementById('editAmount').value = exp.amount;
-  document.getElementById('editModal').style.display = 'flex';
-};
-
-document.getElementById('updateExpense').onclick = async () => {
-  const id = parseInt(document.getElementById('editId').value);
-  const amount = parseFloat(document.getElementById('editAmount').value);
-  const unit = document.getElementById('editUnit').value || '';
-  const category = document.getElementById('editCategory').value;
-  const date = document.getElementById('editDate').value;
-  const desc = document.getElementById('editDesc').value.trim();
-
-  if (!amount || !category || !date) return alert("Fill all required fields");
-
-  await saveToSheet('update', { id, unit, category, date, desc, amount });
-  document.getElementById('editModal').style.display = 'none';
-  refresh();
-};
-
-['modal','editModal'].forEach(id => {
-  const m = document.getElementById(id);
-  m.onclick = e => { if(e.target === m) m.style.display = 'none'; };
-});
-document.getElementById('cancel').onclick = () => document.getElementById('modal').style.display = 'none';
-document.getElementById('editCancel').onclick = () => document.getElementById('editModal').style.display = 'none';
-
-document.getElementById('downloadCSV').onclick = async () => {
-  if (!activeProject) return alert("Select a project first");
-  const data = await loadExpenses(activeProject);
-  let csv = "Date,Category,Description,Unit,Amount(KSh)\n";
-  data.forEach(r => {
-    csv += `${r.date},${CATEGORIES.find(c=>c.key===r.category)?.name || r.category},"${r.desc||''}",${r.unit?(r.unit==='unit1'?'Block 1':'Block 2'):'Shared'},${r.amount}\n`;
+  await saveToSheet('add', {
+    amount,
+    category,
+    date,
+    unit: document.getElementById('expUnit').value || '',
+    desc: document.getElementById('expDesc').value
   });
-  const blob = new Blob([csv], {type: 'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${activeProject}_expenses.csv`;
-  a.click();
+
+  document.getElementById('modal').style.display = 'none';
+  refresh();
 };
+
+document.getElementById('cancel').onclick = () => {
+  document.getElementById('modal').style.display = 'none';
+};
+
+// Close modal when clicking outside
+document.getElementById('modal').onclick = e => {
+  if (e.target.id === 'modal') document.getElementById('modal').style.display = 'none';
+};
+
+// Start everything
+loadProjects();
 </script>
 </body>
 </html>
