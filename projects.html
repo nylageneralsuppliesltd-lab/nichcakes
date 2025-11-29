@@ -41,7 +41,7 @@
   .ledger td{padding:10px;text-align:center;border-bottom:1px solid #334155;}
   .btn-d{background:var(--d);color:#fff;padding:8px 14px;font-size:13px;border-radius:10px;}
   .btn-e{background:#f39c12;color:#fff;padding:8px 14px;font-size:13px;border-radius:10px;margin-left:5px;}
-  .threejs-container{height:420px !important;border-radius:18px solid #000;border-radius:18px;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,0.7);background:#87CEEB;margin-top:20px;}
+  .threejs-container{height:420px !important;border-radius:18px;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,0.7);background:#87CEEB;margin-top:20px;}
   .modal{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;z-index:1000;}
   .modal-box{background:#1e293b;padding:30px;border-radius:18px;width:90%;max-width:460px;}
   .input,select{width:100%;padding:14px;margin:10px 0;border-radius:14px;border:1px solid #475569;background:#0f172a;color:#fff;font-size:16px;}
@@ -204,10 +204,10 @@ const SECRET = 'nyla2025';
 
 // ==================== DATA ====================
 const PROJECTS = [
-  {id:"yedhi,name:"YEDHI PRIMARY (2-door)",doors:2,original:1029000},
-  {id:"sogorosa",name:"SOGOROSA PRIMARY (2-door)",doors:2,original:1029000},
-  {id:"sosoni",name:"SOSONI PRIMARY (3-door)",doors:3,original:1546000},
-  {id:"mugumoni",name:"MUGUMONI PRIMARY (3-door)",doors:3,original:1546000}
+  {id:"yedhi",    name:"YEDHI PRIMARY (2-door)",    doors:2, original:1029000},
+  {id:"sogorosa", name:"SOGOROSA PRIMARY (2-door)", doors:2, original:1029000},
+  {id:"sosoni",   name:"SOSONI PRIMARY (3-door)",   doors:3, original:1546000},
+  {id:"mugumoni", name:"MUGUMONI PRIMARY (3-door)", doors:3, original:1546000}
 ];
 
 const CATEGORIES = [
@@ -230,7 +230,7 @@ let unitFilter = "";
 let scene, camera, renderer, controls;
 let block1 = {}, block2 = {};
 
-// ==================== GOOGLE SHEET SYNC ====================
+// ==================== GOOGLE SHEET ====================
 async function loadExpenses(projectId) {
   try {
     const res = await fetch(`${SHEET_WEBHOOK}?action=get&project=${projectId}&secret=${SECRET}`);
@@ -239,7 +239,7 @@ async function loadExpenses(projectId) {
     return json.expenses || [];
   } catch (e) {
     console.error(e);
-    alert("Cannot load data – check internet or refresh");
+    alert("No internet or server error – data will load when back online");
     return [];
   }
 }
@@ -252,13 +252,12 @@ async function saveToSheet(action, expense = {}) {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error('Save failed');
+    if (!res.ok) throw new Error('Failed');
   } catch (e) {
-    alert("Save failed – trying again in 2s...");
+    alert("Save failed – trying again in 2s");
     setTimeout(() => saveToSheet(action, expense), 2000);
   }
 }
-
 window.saveToSheet = saveToSheet;
 
 // ==================== HELPERS ====================
@@ -383,7 +382,7 @@ function init3D(){
 }
 init3D();
 
-// ==================== MAIN REFRESH ====================
+// ==================== REFRESH ====================
 async function refresh(){
   if(!activeProject) return;
 
@@ -444,7 +443,7 @@ async function refresh(){
       <div><strong>${cat.name}</strong><br><small>Budget: ${format(budget)}</small></div>
       <div style="text-align:right;">
         <div>${format(spent)} spent</div>
-        <div class="progress-container"><div class="progress" style="width:${pct}%"></div></div>
+        <div class="progress-container"><div class="progress-bar" style="width:${pct}%"></div></div>
         <small${pct>100?' style="color:#ef4444;font-weight:700"':''}>${Math.round(pct)}%</small>
       </div>
     </div>`;
@@ -467,7 +466,7 @@ async function refresh(){
   document.getElementById('ledgerBody').innerHTML = rows || '<tr><td colspan="6" style="color:#64748b;padding:20px;">No expenses yet</td></tr>';
 }
 
-// ==================== UI EVENTS ====================
+// ==================== UI ====================
 document.getElementById('projectsList').innerHTML = PROJECTS.map(p => `
   <div class="project-card" data-id="${p.id}">
     <strong>${p.name}</strong>
