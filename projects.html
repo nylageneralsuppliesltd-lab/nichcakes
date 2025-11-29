@@ -260,6 +260,22 @@ async function saveToSheet(action, expense = {}) {
 }
 window.saveToSheet = saveToSheet;
 
+  function loadExpenses(project) {
+  return new Promise((resolve) => {
+    const iframe = document.createElement("iframe");
+
+    window.addEventListener("message", function handler(e) {
+      window.removeEventListener("message", handler);
+      document.body.removeChild(iframe);
+      resolve(e.data);
+    });
+
+    iframe.src = `${SHEET_WEBHOOK}?action=get&project=${project}&secret=nyla2025`;
+    iframe.style.display = "none";
+    document.body.appendChild(iframe);
+  });
+}
+
 // ==================== HELPERS ====================
 function calc(amount){
   const pmc = amount * 0.05;
