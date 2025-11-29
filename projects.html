@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NYLA PIT LATRINES PROGRESS</title>
+<title>NYLA PIT LATRINES • GROWTH 2025</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -38,7 +38,6 @@
 
   .section-title{font-size:17px;font-weight:700;color:#06b6d4;margin:16px 0 10px;}
 
-  /* BUDGET CARDS — FULL RED WHEN OVER BUDGET */
   .budget-grid{display:grid;grid-template-columns:1fr;gap:8px;}
   @media(min-width:600px){.budget-grid{grid-template-columns:repeat(2,1fr);}}
   @media(min-width:900px){.budget-grid{grid-template-columns:repeat(3,1fr);}}
@@ -59,16 +58,15 @@
   .ded-item{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #e2e8f0;}
   .ded-item:last-child{border:none;font-weight:700;color:#10b981;font-size:14px;}
 
-  /* EXPENSE TABLE — FULL TEXT ON DESKTOP, WRAP ON MOBILE */
   .ledger table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px;}
   .ledger th{background:#06b6d4;color:white;padding:8px;font-size:12px;}
   .ledger td{padding:8px;text-align:left;border-bottom:1px solid #e2e8f0;white-space:normal;word-wrap:break-word;}
-  .ledger td:nth-child(1){width:15%;} /* Date */
-  .ledger td:nth-child(2){width:18%;font-weight:600;color:#06b6d4;} /* Category */
-  .ledger td:nth-child(3){width:28%;} /* Description */
-  .ledger td:nth-child(4){width:10%;text-align:center;} /* Unit */
-  .ledger td:nth-child(5){width:15%;text-align:right;font-weight:600;} /* Amount */
-  .ledger td:nth-child(6){width:14%;text-align:center;} /* Actions */
+  .ledger td:nth-child(1){width:15%;}
+  .ledger td:nth-child(2){width:18%;font-weight:600;color:#06b6d4;}
+  .ledger td:nth-child(3){width:28%;}
+  .ledger td:nth-child(4){width:10%;text-align:center;}
+  .ledger td:nth-child(5){width:15%;text-align:right;font-weight:600;}
+  .ledger td:nth-child(6){width:14%;text-align:center;}
 
   @media(max-width:640px){
     .ledger td{padding:6px 4px;font-size:12px;}
@@ -93,14 +91,14 @@
 <div class="container">
   <header>
     <h1>NYLA PIT LATRINES</h1>
-    <p class="subtitle">Real-Time Project Tracking</p>
+    <p class="subtitle">Real-Time Project Tracking • Growing Strong</p>
   </header>
 
   <div class="grid">
     <div class="sidebar">
-      <h2 style="font-size:17px;color:#06b6d4;margin-bottom:12px;">Select a Project</h2>
-      <div id="projectsList"></div>
-    </div>
+      <h2 style="font-size:17px;color:#06b6d4;margin-bottom:12px;">Projects</h2>
+      <div id="projectsList">div>
+    div>
 
     <div class="main">
       <div class="header-bar">
@@ -111,45 +109,40 @@
             <option value="unit1">Block 1 Only</option>
             <option value="unit2">Block 2 Only</option>
           </select>
-        </div>
+        div>
         <div>
           <button class="btn-primary" id="addExpense">+ Add Expense</button>
           <button class="btn-success" id="downloadCSV">Download CSV</button>
-        </div>
-      </div>
+        div>
+      div>
 
-      <div class="deductions" id="deductionSummary"></div>
+      <div class="deductions" id="deductionSummary">div>
 
       <div class="kpi-grid">
         <div class="kpi"><div>Net</div><div class="kpi-value" id="net">KSh 0</div></div>
         <div class="kpi"><div>Spent</div><div class="kpi-value" id="spent">KSh 0</div></div>
         <div class="kpi"><div>Left</div><div class="kpi-value" id="remaining">KSh 0</div></div>
         <div class="kpi"><div>Progress</div><div class="kpi-value" id="percent">0%</div></div>
-      </div>
+      div>
 
       <h3 class="section-title">Budget Breakdown</h3>
-      <div class="budget-grid" id="budgetBreakdown"></div>
+      <div class="budget-grid" id="budgetBreakdown">div>
 
       <h3 class="section-title">Expense Ledger</h3>
       <div class="ledger">
         <table>
           <thead><tr>
-            <th>Date</th>
-            <th>Category</th>
-            <th>Description</th>
-            <th>Unit</th>
-            <th>Amount</th>
-            <th>Actions</th>
+            <th>Date</th><th>Category</th><th>Description</th><th>Unit</th><th>Amount</th><th>Actions</th>
           </tr></thead>
-          <tbody id="ledgerBody"></tbody>
-        </table>
-      </div>
+          <tbody id="ledgerBody">tbody>
+        table>
+      div>
 
       <h3 class="section-title">3D Progress View</h3>
-      <div class="threejs" id="threejs"></div>
-    </div>
-  </div>
-</div>
+      <div class="threejs" id="threejs">div>
+    div>
+  div>
+div>
 
 <!-- MODAL -->
 <div class="modal" id="modal">
@@ -181,9 +174,9 @@
     <div style="text-align:right;margin-top:16px;">
       <button class="btn-primary" id="saveExpense">Save</button>
       <button style="background:#94a3b8;margin-left:8px;" id="cancelModal">Cancel</button>
-    </div>
-  </div>
-</div>
+    div>
+  div>
+div>
 
 <script type="importmap">
 { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
@@ -259,10 +252,30 @@ async function refresh() {
   if (!res.success) return;
   const exp = res.expenses || [];
 
-  const shared = exp.filter(e => !e.unit).reduce((a,e) => a + e.amount, 0) / 2;
-  const b1 = shared + exp.filter(e => e.unit === "unit1").reduce((a,e) => a + e.amount, 0);
-  const b2 = shared + exp.filter(e => e.unit === "unit2").reduce((a,e) => a + e.amount, 0);
-  const spent = single ? (unitFilter === "unit1" ? b1 : b2) : b1 + b2;
+  // FIXED: Shared costs now only count for the block you're viewing (or both when viewing both)
+  const sharedTotal = exp.filter(e => !e.unit).reduce((a,e) => a + e.amount, 0);
+  const sharedPerBlock = sharedTotal / 2;
+
+  const block1Only = exp.filter(e => e.unit === "unit1").reduce((a,e) => a + e.amount, 0);
+  const block2Only = exp.filter(e => e.unit === "unit2").reduce((a,e) => a + e.amount, 0);
+
+  let b1, b2, spent;
+
+  if (single) {
+    if (unitFilter === "unit1") {
+      b1 = sharedPerBlock + block1Only;
+      b2 = 0; // not shown
+      spent = b1;
+    } else {
+      b1 = 0;
+      b2 = sharedPerBlock + block2Only;
+      spent = b2;
+    }
+  } else {
+    b1 = sharedPerBlock + block1Only;
+    b2 = sharedPerBlock + block2Only;
+    spent = b1 + b2;
+  }
 
   document.getElementById('net').textContent = format(net);
   document.getElementById('spent').textContent = format(spent);
@@ -270,12 +283,16 @@ async function refresh() {
   document.getElementById('percent').textContent = Math.round(spent/net*100) + '%';
   document.getElementById('projectTitle').textContent = p.name + (single ? ' • ' + (unitFilter === 'unit1' ? 'Block 1' : 'Block 2') : '');
 
-  // BUDGET CARDS WITH FULL RED WHEN OVER
+  // Budget cards
   let html = '';
   CATEGORIES.forEach(c => {
     const budget = net * c.pct / 100;
-    const spentCat = exp.filter(e => e.category === c.key)
-      .reduce((s,e) => s + (e.unit && single && e.unit !== unitFilter ? 0 : e.amount / (e.unit?1:2)), 0);
+    const spentCat = exp
+      .filter(e => e.category === c.key)
+      .reduce((s,e) => {
+        if (e.unit && single && e.unit !== unitFilter) return s; // skip other block
+        return s + e.amount / (e.unit ? 1 : 2);
+      }, 0);
     const pct = Math.round(spentCat / budget * 100) || 0;
     const over = pct > 100;
     html += `<div class="budget-card ${over?'over':''}">
@@ -287,8 +304,10 @@ async function refresh() {
   });
   document.getElementById('budgetBreakdown').innerHTML = html;
 
-  // FULL TEXT IN LEDGER
-  const list = single ? exp.filter(e => !e.unit || e.unit === unitFilter) : exp;
+  // Ledger - only show relevant expenses
+  const list = single 
+    ? exp.filter(e => !e.unit || e.unit === unitFilter)
+    : exp;
   document.getElementById('ledgerBody').innerHTML = list.map(e => `
     <tr>
       <td>${e.date}</td>
@@ -302,6 +321,7 @@ async function refresh() {
       </td>
     </tr>`).join('');
 
+  // Edit/Delete buttons
   document.querySelectorAll('.btn-edit').forEach(b => b.onclick = () => {
     currentEditId = b.dataset.id;
     document.getElementById('modalTitle').textContent = "Edit Expense";
@@ -321,6 +341,7 @@ async function refresh() {
     }
   });
 
+  // 3D update
   if (block1 && block2) {
     updateBlock(block1, Math.round(b1 / d.perBlock * 100));
     updateBlock(block2, Math.round(b2 / d.perBlock * 100));
@@ -329,7 +350,7 @@ async function refresh() {
   }
 }
 
-// Save/Update
+// Save/Update expense
 document.getElementById('saveExpense').onclick = async () => {
   const payload = {
     date: document.getElementById('expDate').value,
@@ -345,7 +366,7 @@ document.getElementById('saveExpense').onclick = async () => {
 
 document.getElementById('cancelModal').onclick = () => document.getElementById('modal').style.display = 'none';
 
-// 3D Code (unchanged — beautiful & working)
+// 3D Code (unchanged)
 let scene, camera, renderer, controls;
 function init3D() {
   const c = document.getElementById('threejs');
@@ -371,7 +392,23 @@ document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`<div class=
 document.getElementById('projectsList').onclick = e => {const c=e.target.closest('.project-card'); if(c){document.querySelectorAll('.project-card').forEach(x=>x.classList.remove('active')); c.classList.add('active'); activeProject=c.dataset.id; unitFilter=""; document.getElementById('unitFilter').value=""; refresh();}};
 document.getElementById('unitFilter').onchange = e => {unitFilter=e.target.value; refresh();};
 document.getElementById('addExpense').onclick = () => {if(!activeProject)return alert("Select project first"); currentEditId=null; document.getElementById('expDate').value=new Date().toISOString().split('T')[0]; document.getElementById('modal').style.display='flex';};
-document.getElementById('downloadCSV').onclick = async () => {let all=[]; for(const p of PROJECTS){activeProject=p.id; const r=await call("get"); if(r.success)all=all.concat(r.expenses.map(e=>({...e,project:p.name})));} if(!all.length)return alert("No data"); let csv="Project,Date,Category,Description,Unit,Amount\n"; all.forEach(e=>csv+=`"${e.project}","${e.date}","${e.category}","${(e.desc||'').replace(/"/g,'""')}","${e.unit?'Block '+e.unit[4]:'Shared'}","${e.amount}"\n`); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download="NYLA_Projects.csv"; a.click();};
+
+// CSV download (unchanged - still perfect)
+document.getElementById('downloadCSV').onclick = async () => {
+  let all = [];
+  for(const p of PROJECTS){
+    activeProject = p.id;
+    const r = await call("get");
+    if(r.success) all = all.concat(r.expenses.map(e=>({...e, project:p.name})));
+  }
+  if(!all.length) return alert("No data");
+  let csv = "Project,Date,Category,Description,Unit,Amount\n";
+  all.forEach(e=>csv += `"${e.project}","${e.date}","${e.category}","${(e.desc||'').replace(/"/g,'""')}","${e.unit?'Block '+e.unit[4]:'Shared'}","${e.amount}"\n`);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = "NYLA_Projects.csv";
+  a.click();
+};
 
 init3D();
 </script>
