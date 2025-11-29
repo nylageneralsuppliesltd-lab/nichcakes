@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NYLA LATRINES • Compact Pro</title>
+<title>NYLA LATRINES • Final Compact Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
@@ -31,6 +31,8 @@
   .kpi{background:#1e40af;padding:12px;border-radius:12px;text-align:center;font-size:13px;}
   .kpi-value{font-size:20px;font-weight:700;margin-top:4px;}
   .threejs-container{height:380px !important;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.6);background:#87CEEB;}
+  .deductions{background:#1e40af;padding:14px;border-radius:12px;font-size:14px;}
+  .deduction-item{display:flex;justify-content:space-between;padding:6px 0;}
   .budget-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #334155;font-size:14px;}
   .budget-item:last-child{border:none;}
   .progress-container{height:8px;background:#334155;border-radius:4px;overflow:hidden;margin-top:4px;}
@@ -50,7 +52,7 @@
 <div class="container">
   <header>
     <h1>NYLA PIT LATRINES</h1>
-    <p style="font-size:15px;margin-top:6px;opacity:0.9;">Compact Pro • Live 3D • Mobile-First • Budget Alert</p>
+    <p style="font-size:15px;margin-top:6px;opacity:0.9;">Final Compact Pro • Live 3D • Full Deductions • Over-Budget Alert</p>
   </header>
 
   <div class="grid">
@@ -75,8 +77,10 @@
         </div>
       </div>
 
-      <!-- 3D ALWAYS VISIBLE AT THE TOP -->
-      <div class="threejs-container" id="threejs"></div>
+    
+
+      <!-- DEDUCTION SUMMARY (BACK!) -->
+      <div class="deductions" id="deductionSummary"></div>
 
       <div class="kpi-grid">
         <div class="kpi"><div>Net Budget</div><div class="kpi-value" id="net">KSh 0</div></div>
@@ -122,7 +126,7 @@
       <option value="misc">Miscellaneous</option>
     </select>
     <input type="date" id="expDate" class="input">
-    <input type="text" id="expDesc" class="input" placeholder="Description (optional)">
+    <input type="text" id="expDesc" class="input" placeholder="Description">
     <input type="number" id="expAmount" class="input" placeholder="Amount (KSh)" min="1">
     <div style="margin-top:20px;text-align:right;">
       <button class="btn" id="saveExpense">Save</button>
@@ -130,7 +134,10 @@
     </div>
   </div>
 </div>
+  <!-- 3D ALWAYS VISIBLE -->
+      <div class="threejs-container" id="threejs"></div>
 
+  
 <script type="importmap">
 {
   "imports": {
@@ -144,15 +151,15 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const DB_NAME = "NylaCompact_" + Date.now();
+const DB_NAME = "NylaFinal_" + Date.now();
 const db = new Dexie(DB_NAME);
 db.version(1).stores({expenses:"++id,project,unit,category,date,desc,amount"});
 
 const PROJECTS = [
-  {id:"yedhi",name:"YEDHI PRIMARY",doors:2,original:1029000},
-  {id:"sogorosa",name:"SOGOROSA PRIMARY",doors:2,original:1029000},
-  {id:"sosoni",name:"SOSONI PRIMARY",doors:3,original:1546000},
-  {id:"mugumoni",name:"MUGUMONI PRIMARY",doors:3,original:1546000}
+  {id:"yedhi",name:"YEDHI PRIMARY (2-door)",doors:2,original:1029000},
+  {id:"sogorosa",name:"SOGOROSA PRIMARY (2-door)",doors:2,original:1029000},
+  {id:"sosoni",name:"SOSONI PRIMARY (3-door)",doors:3,original:1546000},
+  {id:"mugumoni",name:"MUGUMONI PRIMARY (3-door)",doors:3,original:1546000}
 ];
 
 const CATEGORIES = [
@@ -175,203 +182,111 @@ let unitFilter = "";
 let scene, camera, renderer, controls;
 let block1 = {}, block2 = {};
 
-function calc(a){
-  const net = Math.round(a * (1-0.05-0.19-0.10-0.15-0.05));
-  return {net, perBlock: Math.round(net/2)};
+function calc(amount){
+  const pmc = amount * 0.05;
+  const tax = amount * 0.19;
+  const upfront = amount * 0.10;
+  const contractor = amount * 0.15;
+  const retention = amount * 0.05;
+  const net = Math.round(amount - pmc - tax - upfront - contractor - retention);
+  return {pmc, tax, upfront, contractor, retention, net, perBlock: Math.round(net/2)};
 }
 
-function format(n){ return 'KSh ' + n.toLocaleString(); }
+function format(n){ return 'KSh ' + Number(Math.round(n)).toLocaleString(); }
 
-function getCategoryName(k){ return CATEGORIES.find(c=>c.key===k)?.name || k; }
-
-function createBlock(x, doors){
+function createBlock(x, doors){ /* SAME AS BEFORE — shortened for space */ 
   const group = new THREE.Group();
   const mat = new THREE.MeshStandardMaterial({color:0xd4a574});
   const steel = new THREE.MeshStandardMaterial({color:0x2c3e50});
   const roof = new THREE.MeshStandardMaterial({color:0xc41e3a});
-
-  const pit = new THREE.Mesh(new THREE.CylinderGeometry(2,2.2,3,24,1,true), mat);
-  pit.position.set(x,-1.5,0); group.add(pit);
-
-  const slab = new THREE.Mesh(new THREE.BoxGeometry(3.8,0.15,2.6), new THREE.MeshStandardMaterial({color:0x95a5a6}));
-  slab.position.set(x,0,0); group.add(slab);
-
-  const walls = [];
-  const add = (w,d,px,pz) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w,2.2,d), mat);
-    m.position.set(x+px,1.1,pz); walls.push(m); group.add(m);
-  };
+  const pit = new THREE.Mesh(new THREE.CylinderGeometry(2,2.2,3,24,1,true), mat); pit.position.set(x,-1.5,0); group.add(pit);
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(3.8,0.15,2.6), new THREE.MeshStandardMaterial({color:0x95a5a6})); slab.position.set(x,0,0); group.add(slab);
+  const walls = []; const add = (w,d,px,pz)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,2.2,d),mat);m.position.set(x+px,1.1,pz);walls.push(m);group.add(m);};
   add(3.8,0.2,0,1.2); add(3.8,0.2,0,-1.2); add(0.2,0.2,-1.8,0); add(0.2,0.2,1.8,0);
-
   const doorMeshes = [];
-  if(doors===2){
-    add(0.2,1.8,0,0);
-    [-0.9,0.9].forEach(dx=>{const d=new THREE.Mesh(new THREE.BoxGeometry(0.05,2,0.9),steel);d.position.set(x+dx,1.075,1.21);doorMeshes.push(d);group.add(d);});
-  }else{
-    add(0.2,1.2,-0.9,0); add(0.2,1.2,0.9,0);
-    [-1.2,0,1.2].forEach(dx=>{const d=new THREE.Mesh(new THREE.BoxGeometry(0.05,2,0.8),steel);d.position.set(x+dx*0.75,1.075,1.21);doorMeshes.push(d);group.add(d);});
-  }
-
-  const r = new THREE.Mesh(new THREE.BoxGeometry(4.4,0.15,3.2), roof);
-  r.position.set(x,2.6,0); r.rotation.x = Math.PI*0.18; group.add(r);
-
-  pit.visible = slab.visible = r.visible = false;
-  walls.forEach(w=>w.visible=false);
-  doorMeshes.forEach(d=>d.visible=false);
-
+  if(doors===2){add(0.2,1.8,0,0);[-0.9,0.9].forEach(dx=>{const d=new THREE.Mesh(new THREE.BoxGeometry(0.05,2,0.9),steel);d.position.set(x+dx,1.075,1.21);doorMeshes.push(d);group.add(d);});}
+  else{add(0.2,1.2,-0.9,0);add(0.2,1.2,0.9,0);[-1.2,0,1.2].forEach(dx=>{const d=new THREE.Mesh(new THREE.BoxGeometry(0.05,2,0.8),steel);d.position.set(x+dx*0.75,1.075,1.21);doorMeshes.push(d);group.add(d);});}
+  const r = new THREE.Mesh(new THREE.BoxGeometry(4.4,0.15,3.2), roof); r.position.set(x,2.6,0); r.rotation.x=Math.PI*0.18; group.add(r);
+  pit.visible=slab.visible=r.visible=false; walls.forEach(w=>w.visible=false); doorMeshes.forEach(d=>d.visible=false);
   return {group,pit,walls,slab,roof:r,doorMeshes};
 }
 
-function init3D(){
-  const c = document.getElementById('threejs');
-  scene = new THREE.Scene(); scene.background = new THREE.Color(0xb3e5fc);
-  camera = new THREE.PerspectiveCamera(50, c.clientWidth/380, 0.1, 1000);
-  camera.position.set(0,10,25);
-
-  renderer = new THREE.WebGLRenderer({antialias:true});
-  renderer.setSize(c.clientWidth,380);
-  renderer.shadowMap.enabled = true;
-  c.appendChild(renderer.domElement);
-
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-
-  scene.add(new THREE.AmbientLight(0xffffff,0.9));
-  const sun = new THREE.DirectionalLight(0xffffff,1.3);
-  sun.position.set(15,30,15); scene.add(sun);
-
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(80,80), new THREE.MeshLambertMaterial({color:0x8bc34a}));
-  ground.rotation.x = -Math.PI/2; ground.receiveShadow=true; scene.add(ground);
-
-  const animate = ()=> {requestAnimationFrame(animate); controls.update(); renderer.render(scene,camera);};
-  animate();
-
-  window.addEventListener('resize',()=>{camera.aspect=c.clientWidth/380; camera.updateProjectionMatrix(); renderer.setSize(c.clientWidth,380);});
-}
-
-function updateBlock(b,pct){
-  const s = pct<10?0:pct<35?1:pct<65?2:pct<90?3:4;
-  b.pit.visible=s>=1; b.walls.forEach(w=>w.visible=s>=2); b.slab.visible=s>=2;
-  b.roof.visible=s>=3; b.doorMeshes.forEach(d=>d.visible=s>=4);
-}
+/* init3D, updateBlock — same as previous version (kept short) */
+function init3D(){const c=document.getElementById('threejs');scene=new THREE.Scene();scene.background=new THREE.Color(0xb3e5fc);camera=new THREE.PerspectiveCamera(50,c.clientWidth/380,0.1,1000);camera.position.set(0,10,25);renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(c.clientWidth,380);renderer.shadowMap.enabled=true;c.appendChild(renderer.domElement);controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;scene.add(new THREE.AmbientLight(0xffffff,0.9));const sun=new THREE.DirectionalLight(0xffffff,1.3);sun.position.set(15,30,15);scene.add(sun);const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshLambertMaterial({color:0x8bc34a}));ground.rotation.x=-Math.PI/2;scene.add(ground);const animate=()=>{requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);};animate();window.addEventListener('resize',()=>{camera.aspect=c.clientWidth/380;camera.updateProjectionMatrix();renderer.setSize(c.clientWidth,380);});}
+function updateBlock(b,p){const s=p<10?0:p<35?1:p<65?2:p<90?3:4;b.pit.visible=s>=1;b.walls.forEach(w=>w.visible=s>=2);b.slab.visible=s>=2;b.roof.visible=s>=3;b.doorMeshes.forEach(d=>d.visible=s>=4);}
 
 async function refresh(){
   if(!activeProject) return;
   const p = PROJECTS.find(x=>x.id===activeProject);
-  const {net, perBlock} = calc(p.original);
+  const ded = calc(p.original);
 
-  // 3D
+  // Deduction Summary — BACK!
+  document.getElementById('deductionSummary').innerHTML = `
+    <div class="deduction-item"><span>Original</span><span>${format(p.original)}</span></div>
+    <div class="deduction-item"><span>PMC 5%</span><span>-${format(ded.pmc)}</span></div>
+    <div class="deduction-item"><span>Tax 19%</span><span>-${format(ded.tax)}</span></div>
+    <div class="deduction-item"><span>Upfront 10%</span><span>-${format(ded.upfront)}</span></div>
+    <div class="deduction-item"><span>Contractor 15%</span><span>-${format(ded.contractor)}</span></div>
+    <div class="deduction-item" style="color:#${ded.retention>0?'f39c12':'28a745'};"><span>Retention 5%</span><span>-${format(ded.retention)}</span></div>
+    <div class="deduction-item" style="font-weight:700;color:#28a745;"><span>NET AVAILABLE</span><span>${format(ded.net)}</span></div>`;
+
+  // 3D + rest of refresh logic (same as before, only tiny fixes)
   if(block1.group){scene.remove(block1.group,block2.group);}
-  block1 = createBlock(-8, p.doors);
-  block2 = createBlock(+8, p.doors);
-  scene.add(block1.group, block2.group);
+  block1=createBlock(-8,p.doors); block2=createBlock(+8,p.doors); scene.add(block1.group,block2.group);
+  const exp=await db.expenses.where({project:activeProject}).toArray();
+  const shared=exp.filter(e=>!e.unit).reduce((a,e)=>a+e.amount,0)/2||0;
+  const b1=exp.filter(e=>e.unit==="unit1").reduce((a,e)=>a+e.amount,0)+shared;
+  const b2=exp.filter(e=>e.unit==="unit2").reduce((a,e)=>a+e.amount,0)+shared;
+  updateBlock(block1,Math.min(100,Math.round(b1/ded.perBlock*100)));
+  updateBlock(block2,Math.min(100,Math.round(b2/ded.perBlock*100)));
+  block1.group.visible=!unitFilter||unitFilter==="unit1";
+  block2.group.visible=!unitFilter||unitFilter==="unit2";
+  const spent=unitFilter==="unit1"?b1:unitFilter==="unit2"?b2:b1+b2-shared;
+  const budget=unitFilter?ded.perBlock:ded.net;
+  const pct=Math.round(spent/budget*100);
+  document.getElementById('net').textContent=format(budget);
+  document.getElementById('spent').textContent=format(spent);
+  document.getElementById('remaining').textContent=format(budget-spent);
+  document.getElementById('percent').textContent=pct+'%';
+  document.getElementById('percent').className='kpi-value'+(pct>100?' over-budget':'');
 
-  const exp = await db.expenses.where({project:activeProject}).toArray();
-  const shared = exp.filter(e=>!e.unit).reduce((a,e)=>a+e.amount,0)/2 || 0;
-  const b1 = exp.filter(e=>e.unit==="unit1").reduce((a,e)=>a+e.amount,0) + shared;
-  const b2 = exp.filter(e=>e.unit==="unit2").reduce((a,e)=>a+e.amount,0) + shared;
+  document.getElementById('projectTitle').textContent=p.name+(unitFilter?` • ${unitFilter==='unit1'?'Block 1':'Block 2'}`:'');
 
-  updateBlock(block1, Math.min(100, Math.round(b1/perBlock*100)));
-  updateBlock(block2, Math.min(100, Math.round(b2/perBlock*100)));
+  // Budget breakdown + ledger (same as before)
+  let html=''; CATEGORIES.forEach(cat=>{
+    const catB=unitFilter?ded.perBlock*cat.pct/100:ded.net*cat.pct/100;
+    const catS=exp.filter(e=>e.category===cat.key&&(!unitFilter||e.unit===unitFilter||!e.unit)).reduce((a,e)=>a+(e.unit?e.amount:e.amount/2),0);
+    const catP=catB>0?catS/catB*100:0;
+    html+=`<div class="budget-item"><div><strong>${cat.name}</strong></div><div style="text-align:right;"><div>${format(catS)}</div><div class="progress-container"><div class="progress-bar" style="width:${catP}%"></div></div><small${catP>100?' style="color:#ef4444;font-weight:700"':''}>${Math.round(catP)}%</small></div></div>`;
+  }); document.getElementById('budgetBreakdown').innerHTML=html;
 
-  block1.group.visible = !unitFilter || unitFilter==="unit1";
-  block2.group.visible = !unitFilter || unitFilter==="unit2";
-
-  const spent = unitFilter==="unit1"?b1 : unitFilter==="unit2"?b2 : b1+b2-shared;
-  const budget = unitFilter ? perBlock : net;
-  const percent = Math.round(spent/budget*100);
-
-  document.getElementById('net').textContent = format(budget);
-  document.getElementById('spent').textContent = format(spent);
-  document.getElementById('remaining').textContent = format(budget - spent);
-  document.getElementById('percent').textContent = percent + '%';
-  document.getElementById('percent').className = 'kpi-value' + (percent > 100 ? ' over-budget' : '');
-
-  document.getElementById('projectTitle').textContent = p.name + (unitFilter ? ` • ${unitFilter==='unit1'?'Block 1':'Block 2'}` : '');
-
-  // Budget breakdown
-  let html = '';
-  CATEGORIES.forEach(cat=>{
-    const catBudget = unitFilter ? perBlock * cat.pct/100 : net * cat.pct/100;
-    const catSpent = exp.filter(e=>e.category===cat.key && (!unitFilter || e.unit===unitFilter || !e.unit))
-                       .reduce((a,e)=>a + (e.unit?e.amount:e.amount/2),0);
-    const catPct = catBudget>0 ? catSpent/catBudget*100 : 0;
-    html += `<div class="budget-item">
-      <div><strong>${cat.name}</strong></div>
-      <div style="text-align:right;">
-        <div>${format(catSpent)}</div>
-        <div class="progress-container"><div class="progress-bar" style="width:${catPct}%"></div></div>
-        <small${catPct>100?' style="color:#ef4444;font-weight:700"':''}>${Math.round(catPct)}%</small>
-      </div>
-    </div>`;
-  });
-  document.getElementById('budgetBreakdown').innerHTML = html;
-
-  // Ledger
-  document.getElementById('ledgerBody').innerHTML = exp.map(e=>`
-    <tr>
-      <td>${e.date.slice(5)}</td>
-      <td>${e.category.slice(0,6)}</td>
-      <td style="text-align:left;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.desc||'—'}</td>
-      <td>${e.unit?'B'+(e.unit[4]):'Shr'}</td>
-      <td>${format(e.amount)}</td>
-      <td><button class="btn-d" onclick="db.expenses.delete(${e.id}).then(refresh)">Del</button></td>
-    </tr>`).join('') || '<tr><td colspan="6" style="color:#64748b;">No expenses</td></tr>';
+  document.getElementById('ledgerBody').innerHTML=exp.map(e=>`<tr><td>${e.date.slice(5)}</td><td>${e.category.slice(0,6)}</td><td style="text-align:left;max-width:100px;overflow:hidden;text-overflow:ellipsis;">${e.desc||'—'}</td><td>${e.unit?'B'+(e.unit[4]):'Shr'}</td><td>${format(e.amount)}</td><td><button class="btn-d" onclick="db.expenses.delete(${e.id}).then(refresh)">Del</button></td></tr>`).join('')||'<tr><td colspan="6" style="color:#64748b;">No expenses</td></tr>';
 }
 
-// Init projects
-document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`
+// Build project cards
+document.getElementById('projectsList').innerHTML=PROJECTS.map(p=>`
   <div class="project-card" data-id="${p.id}">
     <strong>${p.name}</strong><br>
     <small>${p.doors}-Door • Net ${format(calc(p.original).net)}</small>
   </div>
 `).join('');
 
-document.getElementById('projectsList').onclick = e=>{
-  const card = e.target.closest('.project-card');
+document.getElementById('projectsList').onclick=e=>{
+  const card=e.target.closest('.project-card');
   if(!card) return;
   document.querySelectorAll('.project-card').forEach(c=>c.classList.remove('active'));
   card.classList.add('active');
-  activeProject = card.dataset.id;
-  unitFilter = "";
-  document.getElementById('unitFilter').value = "";
+  activeProject=card.dataset.id;
+  unitFilter="";
+  document.getElementById('unitFilter').value="";
   refresh();
 };
 
-document.getElementById('unitFilter').onchange = e=>{ unitFilter=e.target.value; refresh(); };
-
-document.getElementById('addExpense').onclick = ()=>{
-  if(!activeProject) return alert("Select project first");
-  document.getElementById('modal').style.display='flex';
-  document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
-};
-
-document.getElementById('cancel').onclick = 
-document.getElementById('modal').onclick = e=>{
-  if(e.target.id==='modal' || e.target.id==='cancel') document.getElementById('modal').style.display='none';
-};
-
-document.getElementById('saveExpense').onclick = async ()=>{
-  const amount = +document.getElementById('expAmount').value;
-  const unit = document.getElementById('expUnit').value || null;
-  const cat = document.getElementById('expCategory').value;
-  const date = document.getElementById('expDate').value;
-  if(!amount || !cat || !date) return alert("Fill all fields");
-  await db.expenses.add({project:activeProject, unit, category:cat, date, desc:document.getElementById('expDesc').value.trim(), amount});
-  document.getElementById('modal').style.display='none';
-  refresh();
-};
-
-document.getElementById('downloadCSV').onclick = async ()=>{
-  if(!activeProject) return alert("Select project");
-  const data = await db.expenses.where({project:activeProject}).toArray();
-  let csv = "Date,Category,Description,Unit,Amount\n";
-  data.forEach(r=>csv += `${r.date},${getCategoryName(r.category)},"${r.desc||''}",${r.unit?(r.unit==='unit1'?'Block 1':'Block 2'):'Shared'},${r.amount}\n`);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download = activeProject + "_expenses.csv";
-  a.click();
-};
+document.getElementById('unitFilter').onchange=e=>{unitFilter=e.target.value;refresh();};
+document.getElementById('addExpense').onclick=()=>{if(!activeProject)return alert("Select project");document.getElementById('modal').style.display='flex';document.getElementById('expDate').value=new Date().toISOString().split('T')[0];};
+document.getElementById('cancel').onclick=document.getElementById('modal').onclick=e=>{if(e.target.id==='modal'||e.target.id==='cancel')document.getElementById('modal').style.display='none';};
+document.getElementById('saveExpense').onclick=async()=>{const a=+document.getElementById('expAmount').value;const u=document.getElementById('expUnit').value||null;const c=document.getElementById('expCategory').value;const d=document.getElementById('expDate').value;if(!a||!c||!d)return alert("Fill all");await db.expenses.add({project:activeProject,unit:u,category:c,date:d,desc:document.getElementById('expDesc').value.trim(),amount:a});document.getElementById('modal').style.display='none';refresh();};
+document.getElementById('downloadCSV').onclick=async()=>{if(!activeProject)return alert("Select project");const data=await db.expenses.where({project:activeProject}).toArray();let csv="Date,Category,Description,Unit,Amount\n";data.forEach(r=>csv+=`${r.date},${CATEGORIES.find(c=>c.key===r.category)?.name||r.category},"${r.desc||''}",${r.unit?(r.unit==='unit1'?'Block 1':'Block 2'):'Shared'},${r.amount}\n`);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=activeProject+"_expenses.csv";a.click();};
 
 init3D();
 </script>
