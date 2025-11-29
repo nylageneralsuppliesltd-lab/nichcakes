@@ -168,8 +168,9 @@ const CATEGORIES = [
 let activeProject = null;
 let unitFilter = "";
 let block1 = null, block2 = null;
+let currentEditId = null; // for edit mode
 
-// This works 100% with your text/plain Apps Script
+// CORS-proof call (works with your text/plain Apps Script)
 async function call(action, payload = {}) {
   const url = action === "get"
     ? `${WEBHOOK}?action=get&project=${activeProject}&secret=${SECRET}`
@@ -177,7 +178,7 @@ async function call(action, payload = {}) {
 
   const opts = action === "get" ? {} : {
     method: "POST",
-    headers: { "Content-Type": "text/plain" },  // Important!
+    headers: { "Content-Type": "text/plain" },
     body: JSON.stringify({ action, project: activeProject, secret: SECRET, ...payload })
   };
 
@@ -186,7 +187,7 @@ async function call(action, payload = {}) {
   try {
     return JSON.parse(text);
   } catch (e) {
-    console.error("Parse failed:", text);
+    console.error("Server response:", text);
     return {success: false, error: "Server error"};
   }
 }
@@ -257,7 +258,7 @@ async function refresh() {
   });
   document.getElementById('budgetBreakdown').innerHTML = html;
 
-  // Ledger
+  // Ledger — FIXED DELETE & EDIT
   const filtered = isSingle ? expenses.filter(e => !e.unit || e.unit === unitFilter) : expenses;
   document.getElementById('ledgerBody').innerHTML = filtered.length ? filtered.map(e => `
     <tr>
@@ -267,13 +268,13 @@ async function refresh() {
       <td>${e.unit ? 'Block '+(e.unit==='unit1'?'1':'2') : 'Shared'}</td>
       <td>${format(e.amount)}</td>
       <td>
-        <button class="btn-e" onclick="editExpense(${e.id})">Edit</button>
-        <button class="btn-d" onclick="if(confirm('Delete?')) call('delete',{id:${e.id}}).then(()=>refresh())">Delete</button>
+        <button class="btn-e" onclick="startEdit(${e.id}, '${e.date}', '${e.category}', '${e.desc||''}', '${e.unit||''}', ${e.amount})">Edit</button>
+        <button class="btn-d" onclick="deleteExpense(${e.id})">Delete</button>
       </td>
     </tr>`).join('') : '<tr><td colspan="6" style="padding:40px;color:#64748b;">No expenses yet</td></tr>';
 
-  // 3D
-  if (block1) {
+  // 3D Update
+  if (block1 && block2) {
     updateBlock(block1, Math.min(100, Math.round(block1Spent / ded.perBlock * 100)));
     updateBlock(block2, Math.min(100, Math.round(block2Spent / ded.perBlock * 100)));
     block1.group.visible = !isSingle || unitFilter === "unit1";
@@ -283,13 +284,135 @@ async function refresh() {
   document.getElementById('projectTitle').textContent = project.name + (isSingle ? ` – ${unitFilter === 'unit1' ? 'Block 1' : 'Block 2'}` : '');
 }
 
-// 3D Code (same beautiful one)
-function createBlock(x) { /* ... same as before ... */ }
-function updateBlock(b, p) { /* ... same ... */ }
-function init3D() { /* ... same beautiful 3D ... */ }
-init3D();
+// DELETE — FIXED
+async function deleteExpense(id) {
+  if (!confirm("Delete this expense permanently?")) return;
+  const result = await call('delete', { id });
+  if (result.success) {
+    refresh();
+  } else {
+    alert("Delete failed");
+  }
+}
 
-// UI
+// EDIT — NOW FULLY WORKING
+function startEdit(id, date, category, desc, unit, amount) {
+  currentEditId = id;
+  document.getElementById('modal').style.display = 'flex';
+  document.getElementById('expDate').value = date;
+  document.getElementById('expCategory').value = category;
+  document.getElementById('expDesc').value = desc;
+  document.getElementById('expUnit').value = unit;
+  document.getElementById('expAmount').value = amount;
+  document.getElementById('saveExpense').textContent = "Update Expense";
+}
+
+// Save (Add or Update)
+document.getElementById('saveExpense').onclick = async () => {
+  const payload = {
+    date: document.getElementById('expDate').value,
+    category: document.getElementById('expCategory').value,
+    desc: document.getElementById('expDesc').value.trim(),
+    unit: document.getElementById('expUnit').value,
+    amount: Number(document.getElementById('expAmount').value)
+  };
+  if (!payload.date || !payload.category || !payload.amount) return alert("Fill all required fields");
+
+  let result;
+  if (currentEditId) {
+    result = await call('update', { id: currentEditId, ...payload });
+    currentEditId = null;
+    document.getElementById('saveExpense').textContent = "Save Expense";
+  } else {
+    result = await call('add', payload);
+  }
+
+  if (result.success) {
+    document.getElementById('modal').style.display = 'none';
+    refresh();
+  } else {
+    alert("Save failed");
+  }
+};
+
+// Cancel resets edit mode
+document.getElementById('cancelModal').onclick = () => {
+  document.getElementById('modal').style.display = 'none';
+  currentEditId = null;
+  document.getElementById('saveExpense').textContent = "Save Expense";
+};
+
+// 3D Code (your beautiful one)
+function init3D() {
+  const container = document.getElementById('threejs');
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0xb3e5fc);
+  const camera = new THREE.PerspectiveCamera(55, container.clientWidth/container.clientHeight, 0.1, 1000);
+  camera.position.set(0,12,28);
+  const renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.shadowMap.enabled = true;
+  container.appendChild(renderer.domElement);
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.4); sun.position.set(20,40,20); scene.add(sun);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(100,100), new THREE.MeshLambertMaterial({color:0x8BC34A}));
+  ground.rotation.x = -Math.PI/2; scene.add(ground);
+
+  block1 = createBlock(-9); block2 = createBlock(9);
+  scene.add(block1.group, block2.group);
+
+  function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  });
+}
+
+function createBlock(x) {
+  const group = new THREE.Group();
+  const brick = new THREE.MeshStandardMaterial({color:0xd4a574});
+  const concrete = new THREE.MeshStandardMaterial({color:0x95a5a6});
+  const roof = new THREE.MeshStandardMaterial({color:0xc41e3a});
+
+  const pit = new THREE.Mesh(new THREE.CylinderGeometry(2,2.2,3,24), brick);
+  pit.position.set(x, -1.5, 0); group.add(pit);
+
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(3.8,0.15,2.6), concrete);
+  slab.position.set(x, 0, 0); group.add(slab);
+
+  const h = 2.2;
+  const walls = [];
+  const addWall = (w,d,px,z) => {
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), brick);
+    wall.position.set(x + px, h/2, z);
+    group.add(wall); walls.push(wall);
+  };
+  addWall(3.8,0.2,0,1.2); addWall(3.8,0.2,0,-1.2);
+  addWall(0.2,0.2,-1.8,0); addWall(0.2,0.2,1.8,0);
+
+  const roofMesh = new THREE.Mesh(new THREE.BoxGeometry(4.4,0.15,3.2), roof);
+  roofMesh.position.set(x, 2.6, 0); group.add(roofMesh);
+
+  pit.visible = slab.visible = roofMesh.visible = false;
+  walls.forEach(w => w.visible = false);
+
+  return {group, pit, walls, slab, roof: roofMesh};
+}
+
+function updateBlock(block, percent) {
+  const s = percent < 10 ? 0 : percent < 35 ? 1 : percent < 65 ? 2 : percent < 90 ? 3 : 4;
+  block.pit.visible = s >= 1;
+  block.walls.forEach(w => w.visible = s >= 2);
+  block.slab.visible = s >= 2;
+  block.roof.visible = s >= 3;
+}
+
+// Project selection
 document.getElementById('projectsList').innerHTML = PROJECTS.map(p => `
   <div class="project-card" data-id="${p.id}">
     <strong>${p.name}</strong>
@@ -309,31 +432,21 @@ document.getElementById('projectsList').onclick = e => {
 };
 
 document.getElementById('unitFilter').onchange = e => { unitFilter = e.target.value; refresh(); };
-
 document.getElementById('addExpense').onclick = () => {
   if (!activeProject) return alert("Select a project first");
+  currentEditId = null;
+  document.getElementById('saveExpense').textContent = "Save Expense";
   document.getElementById('modal').style.display = 'flex';
   document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('expCategory').value = "";
+  document.getElementById('expDesc').value = "";
+  document.getElementById('expUnit').value = "";
+  document.getElementById('expAmount').value = "";
 };
 
-document.getElementById('saveExpense').onclick = async () => {
-  const payload = {
-    date: document.getElementById('expDate').value,
-    category: document.getElementById('expCategory').value,
-    desc: document.getElementById('expDesc').value.trim(),
-    unit: document.getElementById('expUnit').value,
-    amount: Number(document.getElementById('expAmount').value)
-  };
-  if (!payload.date || !payload.category || !payload.amount) return alert("Fill required fields");
-  await call('add', payload);
-  document.getElementById('modal').style.display = 'none';
-  refresh();
-};
-
-window.editExpense = id => alert("Edit coming soon");
-
-document.getElementById('cancelModal').onclick = () => document.getElementById('modal').style.display = 'none';
 document.getElementById('modal').onclick = e => { if (e.target === document.getElementById('modal')) document.getElementById('modal').style.display = 'none'; };
+
+init3D();
 </script>
 </body>
 </html>
