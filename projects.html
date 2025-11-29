@@ -18,7 +18,6 @@
   .project-card{background:#1e40af;padding:16px;border-radius:14px;margin-bottom:12px;cursor:pointer;transition:0.3s;border:3px solid transparent;font-size:16px;}
   .project-card:hover{transform:scale(1.04);}
   .project-card.active{border-color:var(--p);background:#1e3a8a;box-shadow:0 0 20px rgba(0,212,255,0.4);}
-  )}
   .main{background:#1e293b;padding:18px;border-radius:18px;display:flex;flex-direction:column;gap:16px;}
   .header-bar{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center;}
   select{padding:12px 18px;border-radius:30px;border:2px solid var(--p);background:#0f172a;color:#fff;font-size:15px;}
@@ -76,7 +75,7 @@
       <div class="header-bar">
         <div>
           <h2 id="projectTitle" style="font-size:24px;color:#60a5fa;">Select a project</h2>
-          <select id="unitFilter">
+          <select id="unitFilter" aria-label="Filter by block">
             <option value="">Both Blocks</option>
             <option value="unit1">Block 1 Only</option>
             <option value="unit2">Block 2 Only</option>
@@ -114,7 +113,7 @@
   </div>
 </div>
 
-<!-- Add Expense Modal -->
+<!-- Modals -->
 <div class="modal" id="modal">
   <div class="modal-box">
     <h2 style="font-size:22px;margin-bottom:20px;color:#60a5fa;">Add New Expense</h2>
@@ -148,7 +147,6 @@
   </div>
 </div>
 
-<!-- Edit Modal -->
 <div class="modal" id="editModal">
   <div class="modal-box">
     <h2 style="font-size:22px;margin-bottom:20px;color:#60a5fa;">Edit Expense</h2>
@@ -227,16 +225,17 @@ let unitFilter = "";
 let scene, camera, renderer, controls;
 let block1 = null, block2 = null;
 
-// ==================== GOOGLE SHEET ====================
+// ==================== GOOGLE SHEET (ROBUST) ====================
 async function loadExpenses(projectId) {
   try {
     const res = await fetch(`${SHEET_WEBHOOK}?action=get&project=${projectId}&secret=${SECRET}`, { cache: "no-store" });
-    if (!res.ok) throw new Error("HTTP " + res.status);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
+    if (!data.success) throw new Error(data.error || "Server error");
     return data.expenses || [];
   } catch (err) {
-    console.error(err);
-    alert("No internet – data will load when back online");
+    console.error("Load failed:", err);
+    alert("No internet – showing cached/offline view");
     return [];
   }
 }
@@ -250,15 +249,18 @@ async function saveToSheet(action, payload = {}) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-      if (res.ok) return;
-    } catch (e) {}
+      const data = await res.json();
+      if (res.ok && data.success) return data;
+    } catch (e) {
+      console.error("Save attempt failed:", e);
+    }
     await new Promise(r => setTimeout(r, 2000 * (i + 1)));
   }
-  alert("Save failed – check internet");
+  alert("Failed to save – check internet and try again");
 }
 
 // ==================== HELPERS ====================
-function calc(amount){
+function calc(amount) {
   const pmc = amount * 0.05;
   const tax = amount * 0.19;
   const upfront = amount * 0.10;
@@ -268,10 +270,10 @@ function calc(amount){
   return {pmc, tax, upfront, contractor, retention, net, perBlock: Math.round(net/2)};
 }
 
-function format(n){ return 'KSh ' + Number(Math.round(n)).toLocaleString(); }
+function format(n) { return 'KSh ' + Number(Math.round(n)).toLocaleString(); }
 
-// Full 3D block creator (unchanged from original working version)
-function createBlock(xOffset, numDoors){
+// 3D Block Creator
+function createBlock(xOffset, numDoors) {
   const group = new THREE.Group();
   const coral = new THREE.MeshStandardMaterial({color:0xd4a574, roughness:0.95});
   const steel = new THREE.MeshStandardMaterial({color:0x2c3e50, metalness:0.9});
@@ -318,15 +320,15 @@ function createBlock(xOffset, numDoors){
   roof.rotation.x = Math.PI * 0.18;
   group.add(roof);
 
-  // hide everything until progress reaches that stage
   pit.visible = slab.visible = roof.visible = false;
   walls.forEach(w => w.visible = false);
   doorMeshes.forEach(d => d.visible = false);
 
-  return {group, pit, walls, slab, roof, doorMeshes};
+  group.doorCount = numDoors;
+  return {group, pit, walls, slab, roof, doorMeshes, doorCount: numDoors};
 }
 
-function updateBlock(block, percent){
+function updateBlock(block, percent) {
   const stage = percent < 10 ? 0 : percent < 35 ? 1 : percent < 65 ? 2 : percent < 90 ? 3 : 4;
   block.pit.visible = stage >= 1;
   block.walls.forEach(w => w.visible = stage >= 2);
@@ -335,7 +337,7 @@ function updateBlock(block, percent){
   block.doorMeshes.forEach(d => d.visible = stage >= 4);
 }
 
-function init3D(){
+function init3D() {
   const container = document.getElementById('threejs');
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xb3e5fc);
@@ -343,7 +345,7 @@ function init3D(){
   camera = new THREE.PerspectiveCamera(55, container.clientWidth / container.clientHeight, 0.1, 1000);
   camera.position.set(0, 12, 28);
 
-  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer = new THREE.WebGLRenderer({antialias: true});
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.shadowMap.enabled = true;
   container.appendChild(renderer.domElement);
@@ -366,7 +368,6 @@ function init3D(){
   ground.receiveShadow = true;
   scene.add(ground);
 
-  // Create blocks once
   block1 = createBlock(-9, 2);
   block2 = createBlock(+9, 2);
   scene.add(block1.group, block2.group);
@@ -387,38 +388,50 @@ function init3D(){
 }
 init3D();
 
-// ==================== REFRESH ====================
-async function refresh(){
+// ==================== MAIN REFRESH (PERFECT UNIT FILTERING) ====================
+async function refresh() {
   if (!activeProject) return;
 
   const project = PROJECTS.find(p => p.id === activeProject);
   const ded = calc(project.original);
+  const isSingleUnit = unitFilter === "unit1" || unitFilter === "unit2";
 
-  // Deductions
+  const displayDed = {
+    original: isSingleUnit ? project.original / 2 : project.original,
+    pmc: isSingleUnit ? ded.pmc / 2 : ded.pmc,
+    tax: isSingleUnit ? ded.tax / 2 : ded.tax,
+    upfront: isSingleUnit ? ded.upfront / 2 : ded.upfront,
+    contractor: isSingleUnit ? ded.contractor / 2 : ded.contractor,
+    retention: isSingleUnit ? ded.retention / 2 : ded.retention,
+    net: isSingleUnit ? ded.perBlock : ded.net
+  };
+
   document.getElementById('deductionSummary').innerHTML = `
-    <div class="deduction-item"><span>Original Contract</span><span>${format(project.original)}</span></div>
-    <div class="deduction-item"><span>PMC 5%</span><span><span>-${format(ded.pmc)}</span></div>
-    <div class="deduction-item"><span>Tax 19%</span><span>-${format(ded.tax)}</span></div>
-    <div class="deduction-item"><span>Upfront 10%</span><span>-${format(ded.upfront)}</span></div>
-    <div class="deduction-item"><span>Contractor 15%</span><span>-${format(ded.contractor)}</span></div>
-    <div class="deduction-item" style="color:#f39c12;"><span>Retention 5%</span><span>-${format(ded.retention)}</span></div>
-    <div class="deduction-item" style="font-size:18px;color:#28a745;font-weight:700;"><span>NET AVAILABLE</span><span>${format(ded.net)}</span></div>`;
+    <div class="deduction-item"><span>Original Contract</span><span>${format(displayDed.original)}</span></div>
+    <div class="deduction-item"><span>PMC 5%</span><span>-${format(displayDed.pmc)}</span></div>
+    <div class="deduction-item"><span>Tax 19%</span><span>-${format(displayDed.tax)}</span></div>
+    <div class="deduction-item"><span>Upfront 10%</span><span>-${format(displayDed.upfront)}</span></div>
+    <div class="deduction-item"><span>Contractor 15%</span><span>-${format(displayDed.contractor)}</span></div>
+    <div class="deduction-item" style="color:#f39c12;"><span>Retention 5%</span><span>-${format(displayDed.retention)}</span></div>
+    <div class="deduction-item" style="font-size:18px;color:#28a745;font-weight:700;"><span>NET AVAILABLE</span><span>${format(displayDed.net)}</span></div>`;
 
-  // Re-create blocks only if door count changed
   if (!block1 || block1.doorCount !== project.doors) {
     if (block1) scene.remove(block1.group, block2.group);
     block1 = createBlock(-9, project.doors);
     block2 = createBlock(+9, project.doors);
-    block1.doorCount = block2.doorCount = project.doors;
     scene.add(block1.group, block2.group);
   }
 
   const expenses = await loadExpenses(activeProject);
 
-  const sharedCost = expenses.filter(e => !e.unit).reduce((a, e) => a + e.amount, 0) / 2 || 0;
+  const sharedTotal = expenses.filter(e => !e.unit).reduce((a,e) => a + e.amount, 0);
+  const sharedPerBlock = sharedTotal / 2;
 
-  const b1Spent = expenses.filter(e => e.unit === "unit1").reduce((a, e) => a + e.amount, 0) + sharedCost;
-  const b2Spent = expenses.filter(e => e.unit === "unit2").reduce((a, e) => a + e.amount, 0) + sharedCost;
+  const b1Exclusive = expenses.filter(e => e.unit === "unit1").reduce((a,e) => a + e.amount, 0);
+  const b2Exclusive = expenses.filter(e => e.unit === "unit2").reduce((a,e) => a + e.amount, 0);
+
+  const b1Spent = b1Exclusive + sharedPerBlock;
+  const b2Spent = b2Exclusive + sharedPerBlock;
 
   updateBlock(block1, Math.min(100, Math.round(b1Spent / ded.perBlock * 100)));
   updateBlock(block2, Math.min(100, Math.round(b2Spent / ded.perBlock * 100)));
@@ -426,39 +439,41 @@ async function refresh(){
   block1.group.visible = !unitFilter || unitFilter === "unit1";
   block2.group.visible = !unitFilter || unitFilter === "unit2";
 
-  const currentSpent = unitFilter==="unit1" ? b1Spent : unitFilter==="unit2" ? b2Spent : b1Spent + b2Spent - sharedCost;
-  const currentBudget = unitFilter ? ded.perBlock : ded.net;
-  const percent = Math.round(currentSpent / currentBudget * 100);
+  const currentSpent = unitFilter === "unit1" ? b1Spent : unitFilter === "unit2" ? b2Spent : b1Spent + b2Spent;
+  const currentBudget = displayDed.net;
+  const percent = currentBudget > 0 ? Math.round(currentSpent / currentBudget * 100) : 0;
 
   document.getElementById('net').textContent = format(currentBudget);
   document.getElementById('spent').textContent = format(currentSpent);
   document.getElementById('remaining').textContent = format(currentBudget - currentSpent);
   document.getElementById('percent').textContent = percent + '%';
-  document.getElementById('percent').classList.toggle('over-budget', percent > 100);
+  document.getElementById('percent').classList.toggle('over-budget', currentSpent > currentBudget);
 
   document.getElementById('projectTitle').textContent = project.name + (unitFilter ? ` – ${unitFilter==='unit1'?'Block 1':'Block 2'}` : '');
 
-  // Budget breakdown
+  // Budget Breakdown
   let html = '';
   CATEGORIES.forEach(cat => {
-    const budget = unitFilter ? ded.perBlock * cat.pct/100 : ded.net * cat.pct/100;
+    const budget = isSingleUnit ? ded.perBlock * cat.pct/100 : ded.net * cat.pct/100;
     const spent = expenses
       .filter(e => e.category === cat.key && (!unitFilter || e.unit === unitFilter || !e.unit))
       .reduce((a,e) => a + (e.unit ? e.amount : e.amount/2), 0);
-    const pct = budget > 0 ? spent/budget*100 : 0;
+    const pct = budget > 0 ? Math.min(100, Math.round(spent / budget * 100)) : 0;
+
     html += `<div class="budget-item">
       <div><strong>${cat.name}</strong><br><small>Budget: ${format(budget)}</small></div>
       <div style="text-align:right;">
         <div>${format(spent)} spent</div>
         <div class="progress-container"><div class="progress-bar" style="width:${pct}%"></div></div>
-        <small${pct>100?' style="color:#ef4444;font-weight:700"':''}>${Math.round(pct)}%</small>
+        <small${spent>budget?' style="color:#ef4444;font-weight:700"':''}>${pct}%</small>
       </div>
     </div>`;
   });
   document.getElementById('budgetBreakdown').innerHTML = html;
 
-  // Ledger
-  const rows = expenses.map(e => `
+  // Ledger (filtered)
+  const filtered = expenses.filter(e => !unitFilter || e.unit === unitFilter || !e.unit);
+  const rows = filtered.map(e => `
     <tr>
       <td>${e.date}</td>
       <td>${CATEGORIES.find(c=>c.key===e.category)?.name || e.category}</td>
@@ -484,7 +499,7 @@ document.getElementById('projectsList').innerHTML = PROJECTS.map(p => `
 
 document.getElementById('projectsList').onclick = e => {
   const card = e.target.closest('.project-card');
-  if(!card) return;
+  if (!card) return;
   document.querySelectorAll('.project-card').forEach(c => c.classList.remove('active'));
   card.classList.add('active');
   activeProject = card.dataset.id;
@@ -496,7 +511,7 @@ document.getElementById('projectsList').onclick = e => {
 document.getElementById('unitFilter').onchange = e => { unitFilter = e.target.value; refresh(); };
 
 document.getElementById('addExpense').onclick = () => {
-  if(!activeProject) return alert("Select a project first");
+  if (!activeProject) return alert("Select a project first");
   document.getElementById('modal').style.display = 'flex';
   document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
 };
@@ -508,11 +523,11 @@ document.getElementById('saveExpense').onclick = async () => {
   const date = document.getElementById('expDate').value;
   const desc = document.getElementById('expDesc').value.trim();
 
-  if(!amount || !category || !date) return alert("Fill Amount, Category & Date");
+  if (!amount || !category || !date) return alert("Fill Amount, Category & Date");
 
   await saveToSheet('add', { unit, category, date, desc, amount });
   document.getElementById('modal').style.display = 'none';
-  ['expUnit','expCategory','expDesc','expAmount'].forEach(id => document.getElementById(id).value = '');
+  ['expUnit','expCategory','expDesc','expAmount','expDate'].forEach(id => document.getElementById(id).value = '');
   refresh();
 };
 
@@ -538,14 +553,13 @@ document.getElementById('updateExpense').onclick = async () => {
   const date = document.getElementById('editDate').value;
   const desc = document.getElementById('editDesc').value.trim();
 
-  if(!amount || !category || !date) return alert("Fill all required");
+  if (!amount || !category || !date) return alert("Fill all required fields");
 
   await saveToSheet('update', { id, unit, category, date, desc, amount });
   document.getElementById('editModal').style.display = 'none';
   refresh();
 };
 
-// Close modals
 ['modal','editModal'].forEach(id => {
   const m = document.getElementById(id);
   m.onclick = e => { if(e.target === m) m.style.display = 'none'; };
@@ -553,9 +567,8 @@ document.getElementById('updateExpense').onclick = async () => {
 document.getElementById('cancel').onclick = () => document.getElementById('modal').style.display = 'none';
 document.getElementById('editCancel').onclick = () => document.getElementById('editModal').style.display = 'none';
 
-// CSV
 document.getElementById('downloadCSV').onclick = async () => {
-  if(!activeProject) return alert("Select a project first");
+  if (!activeProject) return alert("Select a project first");
   const data = await loadExpenses(activeProject);
   let csv = "Date,Category,Description,Unit,Amount(KSh)\n";
   data.forEach(r => {
