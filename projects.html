@@ -2,38 +2,42 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NYLA PIT LATRINES – FINAL TRUTH EDITION</title>
+<title>NYLA PIT LATRINES – FINAL & FOREVER</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
 <style>
   :root{--p:#00d4ff;--s:#28a745;--d:#e74c3c;--w:#f39c12;}
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;min-height:100vh;}
+  body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#1e3c72,#2a5298);color:#333;min-height:100vh;}
   .container{max-width:1500px;margin:20px auto;padding:20px;}
-  header{text-align:center;padding:35px;background:rgba(255,255,255,0.97);border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,0.4);}
-  h1{font-size:36px;background:linear-gradient(90deg,#00d4ff,#ff3355);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-  .grid{display:flex;flex-direction:column;gap:25px;}
-  @media(min-width:1000px){.grid{flex-direction:row;}
-    .sidebar{flex:0 0 380px;}
+  header{text-align:center;padding:40px;background:#fff;border-radius:25px;box-shadow:0 20px 60px rgba(0,0,0,0.4);margin-bottom:30px;}
+  h1{font-size:38px;background:linear-gradient(90deg,#00d4ff,#ff0066);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900;}
+  .grid{display:flex;flex-direction:column;gap:30px;}
+  @media(min-width:1100px){.grid{flex-direction:row;}
+    .sidebar{flex:0 0 400px;}
   }
-  .sidebar{background:rgba(255,255,255,0.97);border-radius:20px;padding:30px;box-shadow:0 20px 50px rgba(0,0,0,0.3);}
-  .project-card{background:#fff;padding:22px;border-radius:16px;margin-bottom:16px;cursor:pointer;transition:0.3s;box-shadow:0 8px 25px rgba(0,0,0,0.15);border:3px solid transparent;}
-  .project-card:hover{transform:translateY(-6px);}
+  .sidebar{background:#fff;border-radius:25px;padding:35px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+  .project-card{background:#fff;border:4px solid transparent;padding:25px;border-radius:20px;margin-bottom:20px;cursor:pointer;transition:0.3s;box-shadow:0 10px 30px rgba(0,0,0,0.2);font-size:18px;}
+  .project-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,0.3);}
   .project-card.active{border-color:var(--p);background:#f0fbff;}
-  .main{background:rgba(255,255,255,0.97);border-radius:20px;padding:35px;box-shadow:0 20px 50px rgba(0,0,0,0.3);color:#333;}
-  .header-bar{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;align-items:center;margin-bottom:30px;}
-  select{padding:14px 24px;border-radius:50px;border:2px solid var(--p);font-size:17px;background:#fff;}
-  .btn{background:var(--p);color:#fff;padding:16px 36px;border:none;border-radius:50px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(0,212,255,0.4);}
-  .btn:hover{background:#00aaff;}
+  .project-card strong{font-size:22px;display:block;margin-bottom:8px;color:#1e3c72;}
+  .main{background:#fff;border-radius:25px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3);color:#333;}
+  .header-bar{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;align-items:center;margin-bottom:35px;}
+  select{padding:16px 28px;border-radius:50px;border:3px solid var(--p);font-size:18px;background:#fff;font-weight:600;}
+  .btn{background:var(--p);color:#fff;padding:16px 40px;border:none;border-radius:50px;font-weight:700;font-size:18px;cursor:pointer;box-shadow:0 10px 30px rgba(0,212,255,0.4);}
+  .btn:hover{background:#00aaff;transform:translateY(-3px);}
   .btn-s{background:var(--s);}
-  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:25px;margin:40px 0;}
-  .kpi{background:#fff;padding:25px;border-radius:18px;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,0.15);}
-  .kpi-value{font-size:32px;font-weight:800;color:#2c3e50;}
-  .threejs-container{height:750px;background:linear-gradient(to bottom,#87CEEB,#e3f2fd);border-radius:25px;overflow:hidden;box-shadow:0 40px 90px rgba(0,0,0,0.5);}
-  .deductions{background:#fff;padding:25px;border-radius:16px;margin:25px 0;color:#2c3e50;}
-  .deduction-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;font-size:17px;}
-  .deduction-item:last-child{border:none;font-weight:800;color:var(--s);font-size:20px;}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:25px;margin:40px 0;}
+  .kpi{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:30px;border-radius:20px;text-align:center;box-shadow:0 15px 40px rgba(0,0,0,0.3);}
+  .kpi-value{font-size:34px;font-weight:900;margin-top:10px;}
+  .threejs-container{height:800px;background:linear-gradient(to bottom,#87CEEB,#e3f2fd);border-radius:25px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,0.5);margin:50px 0;}
+  .deductions{background:#fff;padding:30px;border-radius:20px;margin:30px 0;box-shadow:0 10px 30px rgba(0,0,0,0.15);}
+  .deduction-item{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #eee;font-size:18px;}
+  .deduction-item:last-child{border:none;font-weight:900;color:var(--s);font-size:22px;}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;z-index:1000;}
+  .modal-box{background:#fff;padding:50px;border-radius:25px;width:90%;max-width:600px;box-shadow:0 30px 100px rgba(0,0,0,0.7);}
+  .input,select{width:100%;padding:18px;margin:15px 0;border-radius:15px;border:2px solid #ddd;font-size:18px;}
 </style>
 </head>
 <body>
@@ -41,19 +45,19 @@
 <div class="container">
   <header>
     <h1>NYLA PIT LATRINES</h1>
-    <p style="font-size:21px;color:#555;margin-top:12px;">Exact 5% PMC • 19% Tax • 10% Upfront • 15% Contractor • 5% Retention</p>
+    <p style="font-size:22px;color:#555;margin-top:15px;">The Final Dashboard • Never Touch Again • Perfect Forever</p>
   </header>
 
   <div class="grid">
     <div class="sidebar">
-      <h2 style="color:#2c3e50;margin-bottom:25px;font-size:24px;">Select Project</h2>
+      <h2 style="font-size:26px;color:#1e3c72;margin-bottom:30px;">SELECT PROJECT</h2>
       <div id="projectsList"></div>
     </div>
 
     <div class="main">
       <div class="header-bar">
         <div>
-          <h2 id="projectTitle" style="font-size:30px;color:#2c3e50;">Select a project</h2>
+          <h2 id="projectTitle" style="font-size:32px;color:#1e3c72;">Select a project</h2>
           <select id="unitFilter" style="margin-top:15px;">
             <option value="">Both Blocks</option>
             <option value="unit1">Block 1 Only</option>
@@ -80,6 +84,24 @@
   </div>
 </div>
 
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h2>Add New Expense</h2>
+    <select id="expUnit" class="input">
+      <option value="">Shared Cost (Split 50/50)</option>
+      <option value="unit1">Block 1 Only</option>
+      <option value="unit2">Block 2 Only</option>
+    </select>
+    <input type="date" id="expDate" class="input">
+    <input type="text" id="expDesc" class="input" placeholder="Description">
+    <input type="number" id="expAmount" class="input" placeholder="Amount (KSh)" min="1">
+    <div style="margin-top:30px;text-align:right;">
+      <button class="btn" id="saveExpense">Save Expense</button>
+      <button class="btn" style="background:#666;margin-left:15px;" id="cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script type="importmap">
 {
   "imports": {
@@ -93,14 +115,14 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const db = new Dexie("NylaTruthDB");
-db.version(1).stores({expenses: "++id,project,unit,amount"});
+const db = new Dexie("NylaFinalForeverDB");
+db.version(5).stores({expenses:"++id,project,unit,date,desc,amount"});
 
 const PROJECTS = [
-  {id:"yedhi",    name:"YEDHI PRIMARY",      doors:2, original:1029000},
-  {id:"sogorosa", name:"SOGOROSA PRIMARY",   doors:2, original:1029000},
-  {id:"sosoni",   name:"SOSONI PRIMARY",     doors:3, original:1546000},
-  {id:"mugumoni", name:"MUGUMONI PRIMARY",   doors:3, original:1546000}
+  {id:"yedhi",name:"YEDHI PRIMARY (2-door)",doors:2,original:1029000},
+  {id:"sogorosa",name:"SOGOROSA PRIMARY (2-door)",doors:2,original:1029000},
+  {id:"sosoni",name:"SOSONI PRIMARY (3-door)",doors:3,original:1546000},
+  {id:"mugumoni",name:"MUGUMONI PRIMARY (3-door)",doors:3,original:1546000}
 ];
 
 let activeProject = null;
@@ -108,153 +130,175 @@ let unitFilter = "";
 let scene, camera, renderer, controls;
 let block1 = {}, block2 = {};
 
-function calculateDeductions(amount) {
-  const pmc = amount * 0.05;
-  const tax = amount * 0.19;
-  const upfront = amount * 0.10;
-  const contractor = amount * 0.15;
-  const retention = amount * 0.05;
-  const totalDeducted = pmc + tax + upfront + contractor + retention;
-  const net = amount - totalDeducted;
-  return {pmc, tax, upfront, contractor, retention, net: Math.round(net), perBlock: Math.round(net/2)};
+function calc(amount){
+  const pmc=amount*0.05; tax=amount*0.19; upfront=amount*0.10; contractor=amount*0.15; retention=amount*0.05;
+  net = Math.round(amount - pmc - tax - upfront - contractor - retention);
+  return {pmc,tax,upfront,contractor,retention,net,perBlock:Math.round(net/2)};
 }
 
-function format(num) { return 'KSh ' + Number(num).toLocaleString(); }
+function format(n){return 'KSh ' + Number(n).toLocaleString();}
 
-function createBlock(xOffset, doorCount) {
-  const group = new THREE.Group();
-  const coral = new THREE.MeshStandardMaterial({color:0xd4a574, roughness:0.95});
-  const steel = new THREE.MeshStandardMaterial({color:0x2c3e50, metalness:0.9});
-  const roofMat = new THREE.MeshStandardMaterial({color:0xc41e3a});
+function createBlock(xOffset, doors){
+  const g = new THREE.Group();
+  const coral = new THREE.MeshStandardMaterial({color:0xd4a574,roughness:0.95});
+  const steel = new THREE.MeshStandardMaterial({color:0x2c3e50,metalness:0.9});
+  const roofC = new THREE.MeshStandardMaterial({color:0xc41e3a});
 
-  const pit = new THREE.Mesh(new THREE.CylinderGeometry(2.0,2.2,3,24,1,true), coral);
-  pit.position.set(xOffset,-1.5,0); group.add(pit);
+  const pit = new THREE.Mesh(new THREE.CylinderGeometry(2,2.2,3,24,1,true),coral);
+  pit.position.set(xOffset,-1.5,0); g.add(pit);
 
-  const slab = new THREE.Mesh(new THREE.BoxGeometry(3.8,0.15,2.6), new THREE.MeshStandardMaterial({color:0x95a5a6}));
-  slab.position.set(xOffset,0,0); group.add(slab);
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(3.8,0.15,2.6),new THREE.MeshStandardMaterial({color:0x95a5a6}));
+  slab.position.set(xOffset,0,0); g.add(slab);
 
-  const walls = [];
-  const h = 2.2;
-  const add = (w,d,x,z) => {
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), coral);
-    wall.position.set(xOffset+x, h/2+0.075, z);
-    walls.push(wall); group.add(wall);
-  };
-  add(3.8,0.2,0,1.2); add(3.8,0.2,0,-1.2); add(0.2,0.2,-1.8,0); add(0.2,0.2,1.8,0);
+  const walls=[]; const h=2.2;
+  const w=(w,d,x,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),coral);m.position.set(xOffset+x,h/2+0.075,z);walls.push(m);g.add(m);};
+  w(3.8,0.2,0,1.2); w(3.8,0.2,0,-1.2); w(0.2,0.2,-1.8,0); w(0.2,0.2,1.8,0);
 
-  const doors = [];
-  if (doorCount===2) {
-    add(0.2,1.8,0,0);
-    const d1 = new THREE.Mesh(new THREE.BoxGeometry(0.05,2.0,0.9), steel);
-    d1.position.set(xOffset-0.9,1.075,1.21); doors.push(d1); group.add(d1);
-    const d2 = new THREE.Mesh(new THREE.BoxGeometry(0.05,2.0,0.9), steel);
-    d2.position.set(xOffset+0.9,1.075,1.21); doors.push(d2); group.add(d2);
-  } else {
-    add(0.2,1.2,-0.9,0); add(0.2,1.2,0.9,0);
-    [-1.2,0,1.2].forEach((p,i) => {
-      const d = new THREE.Mesh(new THREE.BoxGeometry(0.05,2.0,0.8), steel);
-      d.position.set(xOffset + p*0.75,1.075,1.21); doors.push(d); group.add(d);
-    });
+  const doorObjs=[];
+  if(doors===2){
+    w(0.2,1.8,0,0);
+    [-0.9,+0.9].forEach(x=>{const d=new THREE.Mesh(new THREE.BoxGeometry(0.05,2,0.9),steel);d.position.set(xOffset+x,1.075,1.21);doorObjs.push(d);g.add(d);});
+  }else{
+    w(0.2,1.2,-0.9,0); w(0.2,1.2,+0.9,0);
+    [-1.2,0,1.2].forEach((x,i)=>{const d=new THREE.Mesh(new THREE.BoxGeometry(0.05,2,0.8),steel);d.position.set(xOffset+x*0.75,1.075,1.21);doorObjs.push(d);g.add(d);});
   }
 
-  const roof = new THREE.Mesh(new THREE.BoxGeometry(4.4,0.15,3.2), roofMat);
-  roof.position.set(xOffset,2.6,0); roof.rotation.x = Math.PI*0.18; group.add(roof);
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(4.4,0.15,3.2),roofC);
+  roof.position.set(xOffset,2.6,0); roof.rotation.x=Math.PI*0.18; g.add(roof);
 
-  pit.visible = slab.visible = roof.visible = false;
+  pit.visible=slab.visible=roof.visible=false;
   walls.forEach(w=>w.visible=false);
-  doors.forEach(d=>d.visible=false);
+  doorObjs.forEach(d=>d.visible=false);
 
-  return {group, pit, walls, slab, roof, doors};
+  return {group:g,pit,walls,slab,roof,doors:doorObjs};
 }
 
-function init3D() {
-  const container = document.getElementById('threejs');
-  scene = new THREE.Scene(); scene.background = new THREE.Color(0xb3e5fc);
-  camera = new THREE.PerspectiveCamera(55, container.clientWidth/750, 0.1, 1000);
-  camera.position.set(0,12,25);
-  renderer = new THREE.WebGLRenderer({antialias:true});
-  renderer.setSize(container.clientWidth,750); renderer.shadowMap.enabled = true;
-  container.appendChild(renderer.domElement);
-  controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true;
+function init3D(){
+  const c = document.getElementById('threejs');
+  scene=new THREE.Scene(); scene.background=new THREE.Color(0xb3e5fc);
+  camera=new THREE.PerspectiveCamera(55,c.clientWidth/800,0.1,1000);
+  camera.position.set(0,12,28);
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(c.clientWidth,800); renderer.shadowMap.enabled=true;
+  c.appendChild(renderer.domElement);
+  controls=new OrbitControls(camera,renderer.domElement); controls.enableDamping=true;
 
   scene.add(new THREE.AmbientLight(0xffffff,0.8));
-  const sun = new THREE.DirectionalLight(0xffffff,1.4); sun.position.set(20,40,20); sun.castShadow=true; scene.add(sun);
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(100,100), new THREE.MeshLambertMaterial({color:0x8BC34A}));
-  ground.rotation.x = -Math.PI/2; ground.receiveShadow=true; scene.add(ground);
+  const sun=new THREE.DirectionalLight(0xffffff,1.4); sun.position.set(20,40,20); sun.castShadow=true; scene.add(sun);
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,100),new THREE.MeshLambertMaterial({color:0x8BC34A}));
+  ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
 
-  function animate(){requestAnimationFrame(animate); controls.update(); renderer.render(scene,camera);}
+  const animate=()=>{requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);};
   animate();
-  window.addEventListener('resize',()=>{camera.aspect=container.clientWidth/750; camera.updateProjectionMatrix(); renderer.setSize(container.clientWidth,750);});
+  window.addEventListener('resize',()=>{camera.aspect=c.clientWidth/800;camera.updateProjectionMatrix();renderer.setSize(c.clientWidth,800);});
 }
 
-function updateBlock(block,pct){
+function updateBlock(b,pct){
   const s = pct<10?0:pct<35?1:pct<65?2:pct<90?3:4;
-  block.pit.visible = s>=1;
-  block.walls.forEach(w=>w.visible=s>=2);
-  block.slab.visible = s>=2;
-  block.roof.visible = s>=3;
-  block.doors.forEach(d=>d.visible=s>=4);
+  b.pit.visible=s>=1;
+  b.walls.forEach(w=>w.visible=s>=2);
+  b.slab.visible=s>=2;
+  b.roof.visible=s>=3;
+  b.doors.forEach(d=>d.visible=s>=4);
 }
 
-async function refreshAll(){
+async function refresh(){
   if(!activeProject) return;
-  const proj = PROJECTS.find(p=>p.id===activeProject);
-  const d = calculateDeductions(proj.original);
+  const p = PROJECTS.find(x=>x.id===activeProject);
+  const d = calc(p.original);
 
   document.getElementById('deductionSummary').innerHTML = `
-    <div class="deduction-item"><span>Original Contract</span><span>${format(proj.original)}</span></div>
+    <div class="deduction-item"><span>Original Contract Amount</span><span>${format(p.original)}</span></div>
     <div class="deduction-item"><span>PMC 5%</span><span>-${format(d.pmc)}</span></div>
     <div class="deduction-item"><span>Tax 19%</span><span>-${format(d.tax)}</span></div>
     <div class="deduction-item"><span>Upfront 10%</span><span>-${format(d.upfront)}</span></div>
-    <div class="deduction-item"><span>Contractor 15%</span><span>-${format(d.contractor)}</span></div>
-    <div class="deduction-item" style="color:#f39c12;"><span>Retention 5% (held)</span><span>-${format(d.retention)}</span></div>
-    <div class="deduction-item"><span><strong>NET AVAILABLE</strong></span><span style="color:#28a745;font-size:22px"><strong>${format(d.net)}</strong></span></div>
-    <div class="deduction-item"><span>Per Block Budget</span><span>${format(d.perBlock)}</span></div>`;
+    <div class="deduction-item"><span>Contractor Advance 15%</span><span>-${format(d.contractor)}</span></div>
+    <div class="deduction-item" style="color:#f39c12;"><span>Retention 5% (Held)</span><span>-${format(d.retention)}</span></div>
+    <div class="deduction-item"><span><strong>NET AVAILABLE TO SPEND</strong></span><span style="color:#28a745;font-size:24px"><strong>${format(d.net)}</strong></span></div>
+    <div class="deduction-item"><span>Budget Per Block</span><span>${format(d.perBlock)}</span></div>`;
 
-  if(block1.group) scene.remove(block1.group, block2.group);
-  block1 = createBlock(-8, proj.doors);
-  block2 = createBlock(+8, proj.doors);
+  if(block1.group) scene.remove(block1.group,block2.group);
+  block1 = createBlock(-9, p.doors);
+  block2 = createBlock(+9, p.doors);
   scene.add(block1.group); scene.add(block2.group);
 
   const all = await db.expenses.where({project:activeProject}).toArray();
   const shared = all.filter(e=>!e.unit).reduce((a,e)=>a+e.amount,0)/2 || 0;
-  const b1 = all.filter(e=>e.unit==="unit1").reduce((a,e)=>a+e.amount,0) + shared;
-  const b2 = all.filter(e=>e.unit==="unit2").reduce((a,e)=>a+e.amount,0) + shared;
+  const spent1 = all.filter(e=>e.unit==="unit1").reduce((a,e)=>a+e.amount,0) + shared;
+  const spent2 = all.filter(e=>e.unit==="unit2").reduce((a,e)=>a+e.amount,0) + shared;
 
-  const pct1 = Math.min(100, Math.round(b1/d.perBlock*100));
-  const pct2 = Math.min(100, Math.round(b2/d.perBlock*100));
-  updateBlock(block1, pct1); updateBlock(block2, pct2);
+  updateBlock(block1, Math.min(100, Math.round(spent1/d.perBlock*100)));
+  updateBlock(block2, Math.min(100, Math.round(spent2/d.perBlock*100)));
 
-  block1.group.visible = (unitFilter==="" || unitFilter==="unit1");
-  block2.group.visible = (unitFilter==="" || unitFilter==="unit2");
+  block1.group.visible = !unitFilter || unitFilter==="unit1";
+  block2.group.visible = !unitFilter || unitFilter==="unit2";
 
-  const currentSpend = unitFilter==="unit1"?b1:unitFilter==="unit2"?b2:b1+b2-shared;
-  const currentNet = unitFilter ? d.perBlock : d.net;
+  const currentSpent = unitFilter==="unit1"?spent1:unitFilter==="unit2"?spent2:spent1+spent2-shared;
+  const currentBudget = unitFilter ? d.perBlock : d.net;
 
-  document.getElementById('net').textContent = format(currentNet);
-  document.getElementById('spent').textContent = format(Math.round(currentSpend));
-  document.getElementById('remaining').textContent = format(currentNet - currentSpend);
-  document.getElementById('percent').textContent = Math.round(currentSpend/currentNet*100)+'%';
-  document.getElementById('projectTitle').textContent = proj.name + (unitFilter?` – ${unitFilter==='unit1'?'Block 1':'Block 2'}`:' – Both Blocks');
+  document.getElementById('net').textContent = format(currentBudget);
+  document.getElementById('spent').textContent = format(Math.round(currentSpent));
+  document.getElementById('remaining').textContent = format(currentBudget - currentSpent);
+  document.getElementById('percent').textContent = Math.round(currentSpent/currentBudget*100)+'%';
+  document.getElementById('projectTitle').textContent = p.name;
 }
 
 document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`
   <div class="project-card" data-id="${p.id}">
-    <strong>${p.name}</strong><br>
-    <small>${p.doors}-Door • Contract KSh ${p.original.toLocaleString()}</small>
+    <strong>${p.name}</strong>
+    <div style="margin-top:10px;color:#666;">
+      ${p.doors}-Door Block • Contract: ${format(p.original)}
+    </div>
   </div>`).join('');
 
 document.getElementById('projectsList').onclick = e=>{
   const card = e.target.closest('.project-card');
-  if(!card) return;
-  document.querySelectorAll('.project-card').forEach(c=>c.classList.remove('active'));
-  card.classList.add('active');
-  activeProject = card.dataset.id;
-  unitFilter = ""; document.getElementById('unitFilter').value = "";
-  refreshAll();
+  if(card){
+    document.querySelectorAll('.project-card').forEach(c=>c.classList.remove('active'));
+    card.classList.add('active');
+    activeProject = card.dataset.id;
+    unitFilter=""; document.getElementById('unitFilter').value="";
+    refresh();
+  }
 };
 
-document.getElementById('unitFilter').onchange = e=>{ unitFilter=e.target.value; refreshAll(); };
+document.getElementById('unitFilter').onchange = e=>{unitFilter=e.target.value; refresh();};
+
+document.getElementById('addExpense').onclick = ()=>{
+  if(!activeProject) return alert("Select a project first");
+  document.getElementById('modal').style.display='flex';
+  document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('expDesc').value = '';
+  document.getElementById('expAmount').value = '';
+};
+
+document.getElementById('saveExpense').onclick = async ()=>{
+  const amount = parseFloat(document.getElementById('expAmount').value);
+  const unit = document.getElementById('expUnit').value || null;
+  const date = document.getElementById('expDate').value;
+  const desc = document.getElementById('expDesc').value.trim();
+  if(!amount || amount<=0 || !date){alert("Fill all fields"); return;}
+  await db.expenses.add({project:activeProject,unit,date,desc,amount});
+  document.getElementById('modal').style.display='none';
+  refresh();
+};
+
+document.getElementById('cancel').onclick = ()=>{document.getElementById('modal').style.display='none';};
+
+document.getElementById('modal').onclick = e=>{if(e.target.classList.contains('modal')) document.getElementById('modal').style.display='none';};
+
+document.getElementById('downloadCSV').onclick = async ()=>{
+  if(!activeProject) return alert("Select project");
+  const data = await db.expenses.where({project:activeProject}).toArray();
+  let csv = "Date,Description,Unit,Amount\n";
+  data.forEach(r=>{
+    const u = r.unit ? (r.unit==='unit1'?'Block 1':'Block 2') : 'Shared';
+    csv += `${r.date},"${r.desc||''}",${u},${r.amount}\n`;
+  });
+  const blob = new Blob([csv],{type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=`${activeProject}_expenses.csv`; a.click();
+};
 
 init3D();
 </script>
