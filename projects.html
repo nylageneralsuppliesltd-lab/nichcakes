@@ -24,6 +24,7 @@
   .btn{padding:12px 24px;border:none;border-radius:30px;font-weight:600;font-size:15px;cursor:pointer;background:var(--p);color:#000;}
   .btn:hover{background:#00aaff;}
   .btn-s{background:var(--s);color:#fff;}
+  .btn-s:hover{background:#218838;}
   .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
   @media(min-width:640px){.kpi-grid{grid-template-columns:repeat(4,1fr);}}
   .kpi{background:#1e40af;padding:14px;border-radius:14px;text-align:center;font-size:14px;}
@@ -38,17 +39,13 @@
   .over-budget{color:#ef4444 !important;font-weight:700;}
   .ledger table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px;}
   .ledger th{background:var(--p);color:#000;padding:12px;font-weight:600;}
-  .ledger td{padding:10px;text-align:center;border-bottom:1px solid #334155;}
-  .btn-d{background:var(--d);color:#fff;padding:8px 14px;font-size:13px;border-radius:10px;}
-  .btn-e{background:#f39c12;color:#fff;padding:8px 14px;font-size:13px;border-radius:10px;margin-left:5px;}
+  .ledger td{padding:10px;text-align:center;border-bottom:1px solid #334155;color:#f9fafb;}
+  .btn-d{background:var(--d);color:#fff;padding:8px 14px;font-size:13px;border-radius:10px;cursor:pointer;}
+  .btn-e{background:#f39c12;color:#fff;padding:8px 14px;font-size:13px;border-radius:10px;margin-left:5px;cursor:pointer;}
   .threejs-container{height:420px !important;border-radius:18px;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,0.7);background:#87CEEB;margin-top:20px;}
   .modal{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;z-index:1000;}
   .modal-box{background:#1e293b;padding:30px;border-radius:18px;width:90%;max-width:460px;}
   .input,select{width:100%;padding:14px;margin:10px 0;border-radius:14px;border:1px solid #475569;background:#0f172a;color:#fff;font-size:16px;}
-  .deductions,.kpi,.budget-item{background:#111827;color:#f9fafb;}
-  .deduction-item,.budget-item{border-bottom-color:#4b5563;}
-  .ledger td{color:#f9fafb;}
-  .over-budget{color:#fca5a5 !important;}
   @media(max-width:768px){
     .container{padding:4px;}
     header{padding:12px 0;}
@@ -116,7 +113,7 @@
   </div>
 </div>
 
-<!-- ADD MODAL -->
+<!-- Add Expense Modal -->
 <div class="modal" id="modal">
   <div class="modal-box">
     <h2 style="font-size:22px;margin-bottom:20px;color:#60a5fa;">Add New Expense</h2>
@@ -150,7 +147,7 @@
   </div>
 </div>
 
-<!-- EDIT MODAL -->
+<!-- Edit Expense Modal -->
 <div class="modal" id="editModal">
   <div class="modal-box">
     <h2 style="font-size:22px;margin-bottom:20px;color:#60a5fa;">Edit Expense</h2>
@@ -230,50 +227,41 @@ let unitFilter = "";
 let scene, camera, renderer, controls;
 let block1 = {}, block2 = {};
 
-// ==================== GOOGLE SHEET ====================
+// ==================== GOOGLE SHEET COMMUNICATION ====================
 async function loadExpenses(projectId) {
   try {
-    const res = await fetch(`${SHEET_WEBHOOK}?action=get&project=${projectId}&secret=${SECRET}`);
-    if (!res.ok) throw new Error(res.status);
-    const json = await res.json();
-    return json.expenses || [];
-  } catch (e) {
-    console.error(e);
-    alert("No internet or server error – data will load when back online");
+    const url = `${SHEET_WEBHOOK}?action=get&project=${projectId}&secret=${SECRET}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data.expenses || [];
+  } catch (err) {
+    console.error("Load error:", err);
+    alert("No internet or server error – will retry when online");
     return [];
   }
 }
 
-async function saveToSheet(action, expense = {}) {
-  const payload = { action, secret: SECRET, project: activeProject, ...expense };
-  try {
-    const res = await fetch(SHEET_WEBHOOK, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error('Failed');
-  } catch (e) {
-    alert("Save failed – trying again in 2s");
-    setTimeout(() => saveToSheet(action, expense), 2000);
+async function saveToSheet(action, payload = {}) {
+  const body = { action, secret: SECRET, project: activeProject, ...payload };
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const res = await fetch(SHEET_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        cache: "no-store"
+      });
+      if (res.ok) return;
+      throw new Error("Failed");
+    } catch (e) {
+      if (attempt === 4) {
+        alert("Failed to save – check internet connection");
+        return;
+      }
+      await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+    }
   }
-}
-window.saveToSheet = saveToSheet;
-
-  function loadExpenses(project) {
-  return new Promise((resolve) => {
-    const iframe = document.createElement("iframe");
-
-    window.addEventListener("message", function handler(e) {
-      window.removeEventListener("message", handler);
-      document.body.removeChild(iframe);
-      resolve(e.data);
-    });
-
-    iframe.src = `${SHEET_WEBHOOK}?action=get&project=${project}&secret=nyla2025`;
-    iframe.style.display = "none";
-    document.body.appendChild(iframe);
-  });
 }
 
 // ==================== HELPERS ====================
@@ -289,6 +277,7 @@ function calc(amount){
 
 function format(n){ return 'KSh ' + Number(Math.round(n)).toLocaleString(); }
 
+// 3D Block Model
 function createBlock(xOffset, numDoors){
   const group = new THREE.Group();
   const coral = new THREE.MeshStandardMaterial({color:0xd4a574, roughness:0.95});
@@ -398,9 +387,9 @@ function init3D(){
 }
 init3D();
 
-// ==================== REFRESH ====================
+// ==================== REFRESH DATA ====================
 async function refresh(){
-  if(!activeProject) return;
+  if (!activeProject) return;
 
   const project = PROJECTS.find(p => p.id === activeProject);
   const ded = calc(project.original);
@@ -426,7 +415,7 @@ async function refresh(){
   const expenses = await loadExpenses(activeProject);
 
   const sharedCost = expenses.filter(e => !e.unit).reduce((a,e) => a + e.amount, 0) / 2 || 0;
-  const b1Spent = expenses.filter(e => e.unit==="unit1").reduce((a,e) => a + e.amount, 0) + sharedCost;
+  const b1Spent = expenses.filter(e => e.unit==="unit1").reduce((a + e.amount, 0) + sharedCost;
   const b2Spent = expenses.filter(e => e.unit==="unit2").reduce((a,e) => a + e.amount, 0) + sharedCost;
 
   updateBlock(block1, Math.min(100, Math.round(b1Spent / ded.perBlock * 100)));
@@ -476,21 +465,42 @@ async function refresh(){
       <td>${format(e.amount)}</td>
       <td>
         <button class="btn-e" onclick="editExpense(${e.id})">Edit</button>
-        <button class="btn-d" onclick="saveToSheet('delete',{id:${e.id}}); setTimeout(refresh,600)">Delete</button>
+        <button class="btn-d" onclick="deleteExpense(${e.id})">Delete</button>
       </td>
     </tr>`).join('');
   document.getElementById('ledgerBody').innerHTML = rows || '<tr><td colspan="6" style="color:#64748b;padding:20px;">No expenses yet</td></tr>';
 }
 
-// ==================== UI ====================
+// Delete helper
+window.deleteExpense = async function(id) {
+  if(!confirm("Delete this expense?")) return;
+  await saveToSheet('delete', {id});
+  refresh();
+};
+
+// Edit helper
+window.editExpense = async function(id) {
+  const expenses = await loadExpenses(activeProject);
+  const expense = expenses.find(e => e.id === id);
+  if (!expense) return;
+
+  document.getElementById('editId').value = id;
+  document.getElementById('editUnit').value = expense.unit || '';
+  document.getElementById('editCategory').value = expense.category;
+  document.getElementById('editDate').value = expense.date;
+  document.getElementById('editDesc').value = expense.desc || '';
+  document.getElementById('editAmount').value = expense.amount;
+  document.getElementById('editModal').style.display = 'flex';
+};
+
+// ==================== UI EVENTS ====================
 document.getElementById('projectsList').innerHTML = PROJECTS.map(p => `
   <div class="project-card" data-id="${p.id}">
     <strong>${p.name}</strong>
     <div style="margin-top:8px;font-size:14px;">
       ${p.doors}-Door • Net: ${format(calc(p.original).net)}
     </div>
-  </div>
-`).join('');
+  </div>`).join('');
 
 document.getElementById('projectsList').onclick = e => {
   const card = e.target.closest('.project-card');
@@ -525,23 +535,7 @@ document.getElementById('saveExpense').onclick = async () => {
 
   await saveToSheet('add', { unit, category, date, desc, amount });
   document.getElementById('modal').style.display = 'none';
-  document.getElementById('expAmount').value = document.getElementById('expDesc').value = '';
-  document.getElementById('expUnit').value = document.getElementById('expCategory').value = '';
   refresh();
-};
-
-window.editExpense = async function(id) {
-  const expenses = await loadExpenses(activeProject);
-  const expense = expenses.find(e => e.id === id);
-  if (!expense) return;
-
-  document.getElementById('editId').value = id;
-  document.getElementById('editUnit').value = expense.unit || '';
-  document.getElementById('editCategory').value = expense.category;
-  document.getElementById('editDate').value = expense.date;
-  document.getElementById('editDesc').value = expense.desc || '';
-  document.getElementById('editAmount').value = expense.amount;
-  document.getElementById('editModal').style.display = 'flex';
 };
 
 document.getElementById('updateExpense').onclick = async () => {
@@ -562,9 +556,13 @@ document.getElementById('updateExpense').onclick = async () => {
   refresh();
 };
 
-// Close modals
-document.getElementById('modal').onclick = e => { if(e.target === document.getElementById('modal')) document.getElementById('modal').style.display = 'none'; };
-document.getElementById('editModal').onclick = e => { if(e.target === document.getElementById('editModal')) document.getElementById('editModal').style.display = 'none'; };
+// Modal close handlers
+document.getElementById('modal').onclick = e => {
+  if(e.target === document.getElementById('modal')) document.getElementById('modal').style.display = 'none';
+};
+document.getElementById('editModal').onclick = e => {
+  if(e.target === document.getElementById('editModal')) document.getElementById('editModal').style.display = 'none';
+};
 document.getElementById('cancel').onclick = () => document.getElementById('modal').style.display = 'none';
 document.getElementById('editCancel').onclick = () => document.getElementById('editModal').style.display = 'none';
 
