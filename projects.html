@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NYLA PIT LATRINES – FINAL ACCURATE 3D WITH 2 OR 3 DOORS</title>
+<title>NYLA PIT LATRINES – FINAL TRUTH EDITION</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
 <style>
-  :root{--p:#00d4ff;--s:#28a745;--d:#e74c3c;}
+  :root{--p:#00d4ff;--s:#28a745;--d:#e74c3c;--w:#f39c12;}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;min-height:100vh;}
   .container{max-width:1500px;margin:20px auto;padding:20px;}
@@ -31,15 +31,17 @@
   .kpi{background:#fff;padding:25px;border-radius:18px;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,0.15);}
   .kpi-value{font-size:32px;font-weight:800;color:#2c3e50;}
   .threejs-container{height:750px;background:linear-gradient(to bottom,#87CEEB,#e3f2fd);border-radius:25px;overflow:hidden;box-shadow:0 40px 90px rgba(0,0,0,0.5);}
-  .info{background:#fff;padding:20px;border-radius:16px;margin:20px 0;color:#2c3e50;}
+  .deductions{background:#fff;padding:25px;border-radius:16px;margin:25px 0;color:#2c3e50;}
+  .deduction-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;font-size:17px;}
+  .deduction-item:last-child{border:none;font-weight:800;color:var(--s);font-size:20px;}
 </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>NYLA PIT LATRINES – FINAL ACCURATE 3D</h1>
-    <p style="font-size:21px;color:#555;margin-top:12px;">2-Door or 3-Door • Exact Dimensions • Real Progress • Coral Block Look</p>
+    <h1>NYLA PIT LATRINES</h1>
+    <p style="font-size:21px;color:#555;margin-top:12px;">Exact 5% PMC • 19% Tax • 10% Upfront • 15% Contractor • 5% Retention</p>
   </header>
 
   <div class="grid">
@@ -64,13 +66,10 @@
         </div>
       </div>
 
-      <div class="info">
-        <strong>Contract Amount:</strong> <span id="contractAmount">KSh 0</span> | 
-        <strong>Net Available (after 54% deductions):</strong> <span id="netAmount">KSh 0</span>
-      </div>
+      <div class="deductions" id="deductionSummary"></div>
 
       <div class="kpi-grid">
-        <div class="kpi"><div>Net Available (This View)</div><div class="kpi-value" id="net">KSh 0</div></div>
+        <div class="kpi"><div>Net Available</div><div class="kpi-value" id="net">KSh 0</div></div>
         <div class="kpi"><div>Total Spent</div><div class="kpi-value" id="spent">KSh 0</div></div>
         <div class="kpi"><div>Remaining</div><div class="kpi-value" id="remaining">KSh 0</div></div>
         <div class="kpi"><div>Progress</div><div class="kpi-value" id="percent">0%</div></div>
@@ -94,8 +93,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const db = new Dexie("NylaFinal2025");
-db.version(1).stores({expenses: "++id,project,unit,category,amount"});
+const db = new Dexie("NylaTruthDB");
+db.version(1).stores({expenses: "++id,project,unit,amount"});
 
 const PROJECTS = [
   {id:"yedhi",    name:"YEDHI PRIMARY",      doors:2, original:1029000},
@@ -109,69 +108,61 @@ let unitFilter = "";
 let scene, camera, renderer, controls;
 let block1 = {}, block2 = {};
 
-function calculateNet(amount) {
-  return Math.round(amount * 0.46); // 54% deductions
+function calculateDeductions(amount) {
+  const pmc = amount * 0.05;
+  const tax = amount * 0.19;
+  const upfront = amount * 0.10;
+  const contractor = amount * 0.15;
+  const retention = amount * 0.05;
+  const totalDeducted = pmc + tax + upfront + contractor + retention;
+  const net = amount - totalDeducted;
+  return {pmc, tax, upfront, contractor, retention, net: Math.round(net), perBlock: Math.round(net/2)};
 }
+
+function format(num) { return 'KSh ' + Number(num).toLocaleString(); }
 
 function createBlock(xOffset, doorCount) {
   const group = new THREE.Group();
+  const coral = new THREE.MeshStandardMaterial({color:0xd4a574, roughness:0.95});
+  const steel = new THREE.MeshStandardMaterial({color:0x2c3e50, metalness:0.9});
+  const roofMat = new THREE.MeshStandardMaterial({color:0xc41e3a});
 
-  const coralMat = new THREE.MeshStandardMaterial({color: 0xd4a574, roughness: 0.95});
-  const doorMat = new THREE.MeshStandardMaterial({color: 0x2c3e50, metalness: 0.9});
-  const roofMat = new THREE.MeshStandardMaterial({color: 0xc41e3a});
+  const pit = new THREE.Mesh(new THREE.CylinderGeometry(2.0,2.2,3,24,1,true), coral);
+  pit.position.set(xOffset,-1.5,0); group.add(pit);
 
-  // Pit
-  const pit = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.2, 3, 24, 1, true), coralMat);
-  pit.position.set(xOffset, -1.5, 0);
-  group.add(pit);
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(3.8,0.15,2.6), new THREE.MeshStandardMaterial({color:0x95a5a6}));
+  slab.position.set(xOffset,0,0); group.add(slab);
 
-  // Slab
-  const slab = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.15, 2.6), new THREE.MeshStandardMaterial({color: 0x95a5a6}));
-  slab.position.set(xOffset, 0, 0);
-  group.add(slab);
-
-  // Walls (200mm coral)
   const walls = [];
-  const wallHeight = 2.2;
-  const addWall = (w, d, x, z) => {
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(w, wallHeight, d), coralMat);
-    wall.position.set(xOffset + x, wallHeight/2 + 0.075, z);
+  const h = 2.2;
+  const add = (w,d,x,z) => {
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), coral);
+    wall.position.set(xOffset+x, h/2+0.075, z);
     walls.push(wall); group.add(wall);
   };
-  addWall(3.8, 0.2, 0, 1.2);   // front
-  addWall(3.8, 0.2, 0, -1.2);  // back
-  addWall(0.2, 0.2, -1.8, 0);  // left
-  addWall(0.2, 0.2, 1.8, 0);   // right
+  add(3.8,0.2,0,1.2); add(3.8,0.2,0,-1.2); add(0.2,0.2,-1.8,0); add(0.2,0.2,1.8,0);
 
-  // Partitions & Doors
   const doors = [];
-  if (doorCount === 2) {
-    addWall(0.2, 1.8, 0, 0); // central partition
-    const d1 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 2.0, 0.9), doorMat);
-    d1.position.set(xOffset - 0.9, 1.075, 1.21); doors.push(d1); group.add(d1);
-    const d2 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 2.0, 0.9), doorMat);
-    d2.position.set(xOffset + 0.9, 1.075, 1.21); doors.push(d2); group.add(d2);
-  } else if (doorCount === 3) {
-    addWall(0.2, 1.2, -0.9, 0);
-    addWall(0.2, 1.2, 0.9, 0);
-    const positions = [-1.2, 0, 1.2];
-    positions.forEach((pos, i) => {
-      const door = new THREE.Mesh(new THREE.BoxGeometry(0.05, 2.0, 0.8), doorMat);
-      door.position.set(xOffset + pos * 0.75, 1.075, 1.21);
-      doors.push(door); group.add(door);
+  if (doorCount===2) {
+    add(0.2,1.8,0,0);
+    const d1 = new THREE.Mesh(new THREE.BoxGeometry(0.05,2.0,0.9), steel);
+    d1.position.set(xOffset-0.9,1.075,1.21); doors.push(d1); group.add(d1);
+    const d2 = new THREE.Mesh(new THREE.BoxGeometry(0.05,2.0,0.9), steel);
+    d2.position.set(xOffset+0.9,1.075,1.21); doors.push(d2); group.add(d2);
+  } else {
+    add(0.2,1.2,-0.9,0); add(0.2,1.2,0.9,0);
+    [-1.2,0,1.2].forEach((p,i) => {
+      const d = new THREE.Mesh(new THREE.BoxGeometry(0.05,2.0,0.8), steel);
+      d.position.set(xOffset + p*0.75,1.075,1.21); doors.push(d); group.add(d);
     });
   }
 
-  // Roof
-  const roof = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.15, 3.2), roofMat);
-  roof.position.set(xOffset, 2.6, 0);
-  roof.rotation.x = Math.PI * 0.18;
-  group.add(roof);
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(4.4,0.15,3.2), roofMat);
+  roof.position.set(xOffset,2.6,0); roof.rotation.x = Math.PI*0.18; group.add(roof);
 
-  walls.forEach(w => { w.castShadow = w.receiveShadow = true; });
   pit.visible = slab.visible = roof.visible = false;
-  walls.forEach(w => w.visible = false);
-  doors.forEach(d => d.visible = false);
+  walls.forEach(w=>w.visible=false);
+  doors.forEach(d=>d.visible=false);
 
   return {group, pit, walls, slab, roof, doors};
 }
@@ -179,111 +170,91 @@ function createBlock(xOffset, doorCount) {
 function init3D() {
   const container = document.getElementById('threejs');
   scene = new THREE.Scene(); scene.background = new THREE.Color(0xb3e5fc);
-  camera = new THREE.PerspectiveCamera(55, container.clientWidth / 750, 0.1, 1000);
-  camera.position.set(0, 12, 25);
-
+  camera = new THREE.PerspectiveCamera(55, container.clientWidth/750, 0.1, 1000);
+  camera.position.set(0,12,25);
   renderer = new THREE.WebGLRenderer({antialias:true});
-  renderer.setSize(container.clientWidth, 750);
-  renderer.shadowMap.enabled = true;
+  renderer.setSize(container.clientWidth,750); renderer.shadowMap.enabled = true;
   container.appendChild(renderer.domElement);
+  controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true;
 
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
+  scene.add(new THREE.AmbientLight(0xffffff,0.8));
+  const sun = new THREE.DirectionalLight(0xffffff,1.4); sun.position.set(20,40,20); sun.castShadow=true; scene.add(sun);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(100,100), new THREE.MeshLambertMaterial({color:0x8BC34A}));
+  ground.rotation.x = -Math.PI/2; ground.receiveShadow=true; scene.add(ground);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-  const sun = new THREE.DirectionalLight(0xffffff, 1.4);
-  sun.position.set(20, 40, 20); sun.castShadow = true; scene.add(sun);
-
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshLambertMaterial({color: 0x8BC34A}));
-  ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
-
-  // Will be created when project selected
-  function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-  }
+  function animate(){requestAnimationFrame(animate); controls.update(); renderer.render(scene,camera);}
   animate();
-
-  window.addEventListener('resize', () => {
-    camera.aspect = container.clientWidth / 750;
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, 750);
-  });
+  window.addEventListener('resize',()=>{camera.aspect=container.clientWidth/750; camera.updateProjectionMatrix(); renderer.setSize(container.clientWidth,750);});
 }
 
-function updateBlock(block, pct) {
-  const s = pct < 10 ? 0 : pct < 35 ? 1 : pct < 65 ? 2 : pct < 90 ? 3 : 4;
-  block.pit.visible = s >= 1;
-  block.walls.forEach(w => w.visible = s >= 2);
-  block.slab.visible = s >= 2;
-  block.roof.visible = s >= 3;
-  block.doors.forEach(d => d.visible = s >= 4);
+function updateBlock(block,pct){
+  const s = pct<10?0:pct<35?1:pct<65?2:pct<90?3:4;
+  block.pit.visible = s>=1;
+  block.walls.forEach(w=>w.visible=s>=2);
+  block.slab.visible = s>=2;
+  block.roof.visible = s>=3;
+  block.doors.forEach(d=>d.visible=s>=4);
 }
 
-async function refreshAll() {
-  if (!activeProject) return;
+async function refreshAll(){
+  if(!activeProject) return;
+  const proj = PROJECTS.find(p=>p.id===activeProject);
+  const d = calculateDeductions(proj.original);
 
-  const project = PROJECTS.find(p => p.id === activeProject);
-  const net = calculateNet(project.original);
-  const perBlock = net / 2;
+  document.getElementById('deductionSummary').innerHTML = `
+    <div class="deduction-item"><span>Original Contract</span><span>${format(proj.original)}</span></div>
+    <div class="deduction-item"><span>PMC 5%</span><span>-${format(d.pmc)}</span></div>
+    <div class="deduction-item"><span>Tax 19%</span><span>-${format(d.tax)}</span></div>
+    <div class="deduction-item"><span>Upfront 10%</span><span>-${format(d.upfront)}</span></div>
+    <div class="deduction-item"><span>Contractor 15%</span><span>-${format(d.contractor)}</span></div>
+    <div class="deduction-item" style="color:#f39c12;"><span>Retention 5% (held)</span><span>-${format(d.retention)}</span></div>
+    <div class="deduction-item"><span><strong>NET AVAILABLE</strong></span><span style="color:#28a745;font-size:22px"><strong>${format(d.net)}</strong></span></div>
+    <div class="deduction-item"><span>Per Block Budget</span><span>${format(d.perBlock)}</span></div>`;
 
-  document.getElementById('contractAmount').textContent = 'KSh ' + project.original.toLocaleString();
-  document.getElementById('netAmount').textContent = 'KSh ' + net.toLocaleString();
-
-  // Rebuild 3D with correct door count
-  if (block1.group) scene.remove(block1.group, block2.group);
-  block1 = createBlock(-8, project.doors);
-  block2 = createBlock(+8, project.doors);
+  if(block1.group) scene.remove(block1.group, block2.group);
+  block1 = createBlock(-8, proj.doors);
+  block2 = createBlock(+8, proj.doors);
   scene.add(block1.group); scene.add(block2.group);
 
-  const all = await db.expenses.where({project: activeProject}).toArray();
-  const shared = all.filter(e => !e.unit).reduce((a,e)=>a+e.amount,0) / 2;
-  const b1 = all.filter(e => e.unit==="unit1").reduce((a,e)=>a+e.amount,0) + shared;
-  const b2 = all.filter(e => e.unit==="unit2").reduce((a,e)=>a+e.amount,0) + shared;
+  const all = await db.expenses.where({project:activeProject}).toArray();
+  const shared = all.filter(e=>!e.unit).reduce((a,e)=>a+e.amount,0)/2 || 0;
+  const b1 = all.filter(e=>e.unit==="unit1").reduce((a,e)=>a+e.amount,0) + shared;
+  const b2 = all.filter(e=>e.unit==="unit2").reduce((a,e)=>a+e.amount,0) + shared;
 
-  const pct1 = Math.min(100, Math.round(b1 / perBlock * 100));
-  const pct2 = Math.min(100, Math.round(b2 / perBlock * 100));
+  const pct1 = Math.min(100, Math.round(b1/d.perBlock*100));
+  const pct2 = Math.min(100, Math.round(b2/d.perBlock*100));
+  updateBlock(block1, pct1); updateBlock(block2, pct2);
 
-  updateBlock(block1, pct1);
-  updateBlock(block2, pct2);
+  block1.group.visible = (unitFilter==="" || unitFilter==="unit1");
+  block2.group.visible = (unitFilter==="" || unitFilter==="unit2");
 
-  block1.group.visible = (unitFilter === "" || unitFilter === "unit1");
-  block2.group.visible = (unitFilter === "" || unitFilter === "unit2");
+  const currentSpend = unitFilter==="unit1"?b1:unitFilter==="unit2"?b2:b1+b2-shared;
+  const currentNet = unitFilter ? d.perBlock : d.net;
 
-  const currentSpend = unitFilter === "unit1" ? b1 : unitFilter === "unit2" ? b2 : b1 + b2 - shared;
-  const currentNet = unitFilter ? perBlock : net;
-
-  document.getElementById('net').textContent = 'KSh ' + currentNet.toLocaleString();
-  document.getElementById('spent').textContent = 'KSh ' + Math.round(currentSpend).toLocaleString();
-  document.getElementById('remaining').textContent = 'KSh ' + (currentNet - currentSpend).toLocaleString();
-  document.getElementById('percent').textContent = Math.round(currentSpend / currentNet * 100) + '%';
+  document.getElementById('net').textContent = format(currentNet);
+  document.getElementById('spent').textContent = format(Math.round(currentSpend));
+  document.getElementById('remaining').textContent = format(currentNet - currentSpend);
+  document.getElementById('percent').textContent = Math.round(currentSpend/currentNet*100)+'%';
+  document.getElementById('projectTitle').textContent = proj.name + (unitFilter?` – ${unitFilter==='unit1'?'Block 1':'Block 2'}`:' – Both Blocks');
 }
 
-// Project selection
-document.getElementById('projectsList').innerHTML = PROJECTS.map(p => `
+document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`
   <div class="project-card" data-id="${p.id}">
     <strong>${p.name}</strong><br>
-    <small>${p.doors}-Door • KSh ${p.original.toLocaleString()}</small>
-  </div>
-`).join('');
+    <small>${p.doors}-Door • Contract KSh ${p.original.toLocaleString()}</small>
+  </div>`).join('');
 
-document.getElementById('projectsList').onclick = (e) => {
+document.getElementById('projectsList').onclick = e=>{
   const card = e.target.closest('.project-card');
-  if (!card) return;
-  document.querySelectorAll('.project-card').forEach(c => c.classList.remove('active'));
+  if(!card) return;
+  document.querySelectorAll('.project-card').forEach(c=>c.classList.remove('active'));
   card.classList.add('active');
   activeProject = card.dataset.id;
-  document.getElementById('projectTitle').textContent = card.querySelector('strong').textContent;
-  unitFilter = "";
-  document.getElementById('unitFilter').value = "";
+  unitFilter = ""; document.getElementById('unitFilter').value = "";
   refreshAll();
 };
 
-document.getElementById('unitFilter').onchange = (e) => {
-  unitFilter = e.target.value;
-  refreshAll();
-};
+document.getElementById('unitFilter').onchange = e=>{ unitFilter=e.target.value; refreshAll(); };
 
 init3D();
 </script>
