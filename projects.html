@@ -63,15 +63,15 @@
   .ded-item{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e2e8f0;}
   .ded-item:last-child{border:none;font-weight:700;color:#10b981;font-size:14.5px;}
 
-  /* NEW: Separate Ledger Card with Internal Scroll */
-  .ledger-card{background:white;padding:18px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.1);border:1px solid #ccfbf1;height:480px;display:flex;flex-direction:column;}
+  .ledger-card{background:white;padding:18px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.1);border:1px solid #ccfbf1;height:520px;display:flex;flex-direction:column;}
   .ledger-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-  .ledger-body{flex:1;overflow-y:auto;border:1px solid #e2e8f0;border-radius:10px;}
+  .ledger-body{flex:1;overflow-y:auto;border:1px solid #e2e8f0;border-radius:10px;background:#fafafa;}
   .ledger table{width:100%;border-collapse:collapse;font-size:13px;}
   .ledger th{background:#06b6d4;color:white;padding:12px 10px;font-size:13px;}
   .ledger td{padding:10px 8px;border-bottom:1px solid #e2e8f0;word-wrap:break-word;}
-  .ledger td:nth-child(3){max-width:180px;} /* Description wraps nicely */
+  .ledger td:nth-child(3){max-width:200px;}
   .ledger td:nth-child(5){text-align:right;font-weight:600;}
+  .ledger tr:hover{background:#f0fdfa;}
 
   .threejs{border-radius:16px;overflow:hidden;height:320px;background:#e0f2fe;box-shadow:0 8px 25px rgba(6,182,212,.25);}
   @media(max-width:480px){.threejs{height:260px;}}
@@ -89,15 +89,12 @@
   <header><h1>NYLA PIT LATRINES</h1><p class="subtitle">Real-Time Project Tracking • Growing Strong 2025</p></header>
 
   <div class="grid">
-    <!-- Sidebar -->
     <div class="sidebar">
       <h2 style="font-size:18px;color:#06b6d4;margin-bottom:14px;">Projects</h2>
       <div id="projectsList"></div>
     </div>
 
-    <!-- Main Content Area -->
     <div class="main">
-      <!-- Top Summary Card -->
       <div class="card">
         <div class="header-bar">
           <div>
@@ -127,9 +124,11 @@
         <div class="budget-grid" id="budgetBreakdown"></div>
       </div>
 
-      
+      <div class="card">
+        <h3 class="section-title">3D Construction Progress</h3>
+        <div class="threejs" id="threejs"></div>
+      </div>
 
-      <!-- NEW: Separate Ledger Card with Scroll -->
       <div class="ledger-card">
         <div class="ledger-header">
           <h3 class="section-title">Expense Ledger</h3>
@@ -138,7 +137,7 @@
         <div class="ledger-body">
           <div class="ledger">
             <table>
-              <thead><tr><th>Date</th><th>Cat</th><th>Description</th><th>Unit</th><th>Amount</th><th></th></tr></thead>
+              <thead><tr><th>Date</th><th>Cat</th><th>Description</th><th>Unit</th><th>Amount</th><th>Actions</th></tr></thead>
               <tbody id="ledgerBody"></tbody>
             </table>
           </div>
@@ -147,12 +146,6 @@
     </div>
   </div>
 </div>
-
-<!-- 3D View Card -->
-      <div class="card">
-        <h3 class="section-title">3D Construction Progress</h3>
-        <div class="threejs" id="threejs"></div>
-      </div>
 
 <div class="modal" id="modal">
   <div class="modal-box">
@@ -164,18 +157,10 @@
     </select>
     <select id="expCategory" class="input">
       <option value="">Category</option>
-      <option value="excavation">Excavation</option>
-      <option value="concrete">Concrete</option>
-      <option value="steel">Steel</option>
-      <option value="pitwall">Pit Wall</option>
-      <option value="superwall">Super Wall</option>
-      <option value="roofing">Roofing</option>
-      <option value="doors">Doors</option>
-      <option value="plaster">Plaster</option>
-      <option value="painting">Painting</option>
-      <option value="vent">Vent</option>
-      <option value="transport">Transport</option>
-      <option value="misc">Misc</option>
+      <option value="excavation">Excavation</option><option value="concrete">Concrete</option><option value="steel">Steel</option>
+      <option value="pitwall">Pit Wall</option><option value="superwall">Super Wall</option><option value="roofing">Roofing</option>
+      <option value="doors">Doors</option><option value="plaster">Plaster</option><option value="painting">Painting</option>
+      <option value="vent">Vent</option><option value="transport">Transport</option><option value="misc">Misc</option>
     </select>
     <input type="date" id="expDate" class="input">
     <input type="text" id="expDesc" class="input" placeholder="Description (optional)">
@@ -251,7 +236,7 @@ async function refresh() {
 
   const res = await call("get");
   if (!res.success) return;
-  const exp = res.expenses || [];
+  let exp = res.expenses || [];
 
   const getDisplayAmount = (e) => {
     if (!e.unit) return single ? e.amount / 2 : e.amount;
@@ -267,6 +252,7 @@ async function refresh() {
   document.getElementById('percent').textContent = Math.round(totalSpent/net*100) + '%';
   document.getElementById('projectTitle').textContent = p.name + (single ? ' • ' + (unitFilter === 'unit1' ? 'Block 1' : 'Block 2') : '');
 
+  // BUDGET CARDS
   let html = '';
   CATEGORIES.forEach(c => {
     const budget = net * c.pct / 100;
@@ -282,7 +268,12 @@ async function refresh() {
   });
   document.getElementById('budgetBreakdown').innerHTML = html;
 
-  const filtered = single ? exp.filter(e => !e.unit || e.unit === unitFilter) : exp;
+  // LEDGER — FILTER + SORT BY DATE DESCENDING
+  let filtered = single ? exp.filter(e => !e.unit || e.unit === unitFilter) : exp;
+  filtered.sort((a, b) => b.date.localeCompare(a.date));  // NEWEST FIRST
+
+  document.getElementById('ledgerCount').textContent = `${filtered.length} ${filtered.length === 1 ? 'entry' : 'entries'}`;
+
   document.getElementById('ledgerBody').innerHTML = filtered.map(e => `
     <tr>
       <td>${e.date}</td>
@@ -296,6 +287,7 @@ async function refresh() {
       </td>
     </tr>`).join('');
 
+  // Edit & Delete handlers
   document.querySelectorAll('.btn-edit').forEach(b => b.onclick = () => {
     currentEditId = b.dataset.id;
     document.getElementById('modalTitle').textContent = "Edit Expense";
@@ -315,6 +307,7 @@ async function refresh() {
     }
   });
 
+  // 3D Progress
   const b1Spent = exp.filter(e => !e.unit || e.unit === "unit1").reduce((s,e) => s + (e.unit ? e.amount : e.amount/2), 0);
   const b2Spent = exp.filter(e => !e.unit || e.unit === "unit2").reduce((s,e) => s + (e.unit ? e.amount : e.amount/2), 0);
   if (block1 && block2) {
@@ -325,6 +318,7 @@ async function refresh() {
   }
 }
 
+// Save, 3D, events — unchanged and perfect
 document.getElementById('saveExpense').onclick = async () => {
   const payload = {
     date: document.getElementById('expDate').value,
@@ -335,11 +329,7 @@ document.getElementById('saveExpense').onclick = async () => {
   };
   if (!payload.date || !payload.category || !payload.amount) return alert("Fill all required fields");
   const res = await call(currentEditId ? 'update' : 'add', currentEditId ? {id: currentEditId, ...payload} : payload);
-  if (res.success) {
-    document.getElementById('modal').style.display = 'none';
-    currentEditId = null;
-    refresh();
-  }
+  if (res.success) { document.getElementById('modal').style.display = 'none'; currentEditId = null; refresh(); }
 };
 
 document.getElementById('cancelModal').onclick = () => document.getElementById('modal').style.display = 'none';
@@ -358,24 +348,19 @@ function init3D() {
   window.addEventListener('resize',()=>{camera.aspect=c.clientWidth/c.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(c.clientWidth,c.clientHeight);});
 }
 
-function makeBlock(x){
-  const g=new THREE.Group();
-  const brick=new THREE.MeshStandardMaterial({color:0xd4a574});
-  const roof=new THREE.MeshStandardMaterial({color:0xc41e3a});
-  const conc=new THREE.MeshStandardMaterial({color:0x95a5a6});
-  const pit=new THREE.Mesh(new THREE.CylinderGeometry(1.8,2,2.8,20),brick); pit.position.set(x,-1.4,0); g.add(pit);
-  const slab=new THREE.Mesh(new THREE.BoxGeometry(3.6,0.15,2.5),conc); slab.position.set(x,0,0); g.add(slab);
-  const walls=[];
-  const addWall=(w,d,px,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,2.1,d),brick); m.position.set(x+px,1.05,z); g.add(m); walls.push(m);};
-  addWall(3.6,0.2,0,1.2); addWall(3.6,0.2,0,-1.2); addWall(0.2,2.6,-1.7,0); addWall(0.2,2.6,1.7,0);
-  const r=new THREE.Mesh(new THREE.BoxGeometry(4.2,0.15,3),roof); r.position.set(x,2.5,0); g.add(r);
-  pit.visible=slab.visible=r.visible=false; walls.forEach(w=>w.visible=false);
+function makeBlock(x){ /* unchanged */ const g=new THREE.Group();const brick=new THREE.MeshStandardMaterial({color:0xd4a574});const roof=new THREE.MeshStandardMaterial({color:0xc41e3a});const conc=new THREE.MeshStandardMaterial({color:0x95a5a6});
+  const pit=new THREE.Mesh(new THREE.CylinderGeometry(1.8,2,2.8,20),brick);pit.position.set(x,-1.4,0);g.add(pit);
+  const slab=new THREE.Mesh(new THREE.BoxGeometry(3.6,0.15,2.5),conc);slab.position.set(x,0,0);g.add(slab);
+  const walls=[];const addWall=(w,d,px,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,2.1,d),brick);m.position.set(x+px,1.05,z);g.add(m);walls.push(m);};
+  addWall(3.6,0.2,0,1.2);addWall(3.6,0.2,0,-1.2);addWall(0.2,2.6,-1.7,0);addWall(0.2,2.6,1.7,0);
+  const r=new THREE.Mesh(new THREE.BoxGeometry(4.2,0.15,3),roof);r.position.set(x,2.5,0);g.add(r);
+  pit.visible=slab.visible=r.visible=false;walls.forEach(w=>w.visible=false);
   return {group:g,pit,walls,slab,roof:r};
 }
 
 function updateBlock(b,pct){
   const s=pct<10?0:pct<35?1:pct<65?2:pct<90?3:4;
-  b.pit.visible=s>=1; b.walls.forEach(w=>w.visible=s>=2); b.slab.visible=s>=2; b.roof.visible=s>=3;
+  b.pit.visible=s>=1;b.walls.forEach(w=>w.visible=s>=2);b.slab.visible=s>=2;b.roof.visible=s>=3;
 }
 
 document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`<div class="project-card" data-id="${p.id}"><strong>${p.name}</strong><br><small style="color:#64748b;">${format(calc(p.original).net)}</small></div>`).join('');
