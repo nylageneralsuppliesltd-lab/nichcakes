@@ -2,71 +2,68 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NYLA PIT LATRINES - Live 3D Progress Dashboard</title>
+<title>NYLA PIT LATRINES – Mobile Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/controls/OrbitControls.js"></script>
 <style>
   :root{--p:#00d4ff;--s:#28a745;--d:#e74c3c;--bg:linear-gradient(135deg,#667eea,#764ba2);}
-  *{margin:0;padding:0;box-sizing:border-box;}
+  *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Poppins',sans-serif;background:var(--bg);color:#333;min-height:100vh;}
-  .container{max-width:1400px;margin:15px auto;padding:15px;}
-  header{text-align:center;padding:25px;background:rgba(255,255,255,0.98);border-radius:16px;box-shadow:0 15px 35px rgba(0,0,0,0.25);margin-bottom:20px;}
-  h1{font-size:28px;background:linear-gradient(90deg,#00d4ff,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-  .subtitle{font-size:16px;color:#555;margin-top:8px;}
+  .container{max-width:1400px;margin:12px auto;padding:12px;}
+  header{text-align:center;padding:20px;background:rgba(255,255,255,0.98);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.3);margin-bottom:16px;}
+  h1{font-size:26px;background:linear-gradient(90deg,#00d4ff,#ff3355);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .subtitle{font-size:15px;color:#555;margin-top:6px;}
 
-  /* Mobile-first grid */
-  .grid{display:flex;flex-direction:column;gap:20px;}
+  .grid{display:flex;flex-direction:column;gap:16px;}
   @media(min-width:900px){.grid{flex-direction:row;}
-    .sidebar{flex:0 0 320px;}
+    .sidebar{flex:0 0 310px;}
     .main{flex:1;}
   }
 
-  .sidebar{background:rgba(255,255,255,0.98);border-radius:16px;padding:20px;box-shadow:0 15px 35px rgba(0,0,0,0.2);}
-  .project-card{background:white;padding:18px;border-radius:14px;margin-bottom:14px;cursor:pointer;transition:0.3s;border:2px solid transparent;box-shadow:0 8px 20px rgba(0,0,0,0.12);}
-  .project-card:hover{transform:translateY(-4px);}
+  .sidebar{background:rgba(255,255,255,0.98);border-radius:16px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,0.25);}
+  .project-card{background:#fff;padding:16px;border-radius:12px;margin-bottom:12px;cursor:pointer;transition:0.3s;border:2px solid transparent;}
+  .project-card:hover{transform:translateY(-3px);}
   .project-card.active{border-color:var(--p);background:#f0fbff;}
 
-  .main{background:rgba(255,255,255,0.98);border-radius:16px;padding:25px;box-shadow:0 15px 35px rgba(0,0,0,0.2);}
-  .header-bar{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:25px;}
-  .btn{background:var(--p);color:white;padding:12px 24px;border:none;border-radius:50px;font-weight:700;font-size:15px;cursor:pointer;box-shadow:0 8px 20px rgba(0,212,255,0.4);transition:0.3s;}
-  .btn:hover{background:#00b8d4;transform:translateY(-3px);}
+  .main{background:rgba(255,255,255,0.98);border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,0.25);}
+  .header-bar{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin-bottom:20px;}
+  .btn{background:var(--p);color:#fff;padding:10px 20px;border:none;border-radius:50px;font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 6px 18px rgba(0,212,255,0.4);}
+  .btn:hover{background:#00b0d4;}
   .btn-s{background:var(--s);}
-  .btn-d{background:#e74c3c;}
+  .btn-d{background:var(--d);}
 
-  .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin:30px 0;}
-  @media(min-width:768px){.kpi-grid{grid-template-columns:repeat(4,1fr);}}
-  .kpi{background:white;padding:18px;border-radius:14px;text-align:center;box-shadow:0 8px 20px rgba(0,0,0,0.1);}
-  .kpi-label{font-size:13px;color:#666;}
-  .kpi-value{font-size:20px;font-weight:800;color:#2c3e50;margin-top:5px;}
+  .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:25px 0;}
+  @media(min-width:640px){.kpi-grid{grid-template-columns:repeat(4,1fr);}}
+  .kpi{background:#fff;padding:14px;border-radius:12px;text-align:center;box-shadow:0 6px 16px rgba(0,0,0,0.1);}
+  .kpi-label{font-size:12px;color:#666;}
+  .kpi-value{font-size:18px;font-weight:800;margin-top:4px;}
 
-  .deductions{background:white;padding:20px;border-radius:14px;margin:25px 0;box-shadow:0 8px 20px rgba(0,0,0,0.1);}
-  .deduction-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;font-size:15px;}
-  .deduction-item:last-child{border:none;font-weight:800;color:var(--s);}
+  .deductions{background:#fff;padding:16px;border-radius:12px;margin:20px 0;box-shadow:0 6px 16px rgba(0,0,0,0.1);}
+  .deduction-item{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;border-bottom:1px solid #eee;}
+  .deduction-item:last-child{border:none;font-weight:800;color:var(--s);font-size:15px;}
 
-  .section-title{font-size:22px;font-weight:800;color:#2c3e50;margin:35px 0 20px;text-align:center;}
+  .section-title{font-size:20px;font-weight:700;color:#2c3e50;margin:30px 0 16px;text-align:center;}
 
-  .category-grid{display:grid;grid-template-columns:1fr;gap:16px;}
-  @media(min-width:640px){.category-grid{grid-template-columns:repeat(2,1fr);}}
-  .category{background:white;padding:20px;border-radius:14px;box-shadow:0 8px 20px rgba(0,0,0,0.1);}
-  .cat-name{font-size:17px;font-weight:700;margin-bottom:10px;}
-  .progress-container{height:22px;background:#eee;border-radius:11px;overflow:hidden;margin:12px 0;}
-  .progress-bar{height:100%;width:0;transition:width 1s ease;background:linear-gradient(90deg,#00d4ff,#ff6b35);}
+  .category-grid{display:grid;grid-template-columns:1fr;gap:14px;}
+  @media(min-width:600px){.category-grid{grid-template-columns:1fr 1fr;}}
+  .category{background:#fff;padding:18px;border-radius:12px;box-shadow:0 6px 16px rgba(0,0,0,0.1);}
+  .cat-name{font-size:16px;font-weight:600;margin-bottom:8px;}
+  .progress-container{height:20px;background:#eee;border-radius:10px;overflow:hidden;margin:10px 0;}
+  .progress-bar{height:100%;width:0;background:linear-gradient(90deg,#00d4ff,#ff3355);transition:width 1s ease;}
 
-  .threejs-container{height:400px;background:#f0f8ff;border-radius:16px;overflow:hidden;margin:40px 0;box-shadow:0 15px 35px rgba(0,0,0,0.2);}
-  @media(min-width:768px){.threejs-container{height:550px;}}
+  .threejs-container{height:360px;background:#f0f8ff;border-radius:14px;overflow:hidden;margin:35px 0;box-shadow:0 12px 30px rgba(0,0,0,0.2);}
+  @media(min-width:768px){.threejs-container{height:500px;}}
 
-  .ledger{margin-top:40px;background:white;border-radius:14px;overflow:hidden;box-shadow:0 15px 35px rgba(0,0,0,0.2);}
+  .ledger{margin-top:35px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,0.2);}
   table{width:100%;border-collapse:collapse;}
-  th{background:var(--p);color:white;padding:14px 10px;font-size:14px;text-align:left;}
-  td{padding:12px 10px;font-size:14px;border-bottom:1px solid #eee;}
-  .actions button{margin:4px;padding:6px 10px;font-size:12px;border-radius:8px;}
+  th{background:var(--p);color:#fff;padding:12px 8px;font-size:13px;}
+  td{padding:10px 8px;font-size:13px;border-bottom:1px solid #eee;}
+  .actions button{margin:2px 4px;padding:5px 9px;font-size:12px;border-radius:6px;}
 
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
-  .modal-box{background:white;padding:30px;border-radius:16px;width:100%;max-width:500px;box-shadow:0 20px 50px rgba(0,0,0,0.5);}
-  .input,select{width:100%;padding:14px;margin:10px 0;border-radius:12px;border:2px solid #ddd;font-size:16px;}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;z-index:1000;padding:15px;}
+  .modal-box{background:#fff;padding:25px;border-radius:14px;width:100%;max-width:460px;}
+  .input,select{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:2px solid #ddd;font-size:15px;}
 </style>
 </head>
 <body>
@@ -74,53 +71,55 @@
 <div class="container">
   <header>
     <h1>NYLA PIT LATRINES</h1>
-    <p style="font-size:22px;color:#555;margin:15px 0 0;">Real-Time 3D Construction Progress Dashboard</p>
+    <p class="subtitle">Live Mobile Dashboard – Works Perfectly on Phone</p>
   </header>
 
   <div class="grid">
     <div class="sidebar">
-      <h2 style="color:#2c3e50;margin-top:0;">Select Project</h2>
+      <h2 style="font-size:19px;color:#2c3e50;margin-bottom:12px;">Projects</h2>
       <div id="projectsList"></div>
     </div>
 
     <div class="main">
       <div class="header-bar">
         <div>
-          <h2 id="projectTitle" style="margin:0;color:#2c3e50;">Select a project</h2>
-          <p id="unitDisplay" style="margin:8px 0 0;color:#7f8c8d;font-size:18px;"></p>
+          <h2 id="projectTitle" style="font-size:21px;">Select project</h2>
+          <p id="unitDisplay" style="font-size:14px;color:#666;"></p>
         </div>
         <div>
-          <button class="btn" id="addExpense">+ Add Expense</button>
-          <button class="btn btn-s" id="downloadCSV">Download CSV</button>
+          <button class="btn" id="addExpense">+ Add</button>
+          <button class="btn btn-s" id="downloadCSV">CSV</button>
         </div>
       </div>
 
       <div class="deductions" id="contractSummary"></div>
 
       <div class="kpi-grid">
-        <div class="kpi"><div class="kpi-label">Net Available</div><div class="kpi-value" id="net">KSh 0</div></div>
-        <div class="kpi"><div class="kpi-label">Total Spent</div><div class="kpi-value" id="spent">KSh 0</div></div>
-        <div class="kpi"><div class="kpi-label">Remaining</div><div class="kpi-value" id="remaining">KSh 0</div></div>
-        <div class="kpi"><div class="kpi-label">% Complete</div><div class="kpi-value" id="percent">0%</div></div>
+        <div class="kpi"><div class="kpi-label">Net</div><div class="kpi-value" id="net">KSh 0</div></div>
+        <div class="kpi"><div class="kpi-label">Spent</div><div class="kpi-value" id="spent">KSh 0</div></div>
+        <div class="kpi"><div class="kpi-label">Left</div><div class="kpi-value" id="remaining">KSh 0</div></div>
+        <div class="kpi"><div class="kpi-label">%</div><div class="kpi-value" id="percent">0%</div></div>
       </div>
 
-      <h2 class="section-title">Live 3D Construction Progress</h2>
+      <h2 class="section-title">3D Progress</h2>
       <div class="threejs-container" id="threejs"></div>
 
-      <h2 class="section-title">Budget Breakdown (Both Units)</h2>
+      <h2 class="section-title">Budget</h2>
       <div class="category-grid" id="fullBudget"></div>
 
-      <div id="unitSection" style="display:none;margin-top:60px;">
-        <h2 class="section-title" id="unitTitle">Unit 1 Budget</h2>
+      <div id="unitSection" style="display:none;">
+        <h2 class="section-title" id="unitTitle">Unit Budget</h2>
         <div class="category-grid" id="unitBudget"></div>
       </div>
 
       <div class="ledger">
-        <h3 style="margin:0;padding:25px;background:var(--p);color:white;border-radius:18px 18px 0 0;">Expense Ledger - Edit / Delete</h3>
-        <table>
-          <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Unit</th><th>Amount</th><th>Actions</th></tr></thead>
-          <tbody id="ledger"></tbody>
-        </table>
+        <h3 style="padding:16px;background:var(--p);color:#fff;font-size:17px;">Expense Ledger</h3>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Date</th><th>Cat</th><th>Desc</th><th>Unit</th><th>Amt</th><th></th></tr></thead>
+            <tbody id="ledger"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -128,28 +127,34 @@
 
 <div class="modal" id="modal">
   <div class="modal-box">
-    <h2 id="modalTitle">Add New Expense</h2>
-    <input type="hidden" id="editId">
+    <h2 id="modalTitle">Add Expense</h2>
     <select id="expUnitSelect" class="input">
-      <option value="">Both Units (Shared)</option>
+      <option value="">Both Units</option>
       <option value="unit1">Unit 1 Only</option>
       <option value="unit2">Unit 2 Only</option>
     </select>
-    <select id="expCategory" class="input"><option value="">Select Category</option></select>
-    <input type="date" id="expDate" class="input" />
-    <input type="text" id="expDesc" class="input" placeholder="Description" />
-    <input type="number" id="expAmount" class="input" placeholder="Amount in KSh" step="1" />
-    <button class="btn" id="saveExpense">Save Expense</button>
-    <button class="btn btn-d" style="margin-top:10px;" id="cancelEdit">Cancel</button>
+    <select id="expCategory" class="input"><option value="">Category</option></select>
+    <input type="date" id="expDate" class="input">
+    <input type="text" id="expDesc" class="input" placeholder="Description">
+    <input type="number" id="expAmount" class="input" placeholder="Amount (KSh)">
+    <button class="btn" id="saveExpense">Save</button>
+    <button class="btn btn-d" id="cancelEdit">Cancel</button>
   </div>
 </div>
 
-<script>
-// IndexedDB Setup
-const db = new Dexie("NylaCompleteDB");
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+const db = new Dexie("NylaMobileDB");
 db.version(1).stores({expenses:"++id,project,unit,date,category,desc,amount"});
 
-// Projects & Categories
 const PROJECTS = [
   {id:"yedhi",name:"YEDHI PRIMARY (2-door)",original:1029000,pmc:51450,tax:195510,upfront:102900,contractorFee:154350,retention:7718,net:524790},
   {id:"sogorosa",name:"SOGOROSA PRIMARY (2-door)",original:1029000,pmc:51450,tax:195510,upfront:102900,contractorFee:154350,retention:7718,net:524790},
@@ -172,307 +177,184 @@ const CATEGORIES = [
   {key:"misc",name:"Miscellaneous",pct:2}
 ];
 
-let activeProject = null;
-let activeUnit = null;
-let editingId = null;
+let activeProject=null, activeUnit=null, editingId=null;
+let scene,camera,renderer,controls;
+let pit, walls=[], slab, roof, door;
 
-// 3D Scene Variables
-let scene, camera, renderer, controls;
-let pit, walls = [], slab, roof, door;
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-function init3D() {
-  const container = document.getElementById('threejs');
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xe3f2fd);
+function init3D(){
+  const c=document.getElementById('threejs');
+  scene=new THREE.Scene(); scene.background=new THREE.Color(0xe8f5ff);
+  camera=new THREE.PerspectiveCamera(50,c.clientWidth/360,0.1,1000);
+  camera.position.set(6,6,10);
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(c.clientWidth,360); c.appendChild(renderer.domElement);
+  controls=new OrbitControls(camera,renderer.domElement); controls.enableDamping=true;
 
-  camera = new THREE.PerspectiveCamera(50, container.clientWidth / 600, 0.1, 1000);
-  camera.position.set(6, 6, 10);
+  scene.add(new THREE.AmbientLight(0xffffff,0.8));
+  const dirLight=new THREE.DirectionalLight(0xffffff,1); dirLight.position.set(10,15,10); scene.add(dirLight);
 
-  renderer = new THREE.WebGLRenderer({antialias: true});
-  renderer.setSize(container.clientWidth, 600);
-  container.appendChild(renderer.domElement);
+  pit=new THREE.Mesh(new THREE.BoxGeometry(3,4,2.6),new THREE.MeshStandardMaterial({color:0x8B4513})); pit.position.y=2; scene.add(pit);
+  const mat=new THREE.MeshStandardMaterial({color:0xa0522d});
+  const w=(w,h,d,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat); m.position.set(x,y,z); walls.push(m); scene.add(m);};
+  w(3.4,3,0.2,0,3.5,-1.5); w(3.4,3,0.2,0,3.5,1.5); w(0.2,3,3,-1.7,3.5,0); w(0.2,3,3,1.7,3.5,0);
+  slab=new THREE.Mesh(new THREE.BoxGeometry(3.8,0.3,3.4),new THREE.MeshStandardMaterial({color:0x666})); slab.position.y=4.15; scene.add(slab);
+  roof=new THREE.Mesh(new THREE.BoxGeometry(4.2,0.3,4),new THREE.MeshStandardMaterial({color:0xe74c3c})); roof.position.y=5.8; roof.rotation.x=-0.35; scene.add(roof);
+  door=new THREE.Mesh(new THREE.BoxGeometry(0.1,2,0.9),new THREE.MeshStandardMaterial({color:0x2c3e50})); door.position.set(1.75,3,0.9); scene.add(door);
 
-  controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
+  pit.visible=slab.visible=roof.visible=door.visible=false; walls.forEach(w=>w.visible=false);
 
-  const light = new THREE.DirectionalLight(0xffffff, 1);
-  light.position.set(10, 15, 10);
-  scene.add(light);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+  const anim=()=>{requestAnimationFrame(anim); controls.update(); renderer.render(scene,camera);}; anim();
+  window.addEventListener('resize',()=>{camera.aspect=c.clientWidth/360; camera.updateProjectionMatrix(); renderer.setSize(c.clientWidth,360);});
+}
 
-  // Ground
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(20, 20),
-    new THREE.MeshStandardMaterial({color: 0x90ee90})
-  );
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = -0.1;
-  scene.add(ground);
+function update3DProgress(pct){
+  const s = pct<15?0 : pct<35?1 : pct<60?2 : pct<85?3 : 4;
+  pit.visible=s>=1;
+  walls.forEach(w=>w.visible=s>=2);
+  slab.visible=s>=2;
+  roof.visible=s>=3;
+  door.visible=s>=4;
+}
 
-  // Pit
-  pit = new THREE.Mesh(new THREE.BoxGeometry(3, 4, 2.6), new THREE.MeshStandardMaterial({color: 0x8B4513}));
-  pit.position.y = 2;
-  scene.add(pit);
+function format(n){return 'KSh '+Number(n||0).toLocaleString();}
 
-  // Walls
-  const wallMat = new THREE.MeshStandardMaterial({color: 0xa0522d});
-  const createWall = (w, h, d, x, y, z) => {
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
-    wall.position.set(x, y, z);
-    walls.push(wall);
-    scene.add(wall);
-  };
-  createWall(3.4, 3, 0.2, 0, 3.5, -1.5);
-  createWall(3.4, 3, 0.2, 0, 3.5, 1.5);
-  createWall(0.2, 3, 3, -1.7, 3.5, 0);
-  createWall(0.2, 3, 3, 1.7, 3.5, 0);
+async function renderAll(){renderSidebar();renderContractSummary();renderHeader();await renderKPIs();await renderFullBudget();await renderUnitBudget();await renderLedger();}
 
-  // Slab
-  slab = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.3, 3.4), new THREE.MeshStandardMaterial({color: 0x666666}));
-  slab.position.y = 4.15;
-  scene.add(slab);
-
-  // Roof
-  roof = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.3, 4), new THREE.MeshStandardMaterial({color: 0xe74c3c}));
-  roof.position.y = 5.8;
-  roof.rotation.x = THREE.MathUtils.degToRad(-20);
-  scene.add(roof);
-
-  // Door
-  door = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2, 0.9), new THREE.MeshStandardMaterial({color: 0x2c3e50}));
-  door.position.set(1.75, 3, 0.9);
-  scene.add(door);
-
-  // Hide all initially
-  pit.visible = walls.forEach(w => w.visible = false);
-  slab.visible = roof.visible = door.visible = false;
-
-  function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  window.addEventListener('resize', () => {
-    camera.aspect = container.clientWidth / 600;
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, 600);
+function renderSidebar(){
+  const l=document.getElementById('projectsList'); l.innerHTML='';
+  PROJECTS.forEach(p=>{
+    const d=document.createElement('div'); d.className='project-card'+(activeProject===p.id?' active':'');
+    d.innerHTML=`<div style="font-weight:700;font-size:17px;">${p.name}</div><div style="font-size:13px;margin-top:5px;">Net: ${format(p.net)}</div>`;
+    d.onclick=()=>{activeProject=p.id; activeUnit=null; renderAll();};
+    l.appendChild(d);
   });
 }
 
-function update3DProgress(percent) {
-  const stage = percent < 15 ? 0 : percent < 35 ? 1 : percent < 60 ? 2 : percent < 85 ? 3 : 4;
-  pit.visible = stage >= 1;
-  walls.forEach(w => w.visible = stage >= 2);
-  slab.visible = stage >= 2;
-  roof.visible = stage >= 3;
-  door.visible = stage >= 4;
+function renderContractSummary(){
+  if(!activeProject){document.getElementById('contractSummary').innerHTML='';return;}
+  const p=PROJECTS.find(x=>x.id===activeProject);
+  document.getElementById('contractSummary').innerHTML=`
+    <div class="deduction-item"><span>Original</span><span>${format(p.original)}</span></div>
+    <div class="deduction-item"><span>PMC 5%</span><span>-${format(p.pmc)}</span></div>
+    <div class="deduction-item"><span>TAX 19%</span><span>-${format(p.tax)}</span></div>
+    <div class="deduction-item"><span>Upfront 10%</span><span>-${format(p.upfront)}</span></div>
+    <div class="deduction-item"><span>Contractor 15%</span><span>-${format(p.contractorFee)}</span></div>
+    <div class="deduction-item" style="padding-left:20px;font-size:12px;"><span>└ Retention</span><span>-${format(p.retention)}</span></div>
+    <div class="deduction-item"><span><strong>Net Available</strong></span><span style="color:#28a745"><strong>${format(p.net)}</strong></span></div>`;
 }
 
-function format(num) { return 'KSh ' + Number(num||0).toLocaleString(); }
-
-async function renderAll() {
-  renderSidebar();
-  renderContractSummary();
-  renderHeader();
-  await renderKPIs();
-  await renderFullBudget();
-  await renderUnitBudget();
-  await renderLedger();
+function renderHeader(){
+  if(!activeProject){document.getElementById('projectTitle').textContent='Select project';document.getElementById('unitDisplay').textContent='';return;}
+  const p=PROJECTS.find(x=>x.id===activeProject);
+  document.getElementById('projectTitle').textContent=p.name;
+  document.getElementById('unitDisplay').textContent=activeUnit?`Viewing: ${activeUnit==='unit1'?'Unit 1':'Unit 2'}`:'Both Units';
 }
 
-function renderSidebar() {
-  const list = document.getElementById('projectsList');
-  list.innerHTML = '';
-  PROJECTS.forEach(p => {
-    const div = document.createElement('div');
-    div.className = 'project-card' + (activeProject === p.id ? ' active' : '');
-    div.innerHTML = `<div style="font-weight:800;font-size:18px;">${p.name}</div>
-      <div style="font-size:14px;margin-top:8px;">Net: ${format(p.net)}</div>`;
-    div.onclick = () => { activeProject = p.id; activeUnit = null; renderAll(); };
-    list.appendChild(div);
-  });
-}
-
-function renderContractSummary() {
-  if (!activeProject) { document.getElementById('contractSummary').innerHTML = ''; return; }
-  const p = PROJECTS.find(x => x.id === activeProject);
-  document.getElementById('contractSummary').innerHTML = `
-    <div class="deduction-item"><span>Original Contract</span><span>${format(p.original)}</span></div>
-    <div class="deduction-item"><span>PMC (5%)</span><span>-${format(p.pmc)}</span></div>
-    <div class="deduction-item"><span>TAX (19%)</span><span>-${format(p.tax)}</span></div>
-    <div class="deduction-item"><span>Upfront (10%)</span><span>-${format(p.upfront)}</span></div>
-    <div class="deduction-item"><span>Contractor Fee (15%)</span><span>-${format(p.contractorFee)}</span></div>
-    <div class="deduction-item" style="padding-left:20px;font-size:14px;"><span>└ Retention (held)</span><span>-${format(p.retention)}</span></div>
-    <div class="deduction-item"><span><strong>Net Available for Works</strong></span><span style="color:#28a745"><strong>${format(p.net)}</strong></span></div>`;
-}
-
-function renderHeader() {
-  if (!activeProject) {
-    document.getElementById('projectTitle').textContent = 'Select a project';
-    document.getElementById('unitDisplay').textContent = '';
-    return;
-  }
-  const p = PROJECTS.find(x => x.id === activeProject);
-  document.getElementById('projectTitle').textContent = p.name;
-  document.getElementById('unitDisplay').textContent = activeUnit ? `Viewing: ${activeUnit === 'unit1' ? 'Unit 1' : 'Unit 2'} Only` : 'Both Units Combined';
-}
-
-async function renderKPIs() {
-  if (!activeProject) return;
-  const expenses = await db.expenses.where({project: activeProject}).toArray();
-  const spent = expenses.reduce((a, e) => a + e.amount, 0);
-  const p = PROJECTS.find(x => x.id === activeProject);
-  const pct = Math.round((spent / p.net) * 100);
-
-  document.getElementById('net').textContent = format(p.net);
-  document.getElementById('spent').textContent = format(spent);
-  document.getElementById('remaining').textContent = format(p.net - spent);
-  document.getElementById('percent').textContent = pct + '%';
-
+async function renderKPIs(){
+  if(!activeProject)return;
+  const exp=await db.expenses.where({project:activeProject}).toArray();
+  const spent=exp.reduce((a,e)=>a+e.amount,0);
+  const p=PROJECTS.find(x=>x.id===activeProject);
+  const pct=Math.round((spent/p.net)*100);
+  document.getElementById('net').textContent=format(p.net);
+  document.getElementById('spent').textContent=format(spent);
+  document.getElementById('remaining').textContent=format(p.net-spent);
+  document.getElementById('percent').textContent=pct+'%';
   update3DProgress(pct);
 }
 
-async function renderFullBudget() {
-  const c = document.getElementById('fullBudget'); c.innerHTML = '';
-  if (!activeProject) return;
-  const p = PROJECTS.find(x => x.id === activeProject);
-  const expenses = await db.expenses.where({project: activeProject}).toArray();
-  CATEGORIES.forEach(cat => {
-    const budget = Math.round(p.net * cat.pct / 100);
-    const spent = expenses.filter(e => e.category === cat.key).reduce((a, e) => a + e.amount, 0);
-    const pct = budget > 0 ? Math.round((spent / budget) * 100) : 0;
-    const div = document.createElement('div'); div.className = 'category';
-    div.innerHTML = `<div class="cat-name">${cat.name}</div>
+async function renderFullBudget(){
+  const c=document.getElementById('fullBudget'); c.innerHTML='';
+  if(!activeProject)return;
+  const p=PROJECTS.find(x=>x.id===activeProject);
+  const exp=await db.expenses.where({project:activeProject}).toArray();
+  CATEGORIES.forEach(cat=>{
+    const budget=Math.round(p.net*cat.pct/100);
+    const spent=exp.filter(e=>e.category===cat.key).reduce((a,e)=>a+e.amount,0);
+    const pct=budget>0?Math.round((spent/budget)*100):0;
+    const div=document.createElement('div'); div.className='category';
+    div.innerHTML=`<div class="cat-name">${cat.name}</div>
       <div style="display:flex;justify-content:space-between;"><span>Budget: ${format(budget)}</span><span style="color:${pct>100?'#e74c3c':pct>80?'#e67e22':'#27ae60'}">Spent: ${format(spent)}</span></div>
       <div class="progress-container"><div class="progress-bar" style="width:${pct}%"></div></div>
-      <div style="text-align:right;font-weight:600;">${pct}% used</div>`;
+      <div style="text-align:right;font-weight:600;">${pct}%</div>`;
     c.appendChild(div);
   });
 }
 
-async function renderUnitBudget() {
-  if (!activeUnit) { document.getElementById('unitSection').style.display = 'none'; return; }
-  document.getElementById('unitSection').style.display = 'block';
-  document.getElementById('unitTitle').textContent = (activeUnit === 'unit1' ? 'Unit 1' : 'Unit 2') + ' Budget';
-  const c = document.getElementById('unitBudget'); c.innerHTML = '';
-  const p = PROJECTS.find(x => x.id === activeProject);
-  const unitBudget = p.net / 2;
-  const expenses = await db.expenses.where({project: activeProject, unit: activeUnit}).toArray();
-  CATEGORIES.forEach(cat => {
-    const budget = Math.round(unitBudget * cat.pct / 100);
-    const spent = expenses.filter(e => e.category === cat.key).reduce((a, e) => a + e.amount, 0);
-    const pct = budget > 0 ? Math.round((spent / budget) * 100) : 0;
-    const div = document.createElement('div'); div.className = 'category';
-    div.innerHTML = `<div class="cat-name">${cat.name}</div>
+async function renderUnitBudget(){
+  if(!activeUnit){document.getElementById('unitSection').style.display='none';return;}
+  document.getElementById('unitSection').style.display='block';
+  document.getElementById('unitTitle').textContent=(activeUnit==='unit1'?'Unit 1':'Unit 2')+' Budget';
+  const c=document.getElementById('unitBudget'); c.innerHTML='';
+  const p=PROJECTS.find(x=>x.id===activeProject);
+  const unitBudget=p.net/2;
+  const exp=await db.expenses.where({project:activeProject,unit:activeUnit}).toArray();
+  CATEGORIES.forEach(cat=>{
+    const budget=Math.round(unitBudget*cat.pct/100);
+    const spent=exp.filter(e=>e.category===cat.key).reduce((a,e)=>a+e.amount,0);
+    const pct=budget>0?Math.round((spent/budget)*100):0;
+    const div=document.createElement('div'); div.className='category';
+    div.innerHTML=`<div class="cat-name">${cat.name}</div>
       <div style="display:flex;justify-content:space-between;"><span>Budget: ${format(budget)}</span><span>Spent: ${format(spent)}</span></div>
       <div class="progress-container"><div class="progress-bar" style="width:${pct}%"></div></div>
-      <div style="text-align:right;font-weight:600;">${pct}% used</div>`;
+      <div style="text-align:right;font-weight:600;">${pct}%</div>`;
     c.appendChild(div);
   });
 }
 
-async function renderLedger() {
-  const tbody = document.getElementById('ledger'); tbody.innerHTML = '';
-  const q = activeUnit ? db.expenses.where({project: activeProject, unit: activeUnit}) : db.expenses.where({project: activeProject});
-  const rows = await q.toArray();
-  rows.sort((a, b) => b.date.localeCompare(a.date)).forEach(r => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${r.date}</td>
-      <td>${CATEGORIES.find(c => c.key === r.category)?.name}</td>
-      <td>${r.desc || '-'}</td>
-      <td>${r.unit ? 'Unit ' + (r.unit === 'unit1' ? '1' : '2') : 'Both'}</td>
-      <td>${format(r.amount)}</td>
-      <td class="actions">
-        <button class="btn" onclick="editExpense(${r.id})">Edit</button>
-        <button class="btn btn-d" onclick="deleteExpense(${r.id})">Delete</button>
-      </td>`;
+async function renderLedger(){
+  const tbody=document.getElementById('ledger'); tbody.innerHTML='';
+  const q=activeUnit?db.expenses.where({project:activeProject,unit:activeUnit}):db.expenses.where({project:activeProject});
+  const rows=await q.toArray();
+  rows.sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.date}</td><td>${CATEGORIES.find(c=>c.key===r.category)?.name}</td><td>${r.desc||'-'}</td><td>${r.unit?'U'+(r.unit==='unit1'?'1':'2'):'B'}</td><td>${format(r.amount)}</td><td class="actions"><button class="btn" onclick="editExpense(${r.id})">E</button><button class="btn btn-d" onclick="deleteExpense(${r.id})">D</button></td>`;
     tbody.appendChild(tr);
   });
 }
 
-// Edit / Delete
-window.editExpense = async (id) => {
-  const exp = await db.expenses.get(id);
-  editingId = id;
-  document.getElementById('modalTitle').textContent = "Edit Expense";
-  document.getElementById('expUnitSelect').value = exp.unit || "";
-  const catSel = document.getElementById('expCategory');
-  catSel.innerHTML = '<option value="">Select Category</option>';
-  CATEGORIES.forEach(c => {
-    const opt = new Option(c.name, c.key);
-    if (c.key === exp.category) opt.selected = true;
-    catSel.appendChild(opt);
-  });
-  document.getElementById('expDate').value = exp.date;
-  document.getElementById('expDesc').value = exp.desc || '';
-  document.getElementById('expAmount').value = exp.amount;
-  document.getElementById('modal').style.display = 'flex';
+window.editExpense=async(id)=>{
+  const exp=await db.expenses.get(id); editingId=id;
+  document.getElementById('modalTitle').textContent='Edit Expense';
+  document.getElementById('expUnitSelect').value=exp.unit||'';
+  const catSel=document.getElementById('expCategory'); catSel.innerHTML='<option value="">Category</option>';
+  CATEGORIES.forEach(c=>{const opt=new Option(c.name,c.key); if(c.key===exp.category)opt.selected=true; catSel.appendChild(opt);});
+  document.getElementById('expDate').value=exp.date; document.getElementById('expDesc').value=exp.desc||''; document.getElementById('expAmount').value=exp.amount;
+  document.getElementById('modal').style.display='flex';
 };
 
-window.deleteExpense = async (id) => {
-  if (confirm("Delete this expense permanently?")) {
-    await db.expenses.delete(id);
-    renderAll();
-  }
+window.deleteExpense=async(id)=>{
+  if(confirm('Delete?')){await db.expenses.delete(id); renderAll();}
 };
 
-// Modal Controls
-document.getElementById('addExpense').onclick = () => {
-  if (!activeProject) return alert("Select project first");
-  editingId = null;
-  document.getElementById('modalTitle').textContent = "Add New Expense";
-  document.getElementById('expUnitSelect').value = "";
-  const catSel = document.getElementById('expCategory');
-  catSel.innerHTML = '<option value="">Select Category</option>';
-  CATEGORIES.forEach(c => catSel.add(new Option(c.name, c.key)));
-  document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('expDesc').value = '';
-  document.getElementById('expAmount').value = '';
-  document.getElementById('modal').style.display = 'flex';
+document.getElementById('addExpense').onclick=()=>{
+  if(!activeProject)return alert('Select project'); editingId=null;
+  document.getElementById('modalTitle').textContent='Add Expense';
+  document.getElementById('expUnitSelect').value=''; const catSel=document.getElementById('expCategory'); catSel.innerHTML='<option value="">Category</option>'; CATEGORIES.forEach(c=>catSel.add(new Option(c.name,c.key)));
+  document.getElementById('expDate').value=new Date().toISOString().split('T')[0]; document.getElementById('expDesc').value=''; document.getElementById('expAmount').value='';
+  document.getElementById('modal').style.display='flex';
 };
 
-document.getElementById('saveExpense').onclick = async () => {
-  const amount = parseFloat(document.getElementById('expAmount').value);
-  const cat = document.getElementById('expCategory').value;
-  const unit = document.getElementById('expUnitSelect').value || null;
-  if (!cat || !amount || amount <= 0) return alert("Fill all fields");
-
-  if (editingId) {
-    await db.expenses.update(editingId, {unit, date: document.getElementById('expDate').value, category: cat, desc: document.getElementById('expDesc').value.trim(), amount});
-  } else {
-    await db.expenses.add({project: activeProject, unit, date: document.getElementById('expDate').value, category: cat, desc: document.getElementById('expDesc').value.trim(), amount});
-  }
-  document.getElementById('modal').style.display = 'none';
-  renderAll();
+document.getElementById('saveExpense').onclick=async()=>{
+  const amount=parseFloat(document.getElementById('expAmount').value); const cat=document.getElementById('expCategory').value; const unit=document.getElementById('expUnitSelect').value||null;
+  if(!cat||!amount||amount<=0)return alert('Fill fields');
+  if(editingId){await db.expenses.update(editingId,{unit,date:document.getElementById('expDate').value,category:cat,desc:document.getElementById('expDesc').value.trim(),amount});}else{await db.expenses.add({project:activeProject,unit,date:document.getElementById('expDate').value,category:cat,desc:document.getElementById('expDesc').value.trim(),amount});}
+  document.getElementById('modal').style.display='none'; editingId=null; renderAll();
 };
 
-document.getElementById('cancelEdit').onclick = () => {
-  document.getElementById('modal').style.display = 'none';
-  editingId = null;
+document.getElementById('cancelEdit').onclick=()=>{document.getElementById('modal').style.display='none'; editingId=null;};
+
+document.getElementById('downloadCSV').onclick=async()=>{
+  if(!activeProject)return alert('Select project'); const data=activeUnit?await db.expenses.where({project:activeProject,unit:activeUnit}).toArray():await db.expenses.where({project:activeProject}).toArray();
+  let csv="Date,Category,Description,Unit,Amount\n"; data.forEach(r=>csv+=`${r.date},${CATEGORIES.find(c=>c.key===r.category)?.name},${r.desc||''},${r.unit?'Unit '+(r.unit==='unit1'?'1':'2'):'Both'},${r.amount}\n`);
+  const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`${activeProject}_${activeUnit||'both'}_expenses.csv`; a.click();
 };
 
-document.querySelector('.modal').onclick = (e) => {
-  if (e.target.classList.contains('modal')) document.getElementById('modal').style.display = 'none';
-};
+document.querySelector('.modal').onclick=(e)=>{if(e.target.classList.contains('modal'))document.getElementById('modal').style.display='none';};
 
-// CSV Download
-document.getElementById('downloadCSV').onclick = async () => {
-  if (!activeProject) return alert("Select project first");
-  const data = activeUnit ? await db.expenses.where({project: activeProject, unit: activeUnit}).toArray() : await db.expenses.where({project: activeProject}).toArray();
-  let csv = "Date,Category,Description,Unit,Amount\n";
-  data.forEach(r => {
-    csv += `${r.date},${CATEGORIES.find(c=>c.key===r.category)?.name},${r.desc||''},${r.unit?'Unit '+(r.unit==='unit1'?'1':'2'):'Both'},${r.amount}\n`;
-  });
-  const blob = new Blob([csv], {type: 'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `${activeProject}_${activeUnit||'both'}_expenses_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-};
-
-// Start everything
 init3D();
 renderAll();
 </script>
