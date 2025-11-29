@@ -10,7 +10,7 @@
   :root{--p:#00d4ff;--s:#28a745;--d:#e74c3c;--w:#f39c12;}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Poppins',sans-serif;background:#0f172a;color:#fff;min-height:100vh;overflow-x:hidden;}
-  .container{max-width:1400px;margin:0 auto;padding:12px;}
+  .container{max-width:1400px;margin:0 auto;padding:8px;}
   header{text-align:center;padding:18px 0;background:linear-gradient(135deg,#1e3a8a,#3b82f6);margin-bottom:12px;border-radius:0 0 24px 24px;}
   h1{font-size:30px;background:linear-gradient(90deg,#00d4ff,#ff3366);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;}
   .grid{display:grid;grid-template-columns:1fr;gap:14px;}
@@ -42,10 +42,26 @@
   .ledger th{background:var(--p);color:#000;padding:12px;font-weight:600;}
   .ledger td{padding:10px;text-align:center;border-bottom:1px solid #334155;}
   .btn-d{background:var(--d);color:#fff;padding:8px 14px;font-size:13px;border-radius:10px;}
+  .btn-e{background:#f39c12;color:#fff;padding:8px 14px;font-size:13px;border-radius:10px;margin-left:5px;}
   .threejs-container{height:420px !important;border-radius:18px;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,0.7);background:#87CEEB;margin-top:20px;}
   .modal{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;z-index:1000;}
   .modal-box{background:#1e293b;padding:30px;border-radius:18px;width:90%;max-width:460px;}
   .input,select{width:100%;padding:14px;margin:10px 0;border-radius:14px;border:1px solid #475569;background:#0f172a;color:#fff;font-size:16px;}
+  /* Contrasting Colors: Enhanced contrast for readability (darker backgrounds, brighter text) */
+  .deductions, .kpi, .budget-item { background: #111827; color: #f9fafb; }
+  .deduction-item, .budget-item { border-bottom-color: #4b5563; }
+  .ledger td { color: #f9fafb; }
+  .over-budget { color: #fca5a5 !important; }
+  /* Mobile Fixes: Reduced padding/margins, flexible heights, no horizontal scroll */
+  @media(max-width: 768px) {
+    .container { padding: 4px; }
+    header { padding: 12px 0; }
+    .sidebar, .main { padding: 12px; }
+    .header-bar { flex-direction: column; align-items: stretch; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .threejs-container { height: 300px !important; }
+    .ledger th, .ledger td { padding: 6px; font-size: 12px; }
+  }
 </style>
 </head>
 <body>
@@ -145,6 +161,41 @@
   </div>
 </div>
 
+<!-- EDIT MODAL -->
+<div class="modal" id="editModal">
+  <div class="modal-box">
+    <h2 style="font-size:22px;margin-bottom:20px;color:#60a5fa;">Edit Expense</h2>
+    <input type="hidden" id="editId">
+    <select id="editUnit" class="input">
+      <option value="">Shared (Split 50/50)</option>
+      <option value="unit1">Block 1 Only</option>
+      <option value="unit2">Block 2 Only</option>
+    </select>
+    <select id="editCategory" class="input">
+      <option value="">Select Category</option>
+      <option value="excavation">Excavation & Earthworks</option>
+      <option value="concrete">Concrete Works</option>
+      <option value="steel">Reinforcement Steel</option>
+      <option value="pitwall">Pit Walling</option>
+      <option value="superwall">Superstructure Walling</option>
+      <option value="roofing">Roofing</option>
+      <option value="doors">Doors & Carpentry</option>
+      <option value="plaster">Plaster & Screed</option>
+      <option value="painting">Painting</option>
+      <option value="vent">Ventilation</option>
+      <option value="transport">Transport</option>
+      <option value="misc">Miscellaneous</option>
+    </select>
+    <input type="date" id="editDate" class="input">
+    <input type="text" id="editDesc" class="input" placeholder="Description (optional)">
+    <input type="number" id="editAmount" class="input" placeholder="Amount in KSh" min="1">
+    <div style="margin-top:30px;text-align:right;">
+      <button class="btn" id="updateExpense">Update Expense</button>
+      <button class="btn" style="background:#64748b;margin-left:12px;" id="editCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script type="importmap">
 {
   "imports": {
@@ -158,9 +209,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const DB_NAME = "NylaLatrines_Final_" + Date.now();
-const db = new Dexie(DB_NAME);
-db.version(1).stores({expenses:"++id,project,unit,category,date,desc,amount"});
+const STORAGE_KEY = "NylaLatrines_Expenses_v2"; // Fixed key for localStorage
+let expensesData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; // {projectId: [{expenses}]}
 
 const PROJECTS = [
   {id:"yedhi",name:"YEDHI PRIMARY (2-door)",doors:2,original:1029000},
@@ -188,6 +238,36 @@ let activeProject = null;
 let unitFilter = "";
 let scene, camera, renderer, controls;
 let block1 = {}, block2 = {};
+
+function saveExpenses() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(expensesData));
+}
+
+function getExpenses(projectId) {
+  return expensesData[projectId] || [];
+}
+
+function addExpense(projectId, expense) {
+  if (!expensesData[projectId]) expensesData[projectId] = [];
+  expensesData[projectId].push({ id: Date.now(), ...expense });
+  saveExpenses();
+}
+
+function updateExpense(projectId, id, updates) {
+  const expenses = getExpenses(projectId);
+  const index = expenses.findIndex(e => e.id === id);
+  if (index !== -1) {
+    expenses[index] = { ...expenses[index], ...updates };
+    saveExpenses();
+  }
+}
+
+function deleteExpense(projectId, id) {
+  const expenses = getExpenses(projectId);
+  expensesData[projectId] = expenses.filter(e => e.id !== id);
+  if (expensesData[projectId].length === 0) delete expensesData[projectId];
+  saveExpenses();
+}
 
 function calc(amount){
   const pmc = amount * 0.05;
@@ -270,6 +350,10 @@ function init3D(){
 
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
+  controls.maxPolarAngle = Math.PI / 2.1; // Prevent gliding below horizon/out of focus
+  controls.minDistance = 15; // Min zoom to avoid getting too close
+  controls.maxDistance = 60; // Max zoom out
+  controls.target.set(0, 0, 0); // Focus on center
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.8));
   const sun = new THREE.DirectionalLight(0xffffff, 1.4);
@@ -329,7 +413,7 @@ async function refresh(){
   scene.add(block1.group);
   scene.add(block2.group);
 
-  const expenses = await db.expenses.where({project:activeProject}).toArray();
+  const expenses = getExpenses(activeProject);
   const sharedCost = expenses.filter(e => !e.unit).reduce((a,e) => a + e.amount, 0) / 2 || 0;
   const b1Spent = expenses.filter(e => e.unit==="unit1").reduce((a,e) => a + e.amount, 0) + sharedCost;
   const b2Spent = expenses.filter(e => e.unit==="unit2").reduce((a,e) => a + e.amount, 0) + sharedCost;
@@ -377,10 +461,27 @@ async function refresh(){
       <td>${e.desc || '-'}</td>
       <td>${e.unit ? (e.unit==='unit1'?'Block 1':'Block 2') : 'Shared'}</td>
       <td>${format(e.amount)}</td>
-      <td><button class="btn-d" onclick="db.expenses.delete(${e.id}).then(refresh)">Delete</button></td>
+      <td>
+        <button class="btn-e" onclick="editExpense(${e.id})">Edit</button>
+        <button class="btn-d" onclick="deleteExpense('${activeProject}', ${e.id}); refresh();">Delete</button>
+      </td>
     </tr>`).join('');
   document.getElementById('ledgerBody').innerHTML = rows || '<tr><td colspan="6" style="color:#64748b;padding:20px;">No expenses recorded yet</td></tr>';
 }
+
+window.editExpense = function(id) {
+  const expenses = getExpenses(activeProject);
+  const expense = expenses.find(e => e.id === id);
+  if (!expense) return;
+
+  document.getElementById('editId').value = id;
+  document.getElementById('editUnit').value = expense.unit || '';
+  document.getElementById('editCategory').value = expense.category;
+  document.getElementById('editDate').value = expense.date;
+  document.getElementById('editDesc').value = expense.desc || '';
+  document.getElementById('editAmount').value = expense.amount;
+  document.getElementById('editModal').style.display = 'flex';
+};
 
 document.getElementById('projectsList').innerHTML = PROJECTS.map(p => `
   <div class="project-card" data-id="${p.id}">
@@ -412,7 +513,7 @@ document.getElementById('cancel').onclick =
 document.getElementById('modal').onclick = e => {
   if(e.target.id === 'modal' || e.target.id === 'cancel') document.getElementById('modal').style.display = 'none';
 };
-document.getElementById('saveExpense').onclick = async () => {
+document.getElementById('saveExpense').onclick = () => {
   const amount = parseFloat(document.getElementById('expAmount').value);
   const unit = document.getElementById('expUnit').value || null;
   const category = document.getElementById('expCategory').value;
@@ -424,14 +525,37 @@ document.getElementById('saveExpense').onclick = async () => {
     return;
   }
 
-  await db.expenses.add({project:activeProject, unit, category, date, desc, amount});
+  addExpense(activeProject, { unit, category, date, desc, amount });
   document.getElementById('modal').style.display = 'none';
   refresh();
 };
 
-document.getElementById('downloadCSV').onclick = async () => {
+// Edit Modal Handlers
+document.getElementById('editCancel').onclick = 
+document.getElementById('editModal').onclick = e => {
+  if(e.target.id === 'editModal' || e.target.id === 'editCancel') document.getElementById('editModal').style.display = 'none';
+};
+document.getElementById('updateExpense').onclick = () => {
+  const id = parseInt(document.getElementById('editId').value);
+  const amount = parseFloat(document.getElementById('editAmount').value);
+  const unit = document.getElementById('editUnit').value || null;
+  const category = document.getElementById('editCategory').value;
+  const date = document.getElementById('editDate').value;
+  const desc = document.getElementById('editDesc').value.trim();
+
+  if(!amount || !category || !date){
+    alert("Please fill Amount, Category and Date");
+    return;
+  }
+
+  updateExpense(activeProject, id, { unit, category, date, desc, amount });
+  document.getElementById('editModal').style.display = 'none';
+  refresh();
+};
+
+document.getElementById('downloadCSV').onclick = () => {
   if(!activeProject) return alert("Select a project first");
-  const data = await db.expenses.where({project:activeProject}).toArray();
+  const data = getExpenses(activeProject);
   let csv = "Date,Category,Description,Unit,Amount(KSh)\n";
   data.forEach(r => {
     csv += `${r.date},${CATEGORIES.find(c=>c.key===r.category)?.name || r.category},"${r.desc||''}",${r.unit?(r.unit==='unit1'?'Block 1':'Block 2'):'Shared'},${r.amount}\n`;
