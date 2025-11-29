@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NYLA Projects — Concept & Cards</title>
+  <style>
+    body{font-family:Inter, Arial, sans-serif;margin:0;background:#f5f7fb;color:#122135}
+    header{background:#012a4a;color:#fff;padding:20px 24px}
+    .wrap{max-width:1100px;margin:28px auto;padding:0 18px}
+    h1{margin:0;font-size:22px}
+    p.lead{color:#334155}
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:24px;align-items:start}
+    .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .card-mock{background:#fff;border-radius:10px;padding:14px;box-shadow:0 6px 20px rgba(2,6,23,0.08)}
+    .card-mock h3{margin:0 0 8px;font-size:15px;color:#05264c}
+    .tiny{font-size:13px;color:#475569}
+    .badge{display:inline-block;background:#e6f0ff;color:#06357a;padding:4px 8px;border-radius:999px;font-weight:600;font-size:12px}
+    .svgwrap{background:#fff;padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.04)}
+    .legend{font-size:13px;color:#334155;margin-top:8px}
+    pre{background:#0b1220;color:#dbeafe;padding:12px;border-radius:6px;overflow:auto}
+    .note{font-size:13px;color:#0b1220;background:#fff9db;padding:10px;border-radius:6px;margin-top:12px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>NYLA GENERAL SUPPLIES LTD — conceptual draft & card design</h1>
+      <p class="lead">Dashboard concept for the 4 schools (each school has 2 units). "Upfront cut" labelled as <strong>Facilitation Fee</strong>.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="grid">
+      <!-- left: cards -->
+      <section>
+        <h2 style="font-size:16px;margin-bottom:10px">Card mockups (school-level, expandable to two units)</h2>
+        <div class="cards">
+          <div class="card-mock">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <h3>YEDHI PRIMARY SCHOOL — 2-door (×2 Units)</h3>
+                <div class="tiny">Contract: KSh 1,029,000 — Net Available: <strong>KSh 524,790</strong></div>
+              </div>
+              <div class="badge">Net Live</div>
+            </div>
+            <hr style="margin:10px 0;border:none;border-top:1px solid #eef2f7">
+            <div class="tiny">Top categories</div>
+            <ul style="margin:6px 0 0 16px;color:#334155">
+              <li>Pit Walling — KSh 104,958</li>
+              <li>Concrete Works — KSh 94,462</li>
+              <li>Excavation — KSh 62,975</li>
+              <li>Roofing — KSh 62,975</li>
+            </ul>
+            <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+              <small class="tiny">Unit 1</small>
+              <small class="tiny">Unit 2</small>
+            </div>
+          </div>
+
+          <div class="card-mock">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <h3>SOSONI PRIMARY SCHOOL — 3-door (×2 Units)</h3>
+                <div class="tiny">Contract: KSh 1,546,000 — Net Available: <strong>KSh 788,460</strong></div>
+              </div>
+              <div class="badge">Net Live</div>
+            </div>
+            <hr style="margin:10px 0;border:none;border-top:1px solid #eef2f7">
+            <div class="tiny">Top categories</div>
+            <ul style="margin:6px 0 0 16px;color:#334155">
+              <li>Pit Walling — KSh 157,692</li>
+              <li>Concrete Works — KSh 141,923</li>
+              <li>Excavation — KSh 94,615</li>
+              <li>Roofing — KSh 94,615</li>
+            </ul>
+            <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+              <small class="tiny">Unit 1</small>
+              <small class="tiny">Unit 2</small>
+            </div>
+          </div>
+
+          <!-- two more cards for Mugumoni & Sogorosa -->
+          <div class="card-mock">
+            <h3>MUGUMONI PRIMARY — 3-door (×2 Units)</h3>
+            <div class="tiny">Contract: KSh 1,546,000 — Net Available: <strong>KSh 788,460</strong></div>
+            <div class="tiny" style="margin-top:8px">Pit Walling — KSh 157,692</div>
+          </div>
+
+          <div class="card-mock">
+            <h3>SOGOROSA PRIMARY — 2-door (×2 Units)</h3>
+            <div class="tiny">Contract: KSh 1,029,000 — Net Available: <strong>KSh 524,790</strong></div>
+            <div class="tiny" style="margin-top:8px">Pit Walling — KSh 104,958</div>
+          </div>
+        </div>
+
+        <div class="note">
+          Naming: "Facilitation Fee" replaces "Upfront cut". Contractor fee = 15% (retention 5% of that). All net numbers shown on cards are post-deductions.
+        </div>
+      </section>
+
+      <!-- right: diagrams -->
+      <aside>
+        <h2 style="font-size:16px;margin-bottom:8px">Conceptual drawings (plan)</h2>
+
+        <div class="svgwrap">
+          <!-- 2-door unit plan -->
+          <svg width="380" height="160" viewBox="0 0 380 160" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="6" width="168" height="148" rx="6" fill="#eef7ff" stroke="#cbe6ff" />
+            <text x="90" y="22" font-size="12" text-anchor="middle" fill="#062b4f">2-door Unit (Plan)</text>
+            <!-- two cubicles -->
+            <rect x="16" y="34" width="68" height="110" fill="#fff" stroke="#cbd5e1"/>
+            <rect x="96" y="34" width="68" height="110" fill="#fff" stroke="#cbd5e1"/>
+            <!-- slab outline -->
+            <rect x="14" y="30" width="150" height="118" fill="none" stroke="#0ea5a4" stroke-dasharray="4 3"/>
+            <text x="90" y="78" font-size="11" text-anchor="middle" fill="#0b1220">Slab 10.0 m²</text>
+            <text x="90" y="96" font-size="11" text-anchor="middle" fill="#64748b">Pit depth: 6.0 m</text>
+          </svg>
+
+          <div class="legend">Plan legend: white = cubicle, dashed = slab footprint. Numbers are from BQ (slab area & depth).</div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="svgwrap">
+          <!-- 3-door unit plan -->
+          <svg width="380" height="160" viewBox="0 0 380 160" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="6" width="168" height="148" rx="6" fill="#fff7ed" stroke="#ffe6cc" />
+            <text x="90" y="22" font-size="12" text-anchor="middle" fill="#5a2d0c">3-door Unit (Plan)</text>
+            <!-- three cubicles -->
+            <rect x="14" y="34" width="44" height="110" fill="#fff" stroke="#cbd5e1"/>
+            <rect x="62" y="34" width="44" height="110" fill="#fff" stroke="#cbd5e1"/>
+            <rect x="110" y="34" width="44" height="110" fill="#fff" stroke="#cbd5e1"/>
+            <!-- slab outline -->
+            <rect x="12" y="30" width="146" height="118" fill="none" stroke="#b45309" stroke-dasharray="4 3"/>
+            <text x="85" y="78" font-size="11" text-anchor="middle" fill="#7c2d0c">Slab 14.0 m²</text>
+            <text x="85" y="96" font-size="11" text-anchor="middle" fill="#7c2d0c">Pit depth: 6.0 m</text>
+          </svg>
+
+          <div class="legend">Each school delivers two units (stacked or side-by-side depending on site). These are conceptual plan views.</div>
+        </div>
+
+      </aside>
+    </div>
+
+    <h2 style="margin-top:26px">Data model (JSON snippet)</h2>
+    <pre>{
+  "projects": [
+    {
+      "name": "YEDHI",
+      "type": "2-door",
+      "contract_value": 1029000,
+      "deductions": {"pmc": 51450, "tax": 195510, "facilitation_fee": 102900, "contractor_fee": 154350, "retention": 7717.5},
+      "net_available": 524790,
+      "units": [ {"id":1, "budget_share":0.5}, {"id":2, "budget_share":0.5} ]
+    },
+    {
+      "name": "SOSONI",
+      "type": "3-door",
+      "contract_value": 1546000,
+      "deductions": {"pmc": 77300, "tax": 293740, "facilitation_fee": 154600, "contractor_fee": 231900, "retention": 11595},
+      "net_available": 788460,
+      "units": [ {"id":1, "budget_share":0.5}, {"id":2, "budget_share":0.5} ]
+    }
+  ]
+}</pre>
+
+    <div class="note">Next: I can now generate the actual HTML/CSS/JS dashboard that reads this JSON and renders the 4 cards (each expandable to 2 units) with editable "amount spent" fields. Say "build dashboard" and I will output the full GitHub-ready code.</div>
+  </main>
+</body>
+</html>
