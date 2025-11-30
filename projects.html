@@ -599,13 +599,16 @@ document.getElementById('downloadCSV').onclick = async () => {
 
   let grandTotals = {};
   CATEGORIES.forEach(c => grandTotals[c.key] = 0);
-  let grandSpentAll = 0, grandNetAll = 0;
+  let grandSpentAll = 0;
+  let grandNetAll = 0;
 
   for (const p of PROJECTS) {
     const res = await call("get", { project: p.id });
     const expenses = res.success ? (res.expenses || []) : [];
-    const d = calc(p.original);
-    const net = d.net;
+    
+    // Use exact gross amount from PROJECTS
+    const gross = p.original;
+    const net = calc(gross).net;  // This uses your exact 61% logic
 
     csv += `PROJECT: ${p.name} (${p.doors}-door)\n`;
     csv += "Category,Date,Description,Unit,Amount (KSh)\n";
@@ -613,45 +616,66 @@ document.getElementById('downloadCSV').onclick = async () => {
     let categoryTotals = {};
     CATEGORIES.forEach(c => categoryTotals[c.key] = 0);
 
-    for (const cat of CATEGORIES) {
-      const catExpenses = expenses.filter(e => e.category === cat.key);
-      for (const e of catExpenses) {
-        const amount = Math.round(e.amount);
-        categoryTotals[cat.key] += amount;
-        csv += `"${cat.name}","${e.date}","${String(e.desc || '').replace(/"/g,'""')}","${e.unit ? (e.unit==='unit1'?'Block 1':'Block 2') : 'Shared'}","${amount.toLocaleString()}"\n`;
-      }
-      if (catExpenses.length > 0) {
-        csv += `,"Subtotal ${cat.name}","","","${categoryTotals[cat.key].toLocaleString()}"\n\n`;
-      }
-    }
+    // List all expenses exactly as stored (no premature rounding)
+    expenses.forEach(e => {
+      const amount = Number(e.amount); // Keep full precision
+      if (!isNaN(amount) && amount > 0 && e.category) {
+        categoryTotals[e.category] = (categoryTotals[e.category] || 0) + amount;
 
-    const totalSpent = Object.values(categoryTotals).reduce((a,b)=>a+b,0);
-    CATEGORIES.forEach(c => grandTotals[c.key] += categoryTotals[c.key]);
+        const unitLabel = e.unit ? (e.unit === 'unit1' ? 'Block 1' : 'Block 2') : 'Shared';
+        const desc = (e.desc || '').toString().replace(/"/g, '""');
+
+        csv += `"${CATEGORY_NAMES[e.category] || e.category}","${e.date}","${desc}","${unitLabel}","${amount.toLocaleString('en-KE', {minimumFractionDigits: 0})}"\n`;
+      }
+    });
+
+    // Add subtotals per category
+    CATEGORIES.forEach(cat => {
+      const total = categoryTotals[cat.key] || 0;
+      if (total > 0) {
+        csv += `,"Subtotal: ${cat.name}","","","${total.toLocaleString('en-KE')}"\n\n`;
+        grandTotals[cat.key] += total;
+      }
+    });
+
+    const totalSpent = Object.values(categoryTotals).reduce((a, b) => a + b, 0);
     grandSpentAll += totalSpent;
     grandNetAll += net;
 
+    // Project Summary - EXACT numbers, no weird rounding
     csv += "=== PROJECT SUMMARY ===\n";
-    csv += `Gross Contract Amount,,KSh ${p.original.toLocaleString()}\n`;
-    csv += `Net Budget,,KSh ${net.toLocaleString()}\n`;
-    csv += `Total Spent,,KSh ${totalSpent.toLocaleString()}\n`;
-    csv += `Remaining,,KSh ${(net - totalSpent).toLocaleString()}\n`;
-    csv += `Progress,,${Math.round(totalSpent/net*100)}%\n\n\n`;
+    csv += `"Gross Contract Amount","","","","KSh ${gross.toLocaleString('en-KE')}"\n`;
+    csv += `"Net Budget (after all deductions)","","","","KSh ${net.toLocaleString('en-KE')}"\n`;
+    csv += `"Total Spent","","","","KSh ${totalSpent.toLocaleString('en-KE')}"\n`;
+    csv += `"Remaining Balance","","","","KSh ${(net - totalSpent).toLocaleString('en-KE')}"\n`;
+    csv += `"Progress","","","",${Math.round((totalSpent / net) * 100)}%\n\n\n`;
   }
 
-  csv += "=== GRAND TOTALS ALL PROJECTS ===\n";
+  // GRAND TOTALS - Clean and accurate
+  csv += "=== GRAND TOTALS - ALL 4 SCHOOLS ===\n";
   csv += "Category,Total Spent (KSh)\n";
-  CATEGORIES.forEach(c => csv += `"${c.name}","${grandTotals[c.key].toLocaleString()}"\n`);
-  csv += `\nTotal Spent All Projects,KSh ${grandSpentAll.toLocaleString()}\n`;
-  csv += `Total Net All Projects,KSh ${grandNetAll.toLocaleString()}\n`;
-  csv += `Overall Remaining,KSh ${(grandNetAll - grandSpentAll).toLocaleString()}\n`;
+  CATEGORIES.forEach(c => {
+    const amt = grandTotals[c.key] || 0;
+    if (amt > 0) {
+      csv += `"${c.name}","KSh ${amt.toLocaleString('en-KE')}"\n`;
+    }
+  });
 
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  csv += `\n"Total Spent (All Projects)","KSh ${grandSpentAll.toLocaleString('en-KE')}"\n`;
+  csv += `"Total Net Budget (All Projects)","KSh ${grandNetAll.toLocaleString('en-KE')}"\n`;
+  csv += `"Overall Remaining Balance","KSh ${(grandNetAll - grandSpentAll).toLocaleString('en-KE')}"\n`;
+  csv += `"Overall Progress",${Math.round((grandSpentAll / grandNetAll) * 100)}%\n`;
+
+  // Trigger download
+  const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `NYLA_Pit_Latrines_Report_${new Date().toISOString().slice(0,10)}.csv`;
+  link.download = `NYLA_Pit_Latrines_Full_Report_${new Date().toISOString().slice(0,10)}.csv`;
+  link.style.display = 'none';
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
 };
-
 // === START EVERYTHING ===
 setup3D();
 </script>
