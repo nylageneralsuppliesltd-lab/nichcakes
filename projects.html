@@ -203,7 +203,7 @@ let activeProject = null, unitFilter = "", currentEditId = null;
 let block1 = null, block2 = null;
 let scene, camera, renderer, controls;
 
-// ============ PERFECT REALISTIC LATrine (matches your drawing 100%) ============
+// === REALISTIC 3D LATrine (100% accurate) ===
 function createRealLatrine(xOffset = 0, doors = 2) {
   const group = new THREE.Group();
 
@@ -234,7 +234,7 @@ function createRealLatrine(xOffset = 0, doors = 2) {
 
   // Squatting holes
   for (let i = 0; i < doors; i++) {
-    const hole = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.3, 0.45), new THREE.MeshBasicMaterial({color:0x000}));
+    const hole = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.3, 0.45), new THREE.MeshBasicMaterial({color:0x000000}));
     hole.position.set(xOffset + (i - (doors-1)/2)*1.80, 0.08, -0.55);
     group.add(hole);
   }
@@ -251,18 +251,16 @@ function createRealLatrine(xOffset = 0, doors = 2) {
   // Back wall
   addWall(totalW, wallH, wallT, 0, wallH/2, depth/2 - wallT/2);
 
-  // Front wall segments (door gaps)
+  // Front wall segments
   const doorW = 0.90;
   const sideSeg = (totalW - doors * doorW) / 2;
   addWall(sideSeg, wallH, wallT, -totalW/2 + sideSeg/2, wallH/2, -depth/2 + wallT/2);
   addWall(sideSeg, wallH, wallT,  totalW/2 - sideSeg/2, wallH/2, -depth/2 + wallT/2);
 
-  // Side walls – exact 400mm drop
+  // Side walls (400mm drop)
   const sideShape = new THREE.Shape();
-  sideShape.moveTo(-wallT/2, 0);
-  sideShape.lineTo(wallT/2, 0);
-  sideShape.lineTo(wallT/2, wallH + 0.40);
-  sideShape.lineTo(-wallT/2, wallH);
+  sideShape.moveTo(-wallT/2, 0); sideShape.lineTo(wallT/2, 0);
+  sideShape.lineTo(wallT/2, wallH + 0.40); sideShape.lineTo(-wallT/2, wallH);
   sideShape.closePath();
   const sideGeo = new THREE.ExtrudeGeometry(sideShape, {depth: depth, bevelEnabled: false});
   const leftSide = new THREE.Mesh(sideGeo, coralMat);
@@ -273,12 +271,12 @@ function createRealLatrine(xOffset = 0, doors = 2) {
   rightSide.position.x = xOffset + totalW/2;
   group.add(rightSide); walls.push(rightSide);
 
-  // Internal partitions
+  // Partitions
   for (let i = 1; i < doors; i++) {
     addWall(wallT, wallH, depth, (i - doors/2 + 0.5)*cubicleW, wallH/2, 0);
   }
 
-  // Timber doors (facing front)
+  // Doors
   const doorsGroup = new THREE.Group();
   for (let i = 0; i < doors; i++) {
     const door = new THREE.Mesh(new THREE.BoxGeometry(0.88, 2.05, 0.06), doorMat);
@@ -288,7 +286,7 @@ function createRealLatrine(xOffset = 0, doors = 2) {
   }
   group.add(doorsGroup);
 
-  // Mono-pitch roof – exact 400mm drop
+  // Roof (mono-pitch)
   const roofW = totalW + overhang*2;
   const roofD = depth + overhang*2;
   const roofShape = new THREE.Shape();
@@ -315,7 +313,7 @@ function createRealLatrine(xOffset = 0, doors = 2) {
   dot.position.set(xOffset, 0.5, 0);
   group.add(dot);
 
-  // Hide everything at start
+  // Hide everything initially
   pit.visible = slab.visible = roof.visible = dot.visible = doorsGroup.visible = false;
   walls.forEach(w => w.visible = false);
 
@@ -331,7 +329,7 @@ function createRealLatrine(xOffset = 0, doors = 2) {
   };
 }
 
-// ============ 3D SCENE SETUP ============
+// === 3D SCENE SETUP ===
 function setup3D() {
   const container = document.getElementById('threejs');
   scene = new THREE.Scene();
@@ -347,15 +345,13 @@ function setup3D() {
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.8);
-  scene.add(ambient);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
   const sun = new THREE.DirectionalLight(0xffffff, 1);
   sun.position.set(15, 25, 10);
   scene.add(sun);
 
-  // Initial blocks (will be rebuilt on project select)
   block1 = createRealLatrine(-7, 2);
-  block2 = createRealLatrine( 7, 2);
+  block2 = createRealLatrine(7, 2);
   scene.add(block1.group, block2.group);
 
   function animate() {
@@ -372,7 +368,7 @@ function setup3D() {
   });
 }
 
-// ============ REST OF YOUR CODE (100% untouched) ============
+// === CORE FUNCTIONS ===
 async function call(action, payload = {}) {
   try {
     const proj = payload.project ?? activeProject;
@@ -418,7 +414,7 @@ async function refresh() {
   if (!activeProject) return;
   const p = PROJECTS.find(x => x.id === activeProject);
   const d = calc(p.original);
-  const single = unitFilter === "unit1" || unitFilter === "2";
+  const single = unitFilter === "unit1" || unitFilter === "unit2";
   const net = single ? d.perBlock : d.net;
 
   document.getElementById('deductionSummary').innerHTML = `
@@ -470,30 +466,23 @@ async function refresh() {
   filtered.sort((a, b) => b.date.localeCompare(a.date));
 
   document.getElementById('ledgerCount').textContent = `${filtered.length} ${filtered.length === 1 ? 'entry' : 'entries'}`;
- document.getElementById('ledgerBody').innerHTML = filtered.map(e => {
-  const desc = e.desc == null ? '—' : e.desc;
-  const safeDesc = e.desc == null ? '' : String(e.desc).replace(/"/g, '&quot;');
-  return `
-    <tr>
-      <td>${e.date}</td>
-      <td>${e.category}</td>
-      <td>${desc}</td>
-      <td>${e.unit ? (e.unit==='unit1'?'B1':'B2') : 'Shared'}</td>
-      <td>${format(getDisplayAmount(e))}</td>
-      <td class="action-buttons">
-        <button class="action-btn btn-edit" 
-                data-id="${e.id}" 
-                data-date="${e.date}" 
-                data-cat="${e.category}" 
-                data-desc="${safeDesc}" 
-                data-unit="${e.unit||''}" 
-                data-amt="${e.amount}">Edit</button>
-        <button class="action-btn btn-delete" data-id="${e.id}">Del</button>
-      </td>
-    </tr>`;
-}).join('');
+  document.getElementById('ledgerBody').innerHTML = filtered.map(e => {
+    const desc = e.desc == null ? '—' : e.desc;
+    const safeDesc = e.desc == null ? '' : String(e.desc).replace(/"/g, '&quot;');
+    return `
+      <tr>
+        <td>${e.date}</td>
+        <td>${e.category}</td>
+        <td>${desc}</td>
+        <td>${e.unit ? (e.unit==='unit1'?'B1':'B2') : 'Shared'}</td>
+        <td>${format(getDisplayAmount(e))}</td>
+        <td class="action-buttons">
+          <button class="action-btn btn-edit" data-id="${e.id}" data-date="${e.date}" data-cat="${e.category}" data-desc="${safeDesc}" data-unit="${e.unit||''}" data-amt="${e.amount}">Edit</button>
+          <button class="action-btn btn-delete" data-id="${e.id}">Del</button>
+        </td>
+      </tr>`;
+  }).join('');
 
-  // Re-attach edit/delete handlers
   document.querySelectorAll('.btn-edit').forEach(b => {
     b.onclick = () => {
       currentEditId = b.dataset.id;
@@ -517,79 +506,45 @@ async function refresh() {
     };
   });
 
-
-  // 3D Update — now using correct number of doors
+  // 3D Update
   const b1Spent = exp.filter(e => !e.unit || e.unit === "unit1").reduce((s,e) => s + (e.unit ? e.amount : e.amount/2), 0);
   const b2Spent = exp.filter(e => !e.unit || e.unit === "unit2").reduce((s,e) => s + (e.unit ? e.amount : e.amount/2), 0);
 
-  updateBlock(block1, Math.round(b1Spent / d.perBlock * 100));
-  updateBlock(block2, Math.round(b2Spent / d.perBlock * 100));
+  block1.update(Math.round(b1Spent / d.perBlock * 100));
+  block2.update(Math.round(b2Spent / d.perBlock * 100));
 
   block1.group.visible = !single || unitFilter === "unit1";
   block2.group.visible = !single || unitFilter === "unit2";
 }
 
-function updateBlock(b, pct) {
-  if (!b || !b.update) return;
-  b.update(pct);
-}
+// === PROJECT LIST ===
+document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`
+  <div class="project-card" data-id="${p.id}">
+    <strong>${p.name}</strong><br>
+    <small style="color:#64748b;">${p.doors}-door • ${format(calc(p.original).net)}</small>
+  </div>`).join('');
 
-// Project selection — rebuild 3D with correct doors match project
 document.getElementById('projectsList').onclick = e => {
   const c = e.target.closest('.project-card');
-  if(!c) return;
-  document.querySelectorAll('.project-card').forEach(x=>x.classList.remove('active'));
+  if (!c) return;
+  document.querySelectorAll('.project-card').forEach(x => x.classList.remove('active'));
   c.classList.add('active');
   activeProject = c.dataset.id;
   unitFilter = "";
   document.getElementById('unitFilter').value = "";
 
-  // REBUILD 3D with correct number of doors
   scene.remove(block1.group, block2.group);
   const proj = PROJECTS.find(p => p.id === activeProject);
   block1 = createRealLatrine(-7, proj.doors);
-  block2 = createRealLatrine( 7, proj.doors);
+  block2 = createRealLatrine(7, proj.doors);
   scene.add(block1.group, block2.group);
 
   refresh();
 };
 
-// Init projects list
-document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`
-  <div class="project-card" data-id="${p.id}">
-    <strong>${p.name}</strong><br>
-    <small style="color:#64748b;">${p.doors}-door block • ${format(calc(p.original).net)}</small>
-  </div>`).join('');
+document.getElementById('unitFilter').onchange = e => { unitFilter = e.target.value; refresh(); };
 
-// SAVE EXPENSE
-document.getElementById('saveExpense').onclick = async () => {
-  const payload = {
-    date: document.getElementById('expDate').value,
-    category: document.getElementById('expCategory').value,
-    desc: document.getElementById('expDesc').value.trim(),
-    unit: document.getElementById('expUnit').value || null,
-    amount: Number(document.getElementById('expAmount').value)
-  };
-  if (!payload.date || !payload.category || !payload.amount) return alert("Please fill all required fields");
-  const action = currentEditId ? 'update' : 'add';
-  const res = await call(action, currentEditId ? {id: currentEditId, ...payload} : payload);
-  if (res.success) {
-    document.getElementById('modal').style.display = 'none';
-    currentEditId = null;
-    document.getElementById('saveExpense').textContent = "Save";
-    document.getElementById('modalTitle').textContent = "Add Expense";
-    refresh();
-  }
-};
-
-document.getElementById('cancelModal').onclick = () => {
-  document.getElementById('modal').style.display = 'none';
-  currentEditId = null;
-  document.getElementById('saveExpense').textContent = "Save";
-  document.getElementById('modalTitle').textContent = "Add Expense";
-};
-
-// ADD EXPENSE BUTTON — NOW FIXED!
+// === ADD/EDIT EXPENSE ===
 document.getElementById('addExpense').onclick = () => {
   if (!activeProject) return alert("Please select a project first!");
   currentEditId = null;
@@ -603,75 +558,33 @@ document.getElementById('addExpense').onclick = () => {
   document.getElementById('modal').style.display = 'flex';
 };
 
-// 3D WITH 1% DOT
-let scene, camera, renderer, controls;
-function init3D() {
-  const c = document.getElementById('threejs');
-  scene = new THREE.Scene(); scene.background = new THREE.Color(0xe0f2fe);
-  camera = new THREE.PerspectiveCamera(50, c.clientWidth/c.clientHeight, 0.1, 1000); camera.position.set(0,10,25);
-  renderer = new THREE.WebGLRenderer({antialias:true}); renderer.setSize(c.clientWidth, c.clientHeight); c.appendChild(renderer.domElement);
-  controls = new OrbitControls(camera, renderer.domElement);
-  scene.add(new THREE.AmbientLight(0xffffff, 1));
-  const light = new THREE.DirectionalLight(0xffffff, 1); light.position.set(10,20,10); scene.add(light);
-  block1 = makeBlock(-7); block2 = makeBlock(7);
-  scene.add(block1.group, block2.group);
-  function animate(){requestAnimationFrame(animate); controls.update(); renderer.render(scene,camera);} animate();
-  window.addEventListener('resize',()=>{camera.aspect=c.clientWidth/c.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(c.clientWidth,c.clientHeight);});
-}
-
-function makeBlock(x){
-  const g = new THREE.Group();
-  const brick = new THREE.MeshStandardMaterial({color:0xd4a574});
-  const roof = new THREE.MeshStandardMaterial({color:0xc41e3a});
-  const conc = new THREE.MeshStandardMaterial({color:0x95a5a6});
-
-  const dot = new THREE.Mesh(new THREE.SphereGeometry(0.3,16,16), new THREE.MeshBasicMaterial({color:0x10b981}));
-  dot.position.set(x, 0.3, 0); g.add(dot);
-
-  const pit = new THREE.Mesh(new THREE.CylinderGeometry(1.8,2,2.8,20), brick); pit.position.set(x,-1.4,0); g.add(pit);
-  const slab = new THREE.Mesh(new THREE.BoxGeometry(3.6,0.15,2.5), conc); slab.position.set(x,0,0); g.add(slab);
-  const walls = [];
-  const addWall = (w,d,px,z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,2.1,d), brick); m.position.set(x+px,1.05,z); g.add(m); walls.push(m); };
-  addWall(3.6,0.2,0,1.2); addWall(3.6,0.2,0,-1.2); addWall(0.2,2.6,-1.7,0); addWall(0.2,2.6,1.7,0);
-  const r = new THREE.Mesh(new THREE.BoxGeometry(4.2,0.15,3), roof); r.position.set(x,2.5,0); g.add(r);
-
-  dot.visible = pit.visible = slab.visible = r.visible = false;
-  walls.forEach(w => w.visible = false);
-
-  return {group:g, dot, pit, walls, slab, roof:r};
-}
-
-function updateBlock(b, pct){
-  b.dot.visible = pct >= 1;
-  b.pit.visible = pct >= 10;
-  b.walls.forEach(w => w.visible = pct >= 35);
-  b.slab.visible = pct >= 65;
-  b.roof.visible = pct >= 90;
-}
-
-// Project selection & other buttons
-document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`<div class="project-card" data-id="${p.id}"><strong>${p.name}</strong><br><small style="color:#64748b;">${format(calc(p.original).net)}</small></div>`).join('');
-
-document.getElementById('projectsList').onclick = e => {
-  const c = e.target.closest('.project-card');
-  if(c){
-    document.querySelectorAll('.project-card').forEach(x=>x.classList.remove('active'));
-    c.classList.add('active');
-    activeProject = c.dataset.id;
-    unitFilter = "";
-    document.getElementById('unitFilter').value = "";
+document.getElementById('saveExpense').onclick = async () => {
+  const payload = {
+    date: document.getElementById('expDate').value,
+    category: document.getElementById('expCategory').value,
+    desc: document.getElementById('expDesc').value.trim(),
+    unit: document.getElementById('expUnit').value || null,
+    amount: Number(document.getElementById('expAmount').value)
+  };
+  if (!payload.date || !payload.category || !payload.amount) return alert("Fill all required fields");
+  const action = currentEditId ? 'update' : 'add';
+  const res = await call(action, currentEditId ? {id: currentEditId, ...payload} : payload);
+  if (res.success) {
+    document.getElementById('modal').style.display = 'none';
+    currentEditId = null;
     refresh();
   }
 };
 
-document.getElementById('unitFilter').onchange = e => { unitFilter = e.target.value; refresh(); };
+document.getElementById('cancelModal').onclick = () => {
+  document.getElementById('modal').style.display = 'none';
+  currentEditId = null;
+};
 
+// === DOWNLOAD FULL CSV REPORT ===
 document.getElementById('downloadCSV').onclick = async () => {
   let csv = "NYLA PIT LATRINES - FULL FINANCIAL REPORT\n";
   csv += "Generated on," + new Date().toLocaleString() + "\n\n";
-
-  // Map your CATEGORIES array to objects for easy lookup
-  const CATEGORY_MAP = Object.fromEntries(CATEGORIES.map(c => [c.key, c.name]));
 
   let grandTotals = {};
   CATEGORIES.forEach(c => grandTotals[c.key] = 0);
@@ -689,56 +602,47 @@ document.getElementById('downloadCSV').onclick = async () => {
     let categoryTotals = {};
     CATEGORIES.forEach(c => categoryTotals[c.key] = 0);
 
-    // Group expenses by category
     for (const cat of CATEGORIES) {
       const catExpenses = expenses.filter(e => e.category === cat.key);
-      if (catExpenses.length === 0) continue;
-
       for (const e of catExpenses) {
         const amount = Math.round(e.amount);
         categoryTotals[cat.key] += amount;
-
         csv += `"${cat.name}","${e.date}","${String(e.desc || '').replace(/"/g,'""')}","${e.unit ? (e.unit==='unit1'?'Block 1':'Block 2') : 'Shared'}","${amount.toLocaleString()}"\n`;
       }
-
-      csv += `,"Subtotal ${cat.name}","","","${categoryTotals[cat.key].toLocaleString()}"\n\n`;
+      if (catExpenses.length > 0) {
+        csv += `,"Subtotal ${cat.name}","","","${categoryTotals[cat.key].toLocaleString()}"\n\n`;
+      }
     }
 
-    const totalSpent = Object.values(categoryTotals).reduce((a,b) => a+b, 0);
-
-    // Add to grand totals
+    const totalSpent = Object.values(categoryTotals).reduce((a,b)=>a+b,0);
     CATEGORIES.forEach(c => grandTotals[c.key] += categoryTotals[c.key]);
     grandSpentAll += totalSpent;
     grandNetAll += net;
 
-    // Project summary
     csv += "=== PROJECT SUMMARY ===\n";
     csv += `Gross Contract Amount,,KSh ${p.original.toLocaleString()}\n`;
-    csv += `Net Budget (after deductions),,KSh ${net.toLocaleString()}\n`;
+    csv += `Net Budget,,KSh ${net.toLocaleString()}\n`;
     csv += `Total Spent,,KSh ${totalSpent.toLocaleString()}\n`;
-    csv += `Remaining Balance,,KSh ${(net - totalSpent).toLocaleString()}\n`;
+    csv += `Remaining,,KSh ${(net - totalSpent).toLocaleString()}\n`;
     csv += `Progress,,${Math.round(totalSpent/net*100)}%\n\n\n`;
   }
 
-  // GRAND TOTALS
-  csv += "=== GRAND TOTALS ACROSS ALL 4 PROJECTS ===\n";
+  csv += "=== GRAND TOTALS ALL PROJECTS ===\n";
   csv += "Category,Total Spent (KSh)\n";
-  CATEGORIES.forEach(c => {
-    csv += `"${c.name}","${grandTotals[c.key].toLocaleString()}"\n`;
-  });
+  CATEGORIES.forEach(c => csv += `"${c.name}","${grandTotals[c.key].toLocaleString()}"\n`);
   csv += `\nTotal Spent All Projects,KSh ${grandSpentAll.toLocaleString()}\n`;
-  csv += `Total Net Budget All Projects,KSh ${grandNetAll.toLocaleString()}\n`;
-  csv += `Overall Remaining Balance,KSh ${(grandNetAll - grandSpentAll).toLocaleString()}\n`;
+  csv += `Total Net All Projects,KSh ${grandNetAll.toLocaleString()}\n`;
+  csv += `Overall Remaining,KSh ${(grandNetAll - grandSpentAll).toLocaleString()}\n`;
 
-  // Download
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `NYLA_Pit_Latrines_Full_Report_${new Date().toISOString().slice(0,10)}.csv`;
+  link.download = `NYLA_Pit_Latrines_Report_${new Date().toISOString().slice(0,10)}.csv`;
   link.click();
 };
- 
-init3D();
+
+// === START EVERYTHING ===
+setup3D();
 </script>
 </body>
 </html>
