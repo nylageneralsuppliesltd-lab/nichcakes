@@ -478,45 +478,72 @@ document.getElementById('unitFilter').onchange = e => { unitFilter = e.target.va
 document.getElementById('downloadCSV').onclick = async () => {
   let csv = "NYLA PIT LATRINES - FULL FINANCIAL REPORT\n";
   csv += "Generated on," + new Date().toLocaleString() + "\n\n";
-  csv += "Project,Date,Category,Description,Unit,Amount (KSh)\n";
 
-  let grandNet = 0, grandSpent = 0;
+  let grandTotals = {};
+  Object.keys(CATEGORY_PERCENTAGES).forEach(c => grandTotals[c] = 0);
+  let grandSpentAll = 0, grandNetAll = 0;
 
   for (const p of PROJECTS) {
-  const tempProject = p.id;
-
-  // Use the call() function instead of raw fetch
-  const res = await call("get", { project: tempProject });
-  const expenses = res.success ? (res.expenses || []) : [];
-
-
+    const res = await call("get", { project: p.id });
+    const expenses = res.success ? res.expenses : [];
     const d = calc(p.original);
-    const net = d.net;
-    grandNet += net;
+    const net = Math.round(d.net);
 
-    const spent = expenses.reduce((s, e) => s + (e.unit ? e.amount : e.amount), 0); // full project amount
-    grandSpent += spent;
+    csv += `PROJECT: ${p.name}\n`;
+    csv += "Category,Date,Description,Unit,Amount (KSh)\n";
 
-    expenses.forEach(e => {
-      csv += `"${p.name}","${e.date}","${e.category}","${String(e.desc || '').replace(/"/g,'""')}","${e.unit ? 'Block ' + (e.unit === 'unit1' ? '1' : '2') : 'Shared'}",${e.amount}\n`;
+    let categoryTotals = {};
+    Object.keys(CATEGORY_PERCENTAGES).forEach(c => categoryTotals[c] = 0);
 
-    });
+    // Group by category
+    for (const cat of Object.keys(CATEGORY_PERCENTAGES)) {
+      const catExpenses = expenses.filter(e => e.category === cat);
+      if(catExpenses.length === 0) continue;
 
-    csv += `,,,"SUBTOTAL: ${p.name}",,${spent.toLocaleString()}\n`;
-    csv += `,,,"Net Amount",,${net.toLocaleString()}\n`;
-    csv += `,,,"Balance Remaining",,${(net - spent).toLocaleString()}\n\n`;
+      for (const e of catExpenses) {
+        const amount = Math.round(e.amount);
+        categoryTotals[cat] += amount;
+        csv += `"${CATEGORY_NAMES[cat]}","${e.date}","${String(e.desc || '').replace(/"/g,'""')}","${e.unit ? (e.unit==='unit1'?'Block 1':'Block 2') : 'Shared'}","${amount.toLocaleString()}"\n`;
+      }
+
+      // Subtotal per category
+      csv += `,"Subtotal for ${CATEGORY_NAMES[cat]}","","","${categoryTotals[cat].toLocaleString()}"\n\n`;
+    }
+
+    const totalSpent = Object.values(categoryTotals).reduce((a,b)=>a+b,0);
+
+    // Running grand totals
+    Object.keys(categoryTotals).forEach(c => grandTotals[c] += categoryTotals[c]);
+    grandSpentAll += totalSpent;
+    grandNetAll += net;
+
+    // Project summary table on the side
+    csv += "=== PROJECT SUMMARY ===\n";
+    csv += `Gross Contract Amount,,KSh ${Math.round(p.original).toLocaleString()}\n`;
+    csv += `Net Budget (61%),,KSh ${net.toLocaleString()}\n`;
+    csv += `Total Spent,,KSh ${totalSpent.toLocaleString()}\n`;
+    csv += `Remaining Balance,,KSh ${(net-totalSpent).toLocaleString()}\n`;
+    csv += `Progress,,${Math.round(totalSpent/net*100)}%\n\n`;
   }
 
-  csv += `,,,GRAND TOTAL SPENT,,${grandSpent.toLocaleString()}\n`;
-  csv += `,,,TOTAL NET BUDGET,,${grandNet.toLocaleString()}\n`;
-  csv += `,,,OVERALL BALANCE,,${(grandNet - grandSpent).toLocaleString()}\n`;
+  // GRAND TOTALS ACROSS ALL PROJECTS
+  csv += "=== GRAND TOTALS ACROSS ALL PROJECTS ===\n";
+  csv += "Category,Total Spent (KSh)\n";
+  for (const cat of Object.keys(CATEGORY_PERCENTAGES)) {
+    csv += `"${CATEGORY_NAMES[cat]}","${grandTotals[cat].toLocaleString()}"\n`;
+  }
+  csv += `\nTotal Spent Across Projects,KSh ${grandSpentAll.toLocaleString()}\n`;
+  csv += `Total Net Across Projects,KSh ${grandNetAll.toLocaleString()}\n`;
+  csv += `Overall Balance,KSh ${(grandNetAll-grandSpentAll).toLocaleString()}\n`;
 
+  // Download CSV
   const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `NYLA_Pit_Latrines_Full_Report_${new Date().toISOString().slice(0,10)}.csv`;
+  link.download = `NYLA_Pit_Latrines_Financial_Report_${new Date().toISOString().slice(0,10)}.csv`;
   link.click();
 };
+
  
 init3D();
 </script>
