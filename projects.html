@@ -509,7 +509,8 @@ try {
     grandSpent += spent;
 
     expenses.forEach(e => {
-      csv += `"${p.name}","${e.date}","${e.category}","${(e.desc||'').replace(/"/g,'""')}","${e.unit?'Block '+(e.unit==='unit1'?'1':'2'):'Shared'}",${e.amount}\n`;
+      csv += `"${p.name}","${e.date}","${e.category}","${String(e.desc || '').replace(/"/g,'""')}","${e.unit ? 'Block ' + (e.unit === 'unit1' ? '1' : '2') : 'Shared'}",${e.amount}\n`;
+
     });
 
     csv += `,,,"SUBTOTAL: ${p.name}",,${spent.toLocaleString()}\n`;
