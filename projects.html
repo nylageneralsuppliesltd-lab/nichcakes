@@ -204,80 +204,47 @@ let block1 = null, block2 = null;
 
 async function call(action, payload = {}) {
   try {
-    // Prevent null/undefined project errors
     const proj = payload.project ?? activeProject;
     if (!proj) {
       console.error("call() aborted — no project selected");
       return { success: false, error: "No project selected" };
     }
 
-    const isGet = action === "get";
+    return new Promise((resolve) => {
+      // Unique callback name
+      const callbackName = "cb_" + Math.random().toString(36).substring(2);
 
-    // ===============================================
-    // GET → JSONP (CORS-PROOF)
-    // ===============================================
-    if (isGet) {
-      return new Promise((resolve) => {
-        const callback = "cb_" + Math.random().toString(36).substring(2);
+      // Attach callback to window
+      window[callbackName] = (data) => {
+        resolve(data);
+        delete window[callbackName];
+        script.remove();
+      };
 
-        // JSONP callback handler
-        window[callback] = (data) => {
-          resolve(data);
-          delete window[callback];
-          script.remove();
-        };
+      // Build query params
+      const url = new URL(WEBHOOK);
+      url.searchParams.set("action", action);
+      url.searchParams.set("project", proj);
+      url.searchParams.set("secret", SECRET);
+      url.searchParams.set("callback", callbackName);
 
-        const script = document.createElement("script");
-        script.src =
-          `${WEBHOOK}?action=get` +
-          `&project=${encodeURIComponent(proj)}` +
-          `&secret=${encodeURIComponent(SECRET)}` +
-          `&callback=${callback}`;
-
-        script.onerror = () => resolve({ success: false, error: "Network error" });
-
-        document.body.appendChild(script);
+      // Include all payload keys
+      Object.keys(payload).forEach(key => {
+        if (payload[key] != null) {
+          url.searchParams.set(key, payload[key]);
+        }
       });
-    }
 
-    // ===============================================
-    // POST → fetch() (NOT using JSONP)
-    // ===============================================
-    const res = await fetch(WEBHOOK, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action,
-        project: proj,
-        secret: SECRET,
-        ...payload
-      })
+      // Create script tag for JSONP
+      const script = document.createElement("script");
+      script.src = url.toString();
+      script.onerror = () => resolve({ success: false, error: "Network error" });
+
+      document.body.appendChild(script);
     });
-
-    const text = await res.text();
-    let json;
-
-    // Accept ANY MIME → Try parsing JSON
-    try {
-      json = JSON.parse(text);
-    } catch (err) {
-      console.error("Server returned non-JSON:", text);
-      alert("Server error – invalid JSON response");
-      return { success: false, error: "Invalid JSON from server" };
-    }
-
-    // Show backend error message
-    if (!json.success) {
-      console.error("Backend error:", json.error);
-      alert("Error: " + (json.error || "Unknown server error"));
-    }
-
-    return json;
-
   } catch (err) {
-    console.error("Fetch failed:", err);
-    alert("Network error – connection failed");
-    return { success: false, error: "Network failure" };
+    console.error("call() failed:", err);
+    return { success: false, error: "Unexpected error" };
   }
 }
 
