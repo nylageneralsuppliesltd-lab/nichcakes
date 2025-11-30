@@ -211,36 +211,43 @@ async function call(action, payload = {}) {
 
     const opts = isGet ? {} : {
       method: "POST",
-      headers: {"Content-Type": "application/json"},  // ← was text/plain before!
+      headers: { 
+        "Content-Type": "application/json"
+        // NO "Accept" header needed — we accept anything now
+      },
       body: JSON.stringify({
         action,
-        project: activeProject,   // ← explicitly include
+        project: activeProject,
         secret: SECRET,
         ...payload
       })
     };
 
     const r = await fetch(url, opts);
+    
+    // THIS IS THE ONLY CHANGE: accept text/plain from server
     const text = await r.text();
+    let json;
     try {
-      const json = JSON.parse(text);
-      if (!json.success) {
-        console.error("Backend error:", json.error || json);
-        alert("Error: " + (json.error || "Unknown server error"));
-      }
-      return json;
+      json = JSON.parse(text);
     } catch (e) {
-      console.error("Invalid JSON from server:", text);
-      alert("Server returned invalid response");
-      return {success: false};
+      console.error("Server returned non-JSON:", text);
+      alert("Server error – invalid response");
+      return { success: false };
     }
+
+    if (!json.success) {
+      console.error("Backend error:", json.error || json);
+      alert("Error: " + (json.error || "Server error"));
+    }
+    return json;
+
   } catch (err) {
     console.error("Fetch failed:", err);
-    alert("Network error – check internet or try again");
-    return {success: false};
+    alert("Network error – check internet");
+    return { success: false };
   }
 }
-
 function format(n) { return 'KSh ' + Math.round(n).toLocaleString(); }
 
 function calc(amount) {
