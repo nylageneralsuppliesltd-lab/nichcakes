@@ -60,12 +60,12 @@
   .ledger th{background:#06b6d4;color:white;padding:10px 6px;font-size:12px;text-align:left;}
   .ledger td{padding:10px 6px;border-bottom:1px solid #e2e8f0;word-break:break-word;}
   .ledger tr:hover{background:#f0fdfa;}
-  .ledger th:nth-child(1), .ledger td:nth-child(1){width:22%;}
-  .ledger th:nth-child(2), .ledger td:nth-child(2){width:16%;font-size:11.5px;}
-  .ledger th:nth-child(3), .ledger td:nth-child(3){width:28%;}
-  .ledger th:nth-child(4), .ledger td:nth-child(4){width:12%;font-size:11px;}
-  .ledger th:nth-child(5), .ledger td:nth-child(5){width:14%;text-align:right;font-weight:600;}
-  .ledger th:nth-child(6), .ledger td:nth-child(6){width:10%;}
+  .ledger th:nth-child(1),.ledger td:nth-child(1){width:22%;}
+  .ledger th:nth-child(2),.ledger td:nth-child(2){width:16%;font-size:11.5px;}
+  .ledger th:nth-child(3),.ledger td:nth-child(3){width:28%;}
+  .ledger th:nth-child(4),.ledger td:nth-child(4){width:12%;font-size:11px;}
+  .ledger th:nth-child(5),.ledger td:nth-child(5){width:14%;text-align:right;font-weight:600;}
+  .ledger th:nth-child(6),.ledger td:nth-child(6){width:10%;}
 
   .action-buttons{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
   @media(max-width:480px){.action-buttons{flex-direction:column;} .action-btn{width:100%;font-size:10.5px;padding:6px 8px;}}
@@ -77,6 +77,12 @@
 
   .threejs{border-radius:16px;overflow:hidden;height:280px;background:#e0f2fe;box-shadow:0 8px 25px rgba(6,182,212,.25);}
   @media(max-width:480px){.threejs{height:220px;}}
+
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px;}
+  .modal-box{background:white;padding:24px;border-radius:20px;width:100%;max-width:400px;box-shadow:0 25px 50px rgba(0,0,0,0.3);}
+  .input{width:100%;padding:12px;margin:10px 0;border-radius:12px;border:1px solid #94a3b8;font-size:14px;outline:none;}
+  .input:focus{border-color:#06b6d4;}
+  .modal-title{font-size:19px;color:#06b6d4;font-weight:700;text-align:center;margin-bottom:18px;}
 </style>
 </head>
 <body>
@@ -248,7 +254,7 @@ async function refresh() {
   document.getElementById('percent').textContent = Math.round(totalSpent/net*100) + '%';
   document.getElementById('projectTitle').textContent = p.name + (single ? ' • ' + (unitFilter === 'unit1' ? 'Block 1' : 'Block 2') : '');
 
-  // Budget cards & ledger (same as before)
+  // Budget cards
   let html = '';
   CATEGORIES.forEach(c => {
     const budget = net * c.pct / 100;
@@ -264,6 +270,7 @@ async function refresh() {
   });
   document.getElementById('budgetBreakdown').innerHTML = html;
 
+  // Ledger
   let filtered = single ? exp.filter(e => !e.unit || e.unit === unitFilter) : exp;
   filtered.sort((a, b) => b.date.localeCompare(a.date));
 
@@ -281,27 +288,31 @@ async function refresh() {
       </td>
     </tr>`).join('');
 
-  document.querySelectorAll('.btn-edit,.btn-delete').forEach(b => b.onclick = null);
-  document.querySelectorAll('.btn-edit').forEach(b => b.onclick = () => {
-    currentEditId = b.dataset.id;
-    document.getElementById('modalTitle').textContent = "Edit Expense";
-    document.getElementById('expDate').value = b.dataset.date;
-    document.getElementById('expCategory').value = b.dataset.cat;
-    document.getElementById('expDesc').value = b.dataset.desc;
-    document.getElementById('expUnit').value = b.dataset.unit;
-    document.getElementById('expAmount').value = b.dataset.amt;
-    document.getElementById('saveExpense').textContent = "Update";
-    document.getElementById('modal').style.display = 'flex';
+  // Re-attach edit/delete handlers
+  document.querySelectorAll('.btn-edit').forEach(b => {
+    b.onclick = () => {
+      currentEditId = b.dataset.id;
+      document.getElementById('modalTitle').textContent = "Edit Expense";
+      document.getElementById('expDate').value = b.dataset.date;
+      document.getElementById('expCategory').value = b.dataset.cat;
+      document.getElementById('expDesc').value = b.dataset.desc;
+      document.getElementById('expUnit').value = b.dataset.unit;
+      document.getElementById('expAmount').value = b.dataset.amt;
+      document.getElementById('saveExpense').textContent = "Update";
+      document.getElementById('modal').style.display = 'flex';
+    };
   });
 
-  document.querySelectorAll('.btn-delete').forEach(b => b.onclick = async () => {
-    if (confirm("Delete this expense forever?")) {
-      await call('delete', {id: b.dataset.id});
-      refresh();
-    }
+  document.querySelectorAll('.btn-delete').forEach(b => {
+    b.onclick = async () => {
+      if (confirm("Delete this expense forever?")) {
+        await call('delete', {id: b.dataset.id});
+        refresh();
+      }
+    };
   });
 
-  // 3D Update — NOW SHOWS A DOT FROM 1%!
+  // 3D Update
   const b1Spent = exp.filter(e => !e.unit || e.unit === "unit1").reduce((s,e) => s + (e.unit ? e.amount : e.amount/2), 0);
   const b2Spent = exp.filter(e => !e.unit || e.unit === "unit2").reduce((s,e) => s + (e.unit ? e.amount : e.amount/2), 0);
   if (block1 && block2) {
@@ -312,6 +323,7 @@ async function refresh() {
   }
 }
 
+// SAVE EXPENSE
 document.getElementById('saveExpense').onclick = async () => {
   const payload = {
     date: document.getElementById('expDate').value,
@@ -320,14 +332,40 @@ document.getElementById('saveExpense').onclick = async () => {
     unit: document.getElementById('expUnit').value || null,
     amount: Number(document.getElementById('expAmount').value)
   };
-  if (!payload.date || !payload.category || !payload.amount) return alert("Fill all required fields");
-  const res = await call(currentEditId ? 'update' : 'add', currentEditId ? {id: currentEditId, ...payload} : payload);
-  if (res.success) { document.getElementById('modal').style.display = 'none'; currentEditId = null; refresh(); }
+  if (!payload.date || !payload.category || !payload.amount) return alert("Please fill all required fields");
+  const action = currentEditId ? 'update' : 'add';
+  const res = await call(action, currentEditId ? {id: currentEditId, ...payload} : payload);
+  if (res.success) {
+    document.getElementById('modal').style.display = 'none';
+    currentEditId = null;
+    document.getElementById('saveExpense').textContent = "Save";
+    document.getElementById('modalTitle').textContent = "Add Expense";
+    refresh();
+  }
 };
 
-document.getElementById('cancelModal').onclick = () => document.getElementById('modal').style.display = 'none';
+document.getElementById('cancelModal').onclick = () => {
+  document.getElementById('modal').style.display = 'none';
+  currentEditId = null;
+  document.getElementById('saveExpense').textContent = "Save";
+  document.getElementById('modalTitle').textContent = "Add Expense";
+};
 
-// 3D WITH 1% DOT!
+// ADD EXPENSE BUTTON — NOW FIXED!
+document.getElementById('addExpense').onclick = () => {
+  if (!activeProject) return alert("Please select a project first!");
+  currentEditId = null;
+  document.getElementById('modalTitle').textContent = "Add Expense";
+  document.getElementById('saveExpense').textContent = "Save";
+  document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('expCategory').value = "";
+  document.getElementById('expDesc').value = "";
+  document.getElementById('expUnit').value = "";
+  document.getElementById('expAmount').value = "";
+  document.getElementById('modal').style.display = 'flex';
+};
+
+// 3D WITH 1% DOT
 let scene, camera, renderer, controls;
 function init3D() {
   const c = document.getElementById('threejs');
@@ -349,12 +387,8 @@ function makeBlock(x){
   const roof = new THREE.MeshStandardMaterial({color:0xc41e3a});
   const conc = new THREE.MeshStandardMaterial({color:0x95a5a6});
 
-  // NEW: Tiny glowing dot for 1–9%
-  const dotGeo = new THREE.SphereGeometry(0.3, 16, 16);
-  const dotMat = new THREE.MeshBasicMaterial({color:0x10b981});
-  const dot = new THREE.Mesh(dotGeo, dotMat);
-  dot.position.set(x, 0.3, 0);
-  g.add(dot);
+  const dot = new THREE.Mesh(new THREE.SphereGeometry(0.3,16,16), new THREE.MeshBasicMaterial({color:0x10b981}));
+  dot.position.set(x, 0.3, 0); g.add(dot);
 
   const pit = new THREE.Mesh(new THREE.CylinderGeometry(1.8,2,2.8,20), brick); pit.position.set(x,-1.4,0); g.add(pit);
   const slab = new THREE.Mesh(new THREE.BoxGeometry(3.6,0.15,2.5), conc); slab.position.set(x,0,0); g.add(slab);
@@ -363,7 +397,6 @@ function makeBlock(x){
   addWall(3.6,0.2,0,1.2); addWall(3.6,0.2,0,-1.2); addWall(0.2,2.6,-1.7,0); addWall(0.2,2.6,1.7,0);
   const r = new THREE.Mesh(new THREE.BoxGeometry(4.2,0.15,3), roof); r.position.set(x,2.5,0); g.add(r);
 
-  // Hide everything initially
   dot.visible = pit.visible = slab.visible = r.visible = false;
   walls.forEach(w => w.visible = false);
 
@@ -371,7 +404,6 @@ function makeBlock(x){
 }
 
 function updateBlock(b, pct){
-  // NEW LOGIC: Show dot from 1%
   b.dot.visible = pct >= 1;
   b.pit.visible = pct >= 10;
   b.walls.forEach(w => w.visible = pct >= 35);
@@ -379,7 +411,7 @@ function updateBlock(b, pct){
   b.roof.visible = pct >= 90;
 }
 
-// Rest of the code (project list, events, etc.) — unchanged
+// Project selection & other buttons
 document.getElementById('projectsList').innerHTML = PROJECTS.map(p=>`<div class="project-card" data-id="${p.id}"><strong>${p.name}</strong><br><small style="color:#64748b;">${format(calc(p.original).net)}</small></div>`).join('');
 
 document.getElementById('projectsList').onclick = e => {
@@ -395,7 +427,6 @@ document.getElementById('projectsList').onclick = e => {
 };
 
 document.getElementById('unitFilter').onchange = e => { unitFilter = e.target.value; refresh(); };
-document.getElementById('addExpense').onclick = () => { if(!activeProject) return alert("Select project first"); currentEditId=null; document.getElementById('expDate').value=new Date().toISOString().split('T')[0]; document.getElementById('modal').style.display='flex'; };
 
 document.getElementById('downloadCSV').onclick = async () => {
   let all = [];
