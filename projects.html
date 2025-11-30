@@ -461,27 +461,38 @@ async function refresh() {
   });
   document.getElementById('budgetBreakdown').innerHTML = html;
 
-  // Ledger
+  // Ledger - FIXED VERSION (no more blank rows!)
   let filtered = single ? exp.filter(e => !e.unit || e.unit === unitFilter) : exp;
   filtered.sort((a, b) => b.date.localeCompare(a.date));
 
   document.getElementById('ledgerCount').textContent = `${filtered.length} ${filtered.length === 1 ? 'entry' : 'entries'}`;
-  document.getElementById('ledgerBody').innerHTML = filtered.map(e => {
-    const desc = e.desc == null ? '—' : e.desc;
-    const safeDesc = e.desc == null ? '' : String(e.desc).replace(/"/g, '&quot;');
-    return `
-      <tr>
-        <td>${e.date}</td>
-        <td>${e.category}</td>
-        <td>${desc}</td>
-        <td>${e.unit ? (e.unit==='unit1'?'B1':'B2') : 'Shared'}</td>
-        <td>${format(getDisplayAmount(e))}</td>
-        <td class="action-buttons">
-          <button class="action-btn btn-edit" data-id="${e.id}" data-date="${e.date}" data-cat="${e.category}" data-desc="${safeDesc}" data-unit="${e.unit||''}" data-amt="${e.amount}">Edit</button>
-          <button class="action-btn btn-delete" data-id="${e.id}">Del</button>
-        </td>
-      </tr>`;
+  
+  const rows = filtered.map(e => {
+    const desc = e.desc ?? '—';
+    const safeDesc = (e.desc ?? '').toString().replace(/"/g, '&quot;');
+    const displayAmt = format(getDisplayAmount(e));
+    const unitLabel = e.unit ? (e.unit === 'unit1' ? 'B1' : 'B2') : 'Shared';
+
+    return `<tr>
+      <td>${e.date}</td>
+      <td>${e.category}</td>
+      <td>${desc}</td>
+      <td>${unitLabel}</td>
+      <td>${displayAmt}</td>
+      <td class="action-buttons">
+        <button class="action-btn btn-edit" 
+                data-id="${e.id}" 
+                data-date="${e.date}" 
+                data-cat="${e.category}" 
+                data-desc="${safeDesc}" 
+                data-unit="${e.unit||''}" 
+                data-amt="${e.amount}">Edit</button>
+        <button class="action-btn btn-delete" data-id="${e.id}">Del</button>
+      </td>
+    </tr>`;
   }).join('');
+
+  document.getElementById('ledgerBody').innerHTML = rows || '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:20px;">No expenses yet</td></tr>';
 
   document.querySelectorAll('.btn-edit').forEach(b => {
     b.onclick = () => {
