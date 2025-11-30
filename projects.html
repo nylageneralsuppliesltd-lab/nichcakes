@@ -305,18 +305,28 @@ async function refresh() {
   filtered.sort((a, b) => b.date.localeCompare(a.date));
 
   document.getElementById('ledgerCount').textContent = `${filtered.length} ${filtered.length === 1 ? 'entry' : 'entries'}`;
-  document.getElementById('ledgerBody').innerHTML = filtered.map(e => `
+ document.getElementById('ledgerBody').innerHTML = filtered.map(e => {
+  const desc = e.desc == null ? '—' : e.desc;
+  const safeDesc = e.desc == null ? '' : String(e.desc).replace(/"/g, '&quot;');
+  return `
     <tr>
       <td>${e.date}</td>
       <td>${e.category}</td>
-      <td>${e.desc || '—'}</td>
+      <td>${desc}</td>
       <td>${e.unit ? (e.unit==='unit1'?'B1':'B2') : 'Shared'}</td>
       <td>${format(getDisplayAmount(e))}</td>
       <td class="action-buttons">
-        <button class="action-btn btn-edit" data-id="${e.id}" data-date="${e.date}" data-cat="${e.category}" data-desc="${(e.desc||'').replace(/"/g,'&quot;')}" data-unit="${e.unit||''}" data-amt="${e.amount}">Edit</button>
+        <button class="action-btn btn-edit" 
+                data-id="${e.id}" 
+                data-date="${e.date}" 
+                data-cat="${e.category}" 
+                data-desc="${safeDesc}" 
+                data-unit="${e.unit||''}" 
+                data-amt="${e.amount}">Edit</button>
         <button class="action-btn btn-delete" data-id="${e.id}">Del</button>
       </td>
-    </tr>`).join('');
+    </tr>`;
+}).join('');
 
   // Re-attach edit/delete handlers
   document.querySelectorAll('.btn-edit').forEach(b => {
