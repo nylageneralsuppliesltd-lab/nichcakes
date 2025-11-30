@@ -203,12 +203,42 @@ let activeProject = null, unitFilter = "", currentEditId = null;
 let block1 = null, block2 = null;
 
 async function call(action, payload = {}) {
-  const isGet = action === "get";
-  const url = isGet ? `${WEBHOOK}?action=get&project=${activeProject}&secret=${SECRET}` : WEBHOOK;
-  const opts = isGet ? {} : {method:"POST", headers:{"Content-Type":"text/plain"}, body:JSON.stringify({action, project:activeProject, secret:SECRET, ...payload})};
-  const r = await fetch(url, opts);
-  const t = await r.text();
-  try {return JSON.parse(t);} catch {console.log(t); return {success:false};}
+  try {
+    const isGet = action === "get";
+    const url = isGet 
+      ? `${WEBHOOK}?action=get&project=${activeProject}&secret=${SECRET}`
+      : WEBHOOK;
+
+    const opts = isGet ? {} : {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},  // ← was text/plain before!
+      body: JSON.stringify({
+        action,
+        project: activeProject,   // ← explicitly include
+        secret: SECRET,
+        ...payload
+      })
+    };
+
+    const r = await fetch(url, opts);
+    const text = await r.text();
+    try {
+      const json = JSON.parse(text);
+      if (!json.success) {
+        console.error("Backend error:", json.error || json);
+        alert("Error: " + (json.error || "Unknown server error"));
+      }
+      return json;
+    } catch (e) {
+      console.error("Invalid JSON from server:", text);
+      alert("Server returned invalid response");
+      return {success: false};
+    }
+  } catch (err) {
+    console.error("Fetch failed:", err);
+    alert("Network error – check internet or try again");
+    return {success: false};
+  }
 }
 
 function format(n) { return 'KSh ' + Math.round(n).toLocaleString(); }
@@ -428,7 +458,6 @@ document.getElementById('projectsList').onclick = e => {
 
 document.getElementById('unitFilter').onchange = e => { unitFilter = e.target.value; refresh(); };
 
-// ONLY THIS PART IS UPGRADED — DOWNLOAD CSV WITH SUBTOTALS & GRAND TOTAL
 document.getElementById('downloadCSV').onclick = async () => {
   let csv = "NYLA PIT LATRINES - FULL FINANCIAL REPORT\n";
   csv += "Generated on," + new Date().toLocaleString() + "\n\n";
@@ -437,29 +466,28 @@ document.getElementById('downloadCSV').onclick = async () => {
   let grandNet = 0, grandSpent = 0;
 
   for (const p of PROJECTS) {
-    activeProject = p.id;
-    const res = await call("get");
-    const expenses = res.success ? (res.expenses || []) : [];
+    // ← DON'T touch the global activeProject!
+    const tempProject = p.id;
+    const res = await fetch(`${WEBHOOK}?action=get&project=${tempProject}&secret=${SECRET}`);
+    const json = await res.json();
+    const expenses = json.success ? (json.expenses || []) : [];
 
     const d = calc(p.original);
     const net = d.net;
     grandNet += net;
 
-    const spent = expenses.reduce((s, e) => s + (e.unit ? e.amount : e.amount / 2) * 2, 0); // full amount
+    const spent = expenses.reduce((s, e) => s + (e.unit ? e.amount : e.amount), 0); // full project amount
     grandSpent += spent;
 
-    // Individual expenses
     expenses.forEach(e => {
       csv += `"${p.name}","${e.date}","${e.category}","${(e.desc||'').replace(/"/g,'""')}","${e.unit?'Block '+(e.unit==='unit1'?'1':'2'):'Shared'}",${e.amount}\n`;
     });
 
-    // Project subtotal
     csv += `,,,"SUBTOTAL: ${p.name}",,${spent.toLocaleString()}\n`;
     csv += `,,,"Net Amount",,${net.toLocaleString()}\n`;
     csv += `,,,"Balance Remaining",,${(net - spent).toLocaleString()}\n\n`;
   }
 
-  // GRAND TOTAL
   csv += `,,,GRAND TOTAL SPENT,,${grandSpent.toLocaleString()}\n`;
   csv += `,,,TOTAL NET BUDGET,,${grandNet.toLocaleString()}\n`;
   csv += `,,,OVERALL BALANCE,,${(grandNet - grandSpent).toLocaleString()}\n`;
@@ -470,6 +498,7 @@ document.getElementById('downloadCSV').onclick = async () => {
   link.download = `NYLA_Pit_Latrines_Full_Report_${new Date().toISOString().slice(0,10)}.csv`;
   link.click();
 };
+ 
 init3D();
 </script>
 </body>
