@@ -522,23 +522,12 @@ document.getElementById('downloadCSV').onclick = async () => {
   let grandNet = 0, grandSpent = 0;
 
   for (const p of PROJECTS) {
-    // ← DON'T touch the global activeProject!
-    const tempProject = p.id;
-    const r = await fetch(
-  `${WEBHOOK}?action=get&project=${tempProject}&secret=${SECRET}`
-);
+  const tempProject = p.id;
 
-const text = await r.text();
-let json;
-try {
-  json = JSON.parse(text);
-} catch (err) {
-  console.error("Non-JSON from server:", text);
-  alert("Server returned invalid response");
-  json = { success: false, expenses: [] };
-}
+  // Use the call() function instead of raw fetch
+  const res = await call("get", { project: tempProject });
+  const expenses = res.success ? (res.expenses || []) : [];
 
-    const expenses = json.success ? (json.expenses || []) : [];
 
     const d = calc(p.original);
     const net = d.net;
