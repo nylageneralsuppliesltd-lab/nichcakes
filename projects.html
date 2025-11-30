@@ -479,66 +479,70 @@ document.getElementById('downloadCSV').onclick = async () => {
   let csv = "NYLA PIT LATRINES - FULL FINANCIAL REPORT\n";
   csv += "Generated on," + new Date().toLocaleString() + "\n\n";
 
-  let grandCategoryTotals = {};
-  Object.keys(CATEGORY_PERCENTAGES).forEach(cat => grandCategoryTotals[cat] = 0);
+  let grandTotals = {};
+  Object.keys(CATEGORY_PERCENTAGES).forEach(c => grandTotals[c] = 0);
+  let grandSpentAll = 0, grandNetAll = 0;
 
-  for (const p of PROJECTS) {
-    const res = await call("get", { project: p.id });
-    const expenses = res.success ? (res.expenses || []) : [];
+  // Iterate over PROJECTS
+  for (const key of Object.keys(PROJECTS)) {
+    const p = PROJECTS[key];
+    const res = await call("get", { project: key });
+    const expenses = res.success ? res.expenses : [];
+    const net = Math.round(p.gross * 0.61);
 
     csv += `PROJECT: ${p.name}\n`;
-    csv += "Category,Date,Description,Unit,Amount,Subtotal,Status\n";
+    csv += "Category,Date,Description,Unit,Amount (KSh)\n";
 
-    const d = calc(p.original);
-    const netBudget = d.net;
+    let categoryTotals = {};
+    Object.keys(CATEGORY_PERCENTAGES).forEach(c => categoryTotals[c] = 0);
 
-    // Initialize category subtotal map
-    const categorySubtotal = {};
-    Object.keys(CATEGORY_PERCENTAGES).forEach(cat => categorySubtotal[cat] = 0);
+    // Group by category
+    for (const cat of Object.keys(CATEGORY_PERCENTAGES)) {
+      const catExpenses = expenses.filter(e => e.category === cat);
+      if (catExpenses.length === 0) continue;
 
-    // Group transactions by category
-    Object.keys(CATEGORY_PERCENTAGES).forEach(cat => {
-      const catTx = expenses.filter(e => e.category === cat);
-      catTx.forEach(tx => {
-        const amt = tx.amount;
-        categorySubtotal[cat] += amt;
-        csv += `"${CATEGORY_NAMES[cat]}","${tx.date}","${String(tx.desc || '').replace(/"/g,'""')}",` +
-               `"${tx.unit ? (tx.unit==='unit1'?'Block 1':'Block 2') : 'Shared'}",${amt.toLocaleString()},,\n`;
-      });
+      for (const e of catExpenses) {
+        const amount = Math.round(e.amount);
+        categoryTotals[cat] += amount;
 
-      if (catTx.length) {
-        const budget = netBudget * CATEGORY_PERCENTAGES[cat];
-        const spent = categorySubtotal[cat];
-        const status = spent > budget ? '↓' : '↑';
-        csv += `Subtotal ${CATEGORY_NAMES[cat]},,,,,${spent.toLocaleString()},${status}\n`;
-        grandCategoryTotals[cat] += spent;
+        csv += `"${CATEGORY_NAMES[cat]}","${e.date}","${String(e.desc || '').replace(/"/g,'""')}","${e.unit || ''}","${amount.toLocaleString()}"\n`;
       }
-    });
 
-    const totalSpent = expenses.reduce((sum,e)=>sum+e.amount,0);
+      // Subtotal per category
+      csv += `,"Subtotal for ${CATEGORY_NAMES[cat]}","","","${categoryTotals[cat].toLocaleString()}"\n\n`;
+    }
 
-    csv += `Project Summary,,,,, \n`;
-    csv += `Gross Amount,,,,,${p.original.toLocaleString()}\n`;
-    csv += `Net Budget (61%),,,,,${Math.round(netBudget).toLocaleString()}\n`;
-    csv += `Total Spent,,,,,${totalSpent.toLocaleString()}\n`;
-    csv += `Remaining Balance,,,,,${Math.round(netBudget-totalSpent).toLocaleString()}\n`;
-    csv += `Progress,,,,,${Math.round(totalSpent/netBudget*100)}%\n\n`;
+    const totalSpent = Object.values(categoryTotals).reduce((a,b)=>a+b,0);
+
+    // Running grand totals
+    Object.keys(categoryTotals).forEach(c => grandTotals[c] += categoryTotals[c]);
+    grandSpentAll += totalSpent;
+    grandNetAll += net;
+
+    // Project summary table
+    csv += "=== PROJECT SUMMARY ===\n";
+    csv += `Gross Contract Amount,,KSh ${p.gross.toLocaleString()}\n`;
+    csv += `Net Budget (61%),,KSh ${net.toLocaleString()}\n`;
+    csv += `Total Spent,,KSh ${totalSpent.toLocaleString()}\n`;
+    csv += `Remaining Balance,,KSh ${(net-totalSpent).toLocaleString()}\n`;
+    csv += `Progress,,${Math.round(totalSpent/net*100)}%\n\n`;
   }
 
-  // Grand totals across projects
-  csv += `GRAND TOTALS BY CATEGORY\nCategory,Total Spent,Status\n`;
-  Object.keys(CATEGORY_PERCENTAGES).forEach(cat => {
-    const budgetPct = CATEGORY_PERCENTAGES[cat];
-    const totalSpent = grandCategoryTotals[cat];
-    const status = totalSpent > budgetPct*PROJECTS[sosoni].original ? '↓' : '↑'; // simple approx
-    csv += `${CATEGORY_NAMES[cat]},${totalSpent.toLocaleString()},${status}\n`;
-  });
+  // GRAND TOTALS ACROSS ALL PROJECTS
+  csv += "=== GRAND TOTALS ACROSS ALL PROJECTS ===\n";
+  csv += "Category,Total Spent (KSh)\n";
+  for (const cat of Object.keys(CATEGORY_PERCENTAGES)) {
+    csv += `"${CATEGORY_NAMES[cat]}","${grandTotals[cat].toLocaleString()}"\n`;
+  }
+  csv += `\nTotal Spent Across Projects,KSh ${grandSpentAll.toLocaleString()}\n`;
+  csv += `Total Net Across Projects,KSh ${grandNetAll.toLocaleString()}\n`;
+  csv += `Overall Balance,KSh ${(grandNetAll-grandSpentAll).toLocaleString()}\n`;
 
-  // Download CSV
+  // Trigger CSV download
   const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `NYLA_Pit_Latrines_Full_Report_${new Date().toISOString().slice(0,10)}.csv`;
+  link.download = `NYLA_Pit_Latrines_Financial_Report_${new Date().toISOString().slice(0,10)}.csv`;
   link.click();
 };
 
