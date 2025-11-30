@@ -204,78 +204,58 @@ let block1 = null, block2 = null;
 
 async function call(action, payload = {}) {
   try {
-    const isGet = action === "get";
-    const callbackName = `cb_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-
-    // Construct URL for GET with JSONP fallback
-    let url = `${WEBHOOK}?action=${action}&project=${activeProject}&secret=${SECRET}`;
-    if (isGet) {
-      url += `&callback=${callbackName}`;
+    // Prevent NULL project errors
+    const proj = payload.project ?? activeProject;
+    if (!proj) {
+      console.error("call() aborted — no project selected");
+      return { success: false };
     }
 
-    // If GET, try JSONP first
+    const isGet = action === "get";
+
+    // JSONP always works on GitHub Pages → Use for GET
     if (isGet) {
-      return new Promise((resolve, reject) => {
-        window[callbackName] = function(data) {
-          delete window[callbackName];
-          if (!data.success) {
-            console.error("Backend error:", data.error || data);
-            alert("Error: " + (data.error || "Server error"));
-          }
+      return new Promise((resolve) => {
+        const callback = "cb_" + Math.random().toString(36).substring(2);
+        window[callback] = (data) => {
           resolve(data);
+          delete window[callback];
+          script.remove();
         };
 
         const script = document.createElement("script");
-        script.src = url;
-        script.onerror = () => {
-          delete window[callbackName];
-          reject(new Error("JSONP request failed"));
-        };
+        script.src = `${WEBHOOK}?action=get&project=${proj}&secret=${SECRET}&callback=${callback}`;
+        script.onerror = () => resolve({ success: false, error: "Network error" });
         document.body.appendChild(script);
-        setTimeout(() => document.body.removeChild(script), 5000);
-      }).catch(async () => {
-        // JSONP failed → fallback to plain GET fetch
-        const r = await fetch(`${WEBHOOK}?action=${action}&project=${activeProject}&secret=${SECRET}`);
-        const text = await r.text();
-        let json;
-        try { json = JSON.parse(text); } 
-        catch (e) { 
-          console.error("Server returned non-JSON:", text);
-          alert("Server error – invalid response");
-          return { success: false }; 
-        }
-        if (!json.success) alert("Error: " + (json.error || "Server error"));
-        return json;
       });
     }
 
-    // POST request
-    const opts = {
+    // POST can use fetch()
+    const r = await fetch(WEBHOOK, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action,
-        project: activeProject,
+        project: proj,
         secret: SECRET,
         ...payload
       })
-    };
+    });
 
-    const r = await fetch(url, opts);
-
-    // Accept text/plain or JSON from server
+    // Accept ANY MIME: text/plain, application/json, etc.
     const text = await r.text();
     let json;
-    try { json = JSON.parse(text); } 
-    catch (e) { 
+
+    try {
+      json = JSON.parse(text);
+    } catch {
       console.error("Server returned non-JSON:", text);
       alert("Server error – invalid response");
-      return { success: false }; 
+      return { success: false };
     }
 
     if (!json.success) {
-      console.error("Backend error:", json.error || json);
-      alert("Error: " + (json.error || "Server error"));
+      alert("Error: " + (json.error ?? "Unknown server error"));
     }
 
     return json;
