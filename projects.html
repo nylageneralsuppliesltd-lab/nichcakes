@@ -494,28 +494,7 @@ async function refresh() {
 
   document.getElementById('ledgerBody').innerHTML = rows || '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:20px;">No expenses yet</td></tr>';
 
-  document.querySelectorAll('.btn-edit').forEach(b => {
-    b.onclick = () => {
-      currentEditId = b.dataset.id;
-      document.getElementById('modalTitle').textContent = "Edit Expense";
-      document.getElementById('expDate').value = b.dataset.date;
-      document.getElementById('expCategory').value = b.dataset.cat;
-      document.getElementById('expDesc').value = b.dataset.desc;
-      document.getElementById('expUnit').value = b.dataset.unit;
-      document.getElementById('expAmount').value = b.dataset.amt;
-      document.getElementById('saveExpense').textContent = "Update";
-      document.getElementById('modal').style.display = 'flex';
-    };
-  });
 
-  document.querySelectorAll('.btn-delete').forEach(b => {
-    b.onclick = async () => {
-      if (confirm("Delete this expense forever?")) {
-        await call('delete', {id: b.dataset.id});
-        refresh();
-      }
-    };
-  });
 
   // 3D Update
   const b1Spent = exp.filter(e => !e.unit || e.unit === "unit1").reduce((s,e) => s + (e.unit ? e.amount : e.amount/2), 0);
@@ -685,6 +664,32 @@ document.getElementById('downloadCSV').onclick = async () => {
   link.download = `NYLA_Pit_Latrines_Report_${new Date().toISOString().slice(0,10)}.csv`;
   link.click();
 };
+ // === FIXED: EDIT & DELETE WITH EVENT DELEGATION (runs only once) ===
+document.getElementById('ledgerBody').addEventListener('click', async (e) => {
+  const editBtn = e.target.closest('.btn-edit');
+  const delBtn  = e.target.closest('.btn-delete');
+
+  if (editBtn) {
+    e.stopPropagation();
+    currentEditId = editBtn.dataset.id;
+    document.getElementById('modalTitle').textContent = "Edit Expense";
+    document.getElementById('expDate').value       = editBtn.dataset.date;
+    document.getElementById('expCategory').value   = editBtn.dataset.cat;
+    document.getElementById('expDesc').value       = editBtn.dataset.desc;
+    document.getElementById('expUnit').value       = editBtn.dataset.unit || "";
+    document.getElementById('expAmount').value     = editBtn.dataset.amt;
+    document.getElementById('saveExpense').textContent = "Update";
+    document.getElementById('modal').style.display = 'flex';
+  }
+
+  if (delBtn) {
+    e.stopPropagation();
+    if (confirm("Delete this expense forever?")) {
+      const res = await call('delete', { id: delBtn.dataset.id });
+      if (res.success) refresh();
+    }
+  }
+});
 // === START EVERYTHING ===
 setup3D();
 </script>
